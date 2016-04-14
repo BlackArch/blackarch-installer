@@ -1,0 +1,24 @@
+changelog and todo list for blackarch-installer
+===============================================
+
+===> 0.x
+    [ ] new option: choose archlinux mirror
+    [ ] new option: add optional verbose / quiet mode
+    [ ] new option: choose blackarch-groups rather than all/single tools
+    [ ] new option: install one or more window managers of own choice
+    [ ] new option: if possible add 'skip' for each asking sections
+    [ ] new option: add resume functionality
+    [ ] new option: go back to previous section
+    [ ] new option: ask for optional partitions
+    [ ] new option: ask for locale to generate/use (atm default: en_US-UTF.8)
+    [ ] new option: install from Live-ISO
+    [ ] update: print partition table before asking for partitions
+    [ ] update: add help text for each section
+    [ ] update: add check for mkfs.* status before proceeding
+    [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
+    [ ] update: more error handling
+    [ ] update: sort installation routines (order of sections)
+    [ ] REFACTOR THE CODE / optional: split code to multiple files (?)
+
+===> 0.1
+    [.] initial release
