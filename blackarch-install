@@ -855,7 +855,14 @@ mount_filesystems()
 # unmount filesystems
 umount_filesystems()
 {
-    title "Game Over"
+    routine="${1}"
+
+    if [ "${routine}" = "harddrive" ]
+    then
+        title "Hard Drive Setup"
+    else
+        title "Game Over"
+    fi
 
     wprintf "[+] Unmounting filesystems"
     printf "\n\n"
@@ -1642,7 +1649,8 @@ main()
     # hard drive
     get_hd_devs
     ask_hd_dev
-    umount_filesystems
+    umount_filesystems "harddrive"
+    sleep_clear 1
     ask_cfdisk
     sleep_clear 1
     ask_luks
