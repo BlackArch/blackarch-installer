@@ -573,6 +573,7 @@ ask_hd_dev()
     while true
     do
         title "Hard Drive Setup"
+
         wprintf "[+] Available hard drives for installation:"
         printf "\n\n"
 
@@ -626,6 +627,8 @@ get_partition_label()
 # get partitions
 get_partitions()
 {
+    partitions=`ls ${HD_DEV}* | grep -v "${HD_DEV}\>"`
+
     while [ \
         "${BOOT_PART}" = "" -o \
         "${ROOT_PART}" = "" -o \
@@ -633,6 +636,15 @@ get_partitions()
         "${ROOT_FS_TYPE}" = "" ]
     do
         title "Hard Drive Setup"
+        wprintf "[+] Created partitions:"
+        printf "\n\n"
+
+        for i in ${partitions}
+        do
+            echo "    > ${i}"
+        done
+        echo
+
         wprintf "[?] Boot partition (/dev/sdXY): "
         read BOOT_PART
         wprintf "[?] Boot FS type (ext2, ext3, ext4, fat32): "
