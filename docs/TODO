@@ -22,3 +22,6 @@ changelog and todo list for blackarch-installer
 
 ===> 0.1
     [.] initial release
+
+===> 0.2
+    [ ] code refactored to lib/blackarch.sh and lib/globals.cfg except for main()
