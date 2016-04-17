@@ -1,4 +1,3 @@
-# Import all variables used by the routines below
 source "$(pwd)/lib/globals.cfg"
 
 # print formatted output
@@ -133,8 +132,8 @@ ask_install_mode()
         title "Welcome to the BlackArch Linux installation!"
         wprintf "[+] Available installation modes:"
         printf "\n
-    1. Install from BlackArch Linux from repository
-    2. Install from BlackArch Linux from sources using blackman
+    1. Install from repository using pacman
+    2. Install from sources using blackman
     3. Install from Live-ISO (not implemented yet)\n\n"
         wprintf "[?] Choose an installation mode: "
         read INSTALL_MODE
@@ -198,15 +197,15 @@ set_keymap()
 }
 
 
-# update pacman.conf
-update_pacman_conf()
+# enable multilib in pacman.conf if x86_64 present
+enable_pacman_multilib()
 {
     title "Update pacman.conf"
 
     if [ "`uname -m`" = "x86_64" ]
     then
         wprintf "[+] Enabling multilib support"
-        printf "\n"
+        printf "\n\n"
         if grep -q "#\[multilib\]" /etc/pacman.conf
         then
             # it exists but commented
@@ -219,10 +218,32 @@ update_pacman_conf()
         fi
     fi
 
-    # also enable color mode
+    return $SUCCESS
+}
+
+
+# enable color mode in pacman.conf
+enable_pacman_color()
+{
+    title "Update pacman.conf"
+
     wprintf "[+] Enabling color mode"
     printf "\n\n"
+
     sed -i 's/^#Color/Color/' /etc/pacman.conf
+
+    return $SUCCESS
+}
+
+
+# update pacman.conf
+update_pacman_conf()
+{
+    enable_pacman_multilib
+    sleep_clear 1
+
+    enable_pacman_color
+    sleep_clear 1
 
     return $SUCCESS
 }
@@ -410,6 +431,7 @@ ask_hd_dev()
     while true
     do
         title "Hard Drive Setup"
+
         wprintf "[+] Available hard drives for installation:"
         printf "\n\n"
 
@@ -463,6 +485,8 @@ get_partition_label()
 # get partitions
 get_partitions()
 {
+    partitions=`ls ${HD_DEV}* | grep -v "${HD_DEV}\>"`
+
     while [ \
         "${BOOT_PART}" = "" -o \
         "${ROOT_PART}" = "" -o \
@@ -470,6 +494,15 @@ get_partitions()
         "${ROOT_FS_TYPE}" = "" ]
     do
         title "Hard Drive Setup"
+        wprintf "[+] Created partitions:"
+        printf "\n\n"
+
+        for i in ${partitions}
+        do
+            echo "    > ${i}"
+        done
+        echo
+
         wprintf "[?] Boot partition (/dev/sdXY): "
         read BOOT_PART
         wprintf "[?] Boot FS type (ext2, ext3, ext4, fat32): "
@@ -680,6 +713,18 @@ mount_filesystems()
 # unmount filesystems
 umount_filesystems()
 {
+    routine="${1}"
+
+    if [ "${routine}" = "harddrive" ]
+    then
+        title "Hard Drive Setup"
+    else
+        title "Game Over"
+    fi
+
+    wprintf "[+] Unmounting filesystems"
+    printf "\n\n"
+
     umount -Rf ${CHROOT} > /dev/null 2>&1
     umount -Rf "${BOOT_PART}" > /dev/null 2>&1
     umount -Rf "${CHROOT}/proc" > /dev/null 2>&1
@@ -751,6 +796,7 @@ setup_time()
 
     wprintf "[+] Setting up default time and timezone: Europe/Berlin"
     printf "\n\n"
+
     chroot ${CHROOT} tzselect
 
 
@@ -847,13 +893,13 @@ EOF
         wprintf "[+] Setting up GRUB boot loader"
         printf "\n\n"
 
-        chroot ${CHROOT} pacman -S grub --noconfirm --force
+        chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
 
-        if [ -f "data/grub/splash.png" ]
+        if [ -f "data/boot/grub/splash.png" ]
         then
-            cp data/grub/splash.png "${CHROOT}/boot/grub/splash.png"
+            cp data/boot/grub/splash.png "${CHROOT}/boot/grub/splash.png"
         else
-            cp /usr/share/blackarckarch-installer/data/grub/splash.png \
+            cp /usr/share/blackarckarch-installer/data/boot/grub/splash.png \
                 "${CHROOT}/boot/grub/splash.png"
         fi
         if [ ${LUKS} = ${TRUE} ]
@@ -1175,6 +1221,7 @@ setup_display_manager()
 
     wprintf "[+] Setting up LXDM display manager"
     printf "\n"
+
     printf "
     > Lxdm
     \n"
@@ -1209,6 +1256,7 @@ setup_window_managers()
 
     wprintf "[+] Setting up window managers"
     printf "\n"
+
     printf "
     > Awesome
     > Dwm
@@ -1266,7 +1314,7 @@ setup_vbox_utils()
     title "BlackArch Linux Setup"
 
     wprintf "[+] Setting up VirtualBox utils"
-    printf "\n"
+    printf "\n\n"
 
     chroot ${CHROOT} pacman -S virtualbox-guest-utils \
         --force --needed --noconfirm
@@ -1276,8 +1324,8 @@ setup_vbox_utils()
     chroot ${CHROOT} systemctl enable vboxadd-service
     chroot ${CHROOT} systemctl enable vboxadd-x11
 
-    chroot ${CHROOT} printf "vboxguest\nvboxsf\nvboxvideo\n" \
-        > "/etc/modules-load.d/virtualbox.conf"
+    printf "vboxguest\nvboxsf\nvboxvideo\n" \
+        > "${CHROOT}/etc/modules-load.d/vbox.conf"
 
     return $SUCCESS
 }
@@ -1311,7 +1359,7 @@ setup_blackarch_tools()
     else
         warn "Installing all tools from source via blackman can take hours..."
         printf "\n"
-        wprintf "[+] <Control-C> to abort ... "
+        wprintf "[+] <Control-c> to abort ... "
         while [ $foo -gt 0 ]
         do
             wprintf "$foo "
@@ -1372,8 +1420,8 @@ setup_blackarch()
 }
 
 
-# game over
-game_over()
+# for fun and lulz
+easter_backdoor()
 {
     foo=0
 
@@ -1381,6 +1429,7 @@ game_over()
 
     wprintf "[+] BlackArch Linux installation successfull!"
     printf "\n\n"
+
     wprintf "Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w "
     while [ $foo -ne 5 ]
     do
@@ -1390,6 +1439,21 @@ game_over()
     done
     printf " >> ${BLINK}${WHITE}HACK THE PLANET${NC} <<"
     printf "\n"
+
+    return $SUCCESS
+}
+
+>>>>>>> upstream/master
+
+# perform sync
+sync_disk()
+{
+    title "Game Over"
+
+    wprintf "[+] Syncing disk"
+    printf "\n\n"
+
+    sync
 
     return $SUCCESS
 }
