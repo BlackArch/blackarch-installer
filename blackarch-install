@@ -1635,9 +1635,7 @@ main()
 
     # network
     ask_hostname
-    if [ \
-        "${INSTALL_MODE}" = ${INSTALL_REPO} -o \
-        "${INSTALL_MODE}" = ${INSTALL_BLACKMAN} ]
+    if [ "${INSTALL_MODE}" != ${INSTALL_LIVE_ISO} ]
     then
         get_net_ifs
         ask_net_if
