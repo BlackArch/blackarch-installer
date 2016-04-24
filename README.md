@@ -1,10 +1,10 @@
 # blackarch-installer
 
-The official installer for BlackArch Linux.
+The official BlackArch Linux installer.
 
 Overview
 --------
-This is the official installer for BlackArch Linux. It can be run on any Linux
+This is the official BlackArch Linux installer. It can be run on any Linux
 systems. It is recommend to use it with Arch or BlackArch Linux ISOs though.
 
 Installation
