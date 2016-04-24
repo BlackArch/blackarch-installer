@@ -1394,13 +1394,13 @@ setup_display_manager()
 
     sleep 2
 
-    # remove wrong xsession entries
-    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
-    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
-
     # install lxdm packages
     chroot ${CHROOT} pacman -S lxdm blackarch-config-lxdm blackarch-config-gtk \
         --needed --force --noconfirm
+
+    # remove wrong xsession entries
+    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
+    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
 
     # config files
     chroot ${CHROOT} cp -a /etc/lxdm-blackarch/. /etc/lxdm/.
