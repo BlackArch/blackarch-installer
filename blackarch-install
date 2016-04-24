@@ -1638,7 +1638,7 @@ easter_backdoor()
         foo=`expr $foo + 1`
     done
     printf " >> ${BLINK}${WHITE}HACK THE PLANET${NC} <<"
-    printf "\n"
+    printf "\n\n"
 
     return $SUCCESS
 }
