@@ -1681,13 +1681,18 @@ main()
     mount_filesystems
     sleep_clear 1
 
-    # arch linux
-    setup_base_system
-    sleep_clear 1
+    if [ "${INSTALL_MODE}" != ${INSTALL_LIVE_ISO} ]
+    then
+        # arch linux
+        setup_base_system
+        sleep_clear 1
 
-    # blackarch Linux
-    setup_blackarch
-    sleep_clear 1
+        # blackarch Linux
+        setup_blackarch
+        sleep_clear 1
+    else
+        echo "live ISO here"
+    fi
 
     # epilog
     umount_filesystems
