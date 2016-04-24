@@ -1691,7 +1691,8 @@ main()
         setup_blackarch
         sleep_clear 1
     else
-        echo "live ISO here"
+        echo "live ISO"
+        exit 1
     fi
 
     # epilog
