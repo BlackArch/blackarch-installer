@@ -1398,10 +1398,6 @@ setup_display_manager()
     chroot ${CHROOT} pacman -S lxdm blackarch-config-lxdm blackarch-config-gtk \
         --needed --force --noconfirm
 
-    # remove wrong xsession entries
-    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
-    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
-
     # config files
     chroot ${CHROOT} cp -a /etc/lxdm-blackarch/. /etc/lxdm/.
     chroot ${CHROOT} cp -a /usr/share/lxdm-blackarch/. /usr/share/lxdm/.
@@ -1457,6 +1453,10 @@ setup_window_managers()
 
     # wmii
     chroot ${CHROOT} cp -a /usr/share/wmii-blackarch/. /etc/wmii/.
+
+    # remove wrong xsession entries
+    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
+    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
 
     return $SUCCESS
 }
