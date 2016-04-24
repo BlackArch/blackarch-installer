@@ -1398,10 +1398,10 @@ setup_display_manager()
     chroot ${CHROOT} mv /usr/share/xsessions-blackarch/ /usr/share/xsessions/
     chroot ${CHROOT} cp -a /usr/share/gtk-blackarch/. /usr/share/gtk-2.0/.
 
-    # enable it in systemd
+    # enable in systemd
     chroot ${CHROOT} systemctl enable lxdm
 
-    # remove wrong xsession entries entries
+    # remove wrong xsession entries
     chroot ${CHROOT} rm -rf "/usr/share/xsessions/openbox-kde.desktop"
     chroot ${CHROOT} rm -rf "/usr/share/xsessions/i3-with-shmlog.desktop"
 
