@@ -988,7 +988,7 @@ setup_proc_sys_dev()
     wprintf "[+] Setting up /proc, /sys and /dev"
     printf "\n\n"
 
-    mkdir -p ${CHROOT}{proc,sys,dev} > /dev/null 2>&1
+    mkdir -p "${CHROOT}/"{proc,sys,dev} > /dev/null 2>&1
 
     mount -t proc proc "${CHROOT}/proc"
     mount --rbind /sys "${CHROOT}/sys"
