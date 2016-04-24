@@ -885,7 +885,7 @@ umount_filesystems()
 # install ArchLinux base and base-devel packages
 install_base_packages()
 {
-    title "Base System Installation"
+    title "Base System Setup"
 
     wprintf "[+] Installing ArchLinux base packages"
     printf "\n\n"
@@ -1196,6 +1196,9 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
+    install_base_packages
+    sleep_clear 1
+
     cp "/etc/resolv.conf" "${CHROOT}/etc/resolv.conf"
 
     setup_fstab
@@ -1665,8 +1668,6 @@ main()
     sleep_clear 1
 
     # arch linux
-    install_base_packages
-    sleep_clear 1
     setup_base_system
     sleep_clear 1
 
