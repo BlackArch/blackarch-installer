@@ -1536,6 +1536,21 @@ setup_blackarch_tools()
 }
 
 
+# add user to newly created groups
+update_user_groups()
+{
+    title "BlackArch Linux Setup"
+
+    wprintf "[+] Adding user '${NORMAL_USER}' to groups"
+    printf "\n\n"
+
+    chroot ${CHROOT} \
+        usermod -G ${NORMAL_USER},video,audio,vboxsf,wireshark,stunnel
+
+    return $SUCCESS
+}
+
+
 # setup blackarch related stuff (net install)
 setup_blackarch_net()
 {
@@ -1576,6 +1591,9 @@ setup_blackarch_net()
         setup_blackarch_tools
         sleep_clear 1
     fi
+
+    update_user_groups
+    sleep_clear 1
 
     return $SUCCESS
 }
