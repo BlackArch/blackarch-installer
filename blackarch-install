@@ -50,7 +50,7 @@ INSTALL_MODE=""
 # install modes
 INSTALL_REPO="1"
 INSTALL_BLACKMAN="2"
-INSTALL_ISO="3"
+INSTALL_LIVE_ISO="3"
 
 # chosen keymap
 KEYMAP=""
@@ -269,7 +269,7 @@ ask_install_mode()
     while [ \
         "${INSTALL_MODE}" != "${INSTALL_REPO}" -a \
         "${INSTALL_MODE}" != "${INSTALL_BLACKMAN}" -a \
-        "${INSTALL_MODE}" != "${INSTALL_ISO}" ]
+        "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     do
         title "Welcome to the BlackArch Linux installation!"
         wprintf "[+] Available installation modes:"
