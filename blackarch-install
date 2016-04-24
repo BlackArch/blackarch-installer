@@ -1535,8 +1535,8 @@ setup_blackarch_tools()
 }
 
 
-# setup blackarch related stuff
-setup_blackarch()
+# setup blackarch related stuff (net install)
+setup_blackarch_net()
 {
     update_etc
     sleep_clear 1
@@ -1575,6 +1575,19 @@ setup_blackarch()
         setup_blackarch_tools
         sleep_clear 1
     fi
+
+    return $SUCCESS
+}
+
+
+# setup blackarch related stuff (iso install)
+setup_blackarch_iso()
+{
+    title "FOOBAR"
+
+    err "not implemented yet"
+
+    exit 1
 
     return $SUCCESS
 }
@@ -1688,11 +1701,11 @@ main()
         sleep_clear 1
 
         # blackarch Linux
-        setup_blackarch
+        setup_blackarch_net
         sleep_clear 1
     else
-        echo "live ISO"
-        exit 1
+        setup_blackarch_iso
+        sleep_clear 1
     fi
 
     # epilog
