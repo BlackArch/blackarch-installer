@@ -1105,6 +1105,7 @@ setup_user()
         chroot ${CHROOT} groupadd ${user}
         chroot ${CHROOT} useradd -g ${user} -d "/home/${user}" -s "/bin/bash" \
             -G "wheel,users" -m ${user}
+        chroot ${CHROOT} usermod -G "${user},video,audio" ${user}
         chroot ${CHROOT} chown -R ${user}:${user} "/home/${user}"
         wprintf "[+] Added user: ${user}"
         printf "\n\n"
@@ -1583,9 +1584,9 @@ setup_blackarch_net()
 # setup blackarch related stuff (iso install)
 setup_blackarch_iso()
 {
-    title "FOOBAR"
+    title "BlackArch Linux Setup"
 
-    err "not implemented yet"
+    err "Not implemented yet"
 
     exit 1
 
