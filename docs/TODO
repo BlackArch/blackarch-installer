@@ -12,6 +12,7 @@ changelog and todo list for blackarch-installer
     [ ] new option: ask for optional partitions
     [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
     [ ] new option: install from Live-ISO
+    [ ] update: check for available disk space before starting to install pkgs
     [ ] update: add help text for each section
     [ ] update: add check for mkfs.* status before proceeding (-> $?)
     [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
