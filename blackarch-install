@@ -282,6 +282,11 @@ ask_install_mode()
     clear
     done
 
+    if [ ${INSTALL_MODE} = "${INSTALL_LIVE_ISO}" ]
+    then
+        err "Sorry, installation from Live-ISO not implemented yet"
+    fi
+
     return $SUCCESS
 }
 
