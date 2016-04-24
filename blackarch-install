@@ -1597,8 +1597,11 @@ setup_blackarch_net()
         sleep_clear 1
     fi
 
-    update_user_groups
-    sleep_clear 1
+    if [ -n "${NORMAL_USER}" ]
+    then
+        update_user_groups
+        sleep_clear 1
+    fi
 
     return $SUCCESS
 }
