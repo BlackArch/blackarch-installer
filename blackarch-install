@@ -1403,8 +1403,8 @@ setup_display_manager()
     chroot ${CHROOT} systemctl enable lxdm
 
     # remove wrong xsession entries
-    chroot ${CHROOT} rm -rf "/usr/share/xsessions/openbox-kde.desktop"
-    chroot ${CHROOT} rm -rf "/usr/share/xsessions/i3-with-shmlog.desktop"
+    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
+    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
 
     return $SUCCESS
 }
