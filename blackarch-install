@@ -276,16 +276,11 @@ ask_install_mode()
         printf "\n
     1. Install from repository using pacman
     2. Install from sources using blackman
-    3. Install from Live-ISO (not implemented yet)\n\n"
+    3. Install from Live-ISO\n\n"
         wprintf "[?] Choose an installation mode: "
         read INSTALL_MODE
     clear
     done
-
-    if [ ${INSTALL_MODE} = "${INSTALL_LIVE_ISO}" ]
-    then
-        err "Sorry, installation from Live-ISO not implemented yet"
-    fi
 
     return $SUCCESS
 }
@@ -383,13 +378,30 @@ enable_pacman_color()
 }
 
 
-# update pacman.conf
-update_pacman_conf()
+# update pacman package database
+update_pkg_database()
+{
+    title "Update pacman database"
+
+    wprintf "[+] Updating pacman database"
+    printf "\n\n"
+
+    pacman -Syy --noconfirm
+
+    return $SUCCESS
+}
+
+
+# update pacman.conf and database
+update_pacman()
 {
     enable_pacman_multilib
     sleep_clear 1
 
     enable_pacman_color
+    sleep_clear 1
+
+    update_pkg_database
     sleep_clear 1
 
     return $SUCCESS
@@ -896,6 +908,7 @@ install_base_packages()
     printf "\n\n"
 
     pacstrap ${CHROOT} base base-devel
+    chroot ${CHROOT} pacman -Syy --force
 
     return $SUCCESS
 }
@@ -1219,6 +1232,12 @@ setup_base_system()
     install_base_packages
     sleep_clear 1
 
+    if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+    then
+        dump_live_iso
+        sleep_clear 1
+    fi
+
     setup_resolvconf
     sleep_clear 1
 
@@ -1249,8 +1268,11 @@ setup_base_system()
         sleep_clear 1
     fi
 
-    setup_extra_packages
-    sleep_clear 1
+    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    then
+        setup_extra_packages
+        sleep_clear 1
+    fi
 
     setup_bootloader
     sleep_clear 1
@@ -1556,8 +1578,40 @@ update_user_groups()
 }
 
 
-# setup blackarch related stuff (net install)
-setup_blackarch_net()
+# dump data from the live-iso
+dump_live_iso()
+{
+    live_dirs="/bin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
+    foo=5
+
+    title "BlackArch Linux Setup"
+
+    wprintf "[+] Dumping data from Live-ISO (grab a coffee)"
+    printf "\n"
+
+    for d in ${live_dirs}
+    do
+        printf "
+    > ${d} (`du -sh ${d} 2> /dev/null | awk '{print $1}'`)"
+    done
+    printf "\n\n"
+
+    for d in ${live_dirs}
+    do
+        wprintf "[+] Installing ${d}, please wait ... "
+        cp -aRp ${d} ${CHROOT}
+        wprintf "done\n"
+    done
+
+    # clean up files (it will be created later)
+    rm -rf "${CHROOT}/etc"{group*,passwd*,shadow*,gshadow*}
+
+    return $SUCCESS
+}
+
+
+# setup blackarch related stuff
+setup_blackarch()
 {
     update_etc
     sleep_clear 1
@@ -1568,33 +1622,36 @@ setup_blackarch_net()
     run_strap_sh
     sleep_clear 1
 
-    ask_x_setup
-    sleep_clear 2
-
-    if [ $X_SETUP -eq $TRUE ]
+    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     then
-        setup_display_manager
-        sleep_clear 1
-        setup_window_managers
-        sleep_clear 1
-    fi
+        ask_x_setup
+        sleep_clear 2
 
-    ask_vbox_setup
-    sleep_clear 1
+        if [ $X_SETUP -eq $TRUE ]
+        then
+            setup_display_manager
+            sleep_clear 1
+            setup_window_managers
+            sleep_clear 1
+        fi
 
-    if [ $VBOX_SETUP -eq $TRUE ]
-    then
-        setup_vbox_utils
+        ask_vbox_setup
         sleep_clear 1
-    fi
 
-    ask_ba_tools_setup
-    sleep_clear 1
+        if [ $VBOX_SETUP -eq $TRUE ]
+        then
+            setup_vbox_utils
+            sleep_clear 1
+        fi
 
-    if [ $BA_TOOLS_SETUP -eq $TRUE ]
-    then
-        setup_blackarch_tools
+        ask_ba_tools_setup
         sleep_clear 1
+
+        if [ $BA_TOOLS_SETUP -eq $TRUE ]
+        then
+            setup_blackarch_tools
+            sleep_clear 1
+        fi
     fi
 
     if [ -n "${NORMAL_USER}" ]
@@ -1602,19 +1659,6 @@ setup_blackarch_net()
         update_user_groups
         sleep_clear 1
     fi
-
-    return $SUCCESS
-}
-
-
-# setup blackarch related stuff (iso install)
-setup_blackarch_iso()
-{
-    title "BlackArch Linux Setup"
-
-    err "Not implemented yet"
-
-    exit 1
 
     return $SUCCESS
 }
@@ -1675,32 +1719,29 @@ main()
 
     # network
     ask_hostname
-    if [ "${INSTALL_MODE}" != ${INSTALL_LIVE_ISO} ]
-    then
-        get_net_ifs
-        ask_net_if
-        ask_net_conf_mode
-        case "${NET_CONF_MODE}" in
-            "${NET_CONF_AUTO}")
-                net_conf_auto
-                ;;
-            "${NET_CONF_MANUAL}")
-                ask_net_addr
-                net_conf_manual
-                ;;
-            "${NET_CONF_SKIP}")
-                break
-                ;;
-            *)
-                ;;
-        esac
-        sleep_clear 1
-        check_inet_conn
-        sleep_clear 1
-    fi
+    get_net_ifs
+    ask_net_if
+    ask_net_conf_mode
+    case "${NET_CONF_MODE}" in
+        "${NET_CONF_AUTO}")
+            net_conf_auto
+            ;;
+        "${NET_CONF_MANUAL}")
+            ask_net_addr
+            net_conf_manual
+            ;;
+        "${NET_CONF_SKIP}")
+            break
+            ;;
+        *)
+            ;;
+    esac
+    sleep_clear 1
+    check_inet_conn
+    sleep_clear 1
 
     # pacman
-    update_pacman_conf
+    update_pacman
     sleep_clear 1
 
     # hard drive
@@ -1721,19 +1762,13 @@ main()
     mount_filesystems
     sleep_clear 1
 
-    if [ "${INSTALL_MODE}" != ${INSTALL_LIVE_ISO} ]
-    then
-        # arch linux
-        setup_base_system
-        sleep_clear 1
+    # arch linux
+    setup_base_system
+    sleep_clear 1
 
-        # blackarch Linux
-        setup_blackarch_net
-        sleep_clear 1
-    else
-        setup_blackarch_iso
-        sleep_clear 1
-    fi
+    # blackarch Linux
+    setup_blackarch
+    sleep_clear 1
 
     # epilog
     umount_filesystems
