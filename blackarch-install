@@ -19,7 +19,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.1.2"
+VERSION="v0.1.3"
 
 # true / false
 TRUE=0
