@@ -49,8 +49,8 @@ INSTALL_MODE=""
 
 # install modes
 INSTALL_REPO="1"
-INSTALL_BLACKMAN="2"
-INSTALL_LIVE_ISO="3"
+INSTALL_LIVE_ISO="2"
+INSTALL_BLACKMAN="3"
 
 # chosen keymap
 KEYMAP=""
@@ -275,8 +275,8 @@ ask_install_mode()
         wprintf "[+] Available installation modes:"
         printf "\n
     1. Install from repository using pacman
-    2. Install from sources using blackman
-    3. Install from Live-ISO\n\n"
+    2. Install from Live-ISO
+    3. Install from sources using blackman\n\n"
         wprintf "[?] Choose an installation mode: "
         read INSTALL_MODE
     clear
@@ -1229,6 +1229,9 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
+    setup_resolvconf
+    sleep_clear 1
+
     install_base_packages
     sleep_clear 1
 
