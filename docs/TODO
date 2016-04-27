@@ -26,6 +26,10 @@ ChangeLog and TODO list for blackarch-installer
   [ ] CODE REFACTORING / optional: split code to multiple files
 
 
+===> 0.1.2
+
+  [x] bump version
+
 ===> 0.1.1
 
   [x] update: cp resolv.conf to chroot prior to base pkgs installation
