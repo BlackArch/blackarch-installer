@@ -1,0 +1,54 @@
+ChangeLog and TODO list for blackarch-installer
+===============================================
+
+[ ] task to be performed
+[.] ongoing task
+[X] finished task
+
+
+===> 0.x
+
+  [ ] new option: choose archlinux mirror
+  [ ] new option: add optional verbose / quiet mode
+  [ ] new option: choose blackarch-groups rather than all/single tools
+  [ ] new option: install window manager(s) by choice rather than all
+  [ ] new option: if possible add 'skip' for each asking sections
+  [ ] new option: add resume functionality
+  [ ] new option: go back to previous section
+  [ ] new option: ask for optional partitions
+  [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
+  [ ] update: check for available disk space before starting to install pkgs
+  [ ] update: add help text for each section and sub-section
+  [ ] update: add check for mkfs.* status before proceeding (-> $?)
+  [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
+  [ ] update: more error handling
+  [ ] update: sort installation routines (order of sections)
+  [ ] CODE REFACTORING / optional: split code to multiple files
+
+
+===> 0.1.4
+
+  [x] bump version
+
+
+===> 0.1.3
+
+  [x] bump version
+
+
+===> 0.1.2
+
+  [x] bump version
+
+
+===> 0.1.1
+
+  [x] update: cp resolv.conf to chroot prior to base pkgs installation
+  [x] update: change menu order for installation mode
+  [x] new option: install from Live-ISO
+
+
+===> 0.1
+
+  [x] update: print partition table before asking for partitions
+  [x] initial release
