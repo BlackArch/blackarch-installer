@@ -11,7 +11,6 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: choose archlinux mirror
   [ ] new option: add optional verbose / quiet mode
   [ ] new option: choose blackarch-groups rather than all/single tools
-  [ ] new option: install window manager(s) by choice rather than all
   [ ] new option: if possible add 'skip' for each asking sections
   [ ] new option: add resume functionality
   [ ] new option: go back to previous section
@@ -25,6 +24,8 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: sort installation routines (order of sections)
   [ ] CODE REFACTORING / optional: split code to multiple files
 
+===> 0.1.5
+  [x] new option: install window manager(s) by choice rather than all
 
 ===> 0.1.4
 
