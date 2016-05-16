@@ -1451,7 +1451,8 @@ setup_window_managers()
     window_managers[4]="i3-wm"
     window_managers[5]="openbox"
     window_managers[6]="spectrwm"
-    
+    window_managers[7]="wmii"
+
     declare -A choice
     
     while true 
@@ -1464,11 +1465,59 @@ setup_window_managers()
         4. I3-wm
         5. Openbox
         6. Spectrwm
-        \n> Choose an option: "
+        7. Wmii
+        8. All of the above
+        \n> Choose an option (default: 8 -> All): "
         read -n1 choice
         printf "\n"
-        if [ $choice -ge 1 ] && [ $choice -le 6 ]
+        if [ $choice -ge 1 ] && [ $choice -le 7 ]
         then
+            chroot ${CHROOT} pacman -S ${window_managers[$choice]} \
+                                       blackarch-config-${window_managers[$choice]} \
+                                       --needed --force --noconfirm
+            case $choice in
+                1)# awesome
+                    chroot ${CHROOT} cp /etc/xdg/awesome/rc.lua.blackarch \
+                                        /etc/xdg/awesome/rc.lua
+                    ;;
+                3)# fluxbox
+                    chroot ${CHROOT} cp -a /usr/share/fluxbox-blackarch/. /usr/share/fluxbox/.
+                    ;;
+                5)# openbox
+                    chroot ${CHROOT} cp -a /etc/xdg/openbox-blackarch/. /etc/xdg/openbox/.
+                    chroot ${CHROOT} mv /usr/share/themes/blackarch/openbox-3-blackarch/ \
+                                        /usr/share/themes/blackarch/openbox-3
+                    ;;
+                6)# spectrwm
+                    chroot ${CHROOT} cp -a /usr/share/spectrwm-blackarch/spectrwm.conf \
+                                           /etc/spectrwm.conf
+                    ;;
+                7)# wmii
+                    chroot ${CHROOT} cp -a /usr/share/wmii-blackarch/. /etc/wmii/.
+                    ;;
+                *)
+                    ;;
+            esac 
+            break
+        elif [ $choice == 8 ] || [ -z $choice ]
+            chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii dwm spectrwm \
+                                       blackarch-config-fluxbox blackarch-config-openbox \
+                                       blackarch-config-awesome blackarch-config-wmii \
+                                       blackarch-config-spectrwm --needed --force --noconfirm
+            # awesome
+            chroot ${CHROOT} cp /etc/xdg/awesome/rc.lua.blackarch \
+                                /etc/xdg/awesome/rc.lua
+            # fluxbox
+            chroot ${CHROOT} cp -a /usr/share/fluxbox-blackarch/. /usr/share/fluxbox/.
+            # openbox
+            chroot ${CHROOT} cp -a /etc/xdg/openbox-blackarch/. /etc/xdg/openbox/.
+            chroot ${CHROOT} mv /usr/share/themes/blackarch/openbox-3-blackarch/ \
+                                /usr/share/themes/blackarch/openbox-3
+            # spectrwm
+            chroot ${CHROOT} cp -a /usr/share/spectrwm-blackarch/spectrwm.conf \
+                                   /etc/spectrwm.conf
+            # wmii
+            chroot ${CHROOT} cp -a /usr/share/wmii-blackarch/. /etc/wmii/. 
             break
         else
             echo "Invalid Choice"
@@ -1477,29 +1526,6 @@ setup_window_managers()
     printf "\n"
     sleep 5
 
-    chroot ${CHROOT} pacman -S ${window_managers[$choice]} \
-                               blackarch-config-${window_managers[$choice]} \
-                               --needed --force --noconfirm
-
-    case $choice in
-        1)# awesome
-            chroot ${CHROOT} cp /etc/xdg/awesome/rc.lua.blackarch \
-                /etc/xdg/awesome/rc.lua
-            ;;
-        3)# fluxbox
-            chroot ${CHROOT} cp -a /usr/share/fluxbox-blackarch/. /usr/share/fluxbox/.
-            ;;
-        5)# openbox
-            chroot ${CHROOT} cp -a /etc/xdg/openbox-blackarch/. /etc/xdg/openbox/.
-            chroot ${CHROOT} mv /usr/share/themes/blackarch/openbox-3-blackarch/ \
-                /usr/share/themes/blackarch/openbox-3
-            ;;
-        6)# spectrwm
-            chroot ${CHROOT} cp -a /usr/share/spectrwm-blackarch/spectrwm.conf \
-                /etc/spectrwm.conf
-    esac
-    # wmii
-    chroot ${CHROOT} cp -a /usr/share/wmii-blackarch/. /etc/wmii/.
 
     # remove wrong xsession entries
     chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
