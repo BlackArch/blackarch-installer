@@ -545,7 +545,7 @@ net_conf_auto()
 # check for internet connection
 check_inet_conn()
 {
-    if ! ping -c1 google.com > /dev/null 2>&1
+    if ! ping -c1 github.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
