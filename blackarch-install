@@ -19,7 +19,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.1.4"
+VERSION="v0.2"
 
 # true / false
 TRUE=0
@@ -271,7 +271,7 @@ ask_install_mode()
         "${INSTALL_MODE}" != "${INSTALL_BLACKMAN}" -a \
         "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     do
-        title "Welcome to the BlackArch Linux installation!"
+        title "Welcome to the BlackArch Linux installer!"
         wprintf "[+] Available installation modes:"
         printf "\n
     1. Install from repository using pacman
@@ -342,7 +342,7 @@ set_keymap()
 # enable multilib in pacman.conf if x86_64 present
 enable_pacman_multilib()
 {
-    title "Update pacman.conf"
+    title "Pacman Setup"
 
     if [ "`uname -m`" = "x86_64" ]
     then
@@ -367,7 +367,7 @@ enable_pacman_multilib()
 # enable color mode in pacman.conf
 enable_pacman_color()
 {
-    title "Update pacman.conf"
+    title "Pacman Setup"
 
     wprintf "[+] Enabling color mode"
     printf "\n\n"
@@ -381,7 +381,7 @@ enable_pacman_color()
 # update pacman package database
 update_pkg_database()
 {
-    title "Update pacman database"
+    title "Pacman Setup"
 
     wprintf "[+] Updating pacman database"
     printf "\n\n"
@@ -466,12 +466,12 @@ ask_net_conf_mode()
         "${NET_CONF_MODE}" != "${NET_CONF_MANUAL}" -a \
         "${NET_CONF_MODE}" != "${NET_CONF_SKIP}" ]
     do
-        title "Network setup - Configure network interface"
-        wprintf "[+] Configuruation modes for network interfaces:"
+        title "Network Setup"
+        wprintf "[+] Configuruation network interfaces:"
         printf "\n
     1. Auto (DHCP)
-    2. Manual
-    3. Skip\n\n"
+    2. Manual (use this, if you are 1337)
+    3. Skip (hint: use this if you are already connected)\n\n"
         wprintf "[?] Please choose a mode: "
         read NET_CONF_MODE
         clear
@@ -497,9 +497,9 @@ ask_net_addr()
     > Broadcast
     > Nameserver
         \n"
-        wprintf "[?] Host ipv4: "
+        wprintf "[?] Host IPv4: "
         read HOST_IPV4
-        wprintf "[?] Gateway ipv4: "
+        wprintf "[?] Gateway IPv4: "
         read GATEWAY
         wprintf "[?] Subnetmask: "
         read SUBNETMASK
@@ -545,7 +545,7 @@ net_conf_auto()
 # check for internet connection
 check_inet_conn()
 {
-    if ! ping -c1 google.com > /dev/null 2>&1
+    if ! ping -c 1 google.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
@@ -707,7 +707,7 @@ print_partitions()
         elif [ "${i}" = "n" -o "${i}" = "N" ]
         then
             echo
-            err "B00m! Hard Drive Setup aborted."
+            err "Hard Drive Setup aborted."
         else
             clear
             continue
@@ -859,7 +859,7 @@ mount_filesystems()
     fi
 
     # BOOT
-    mkdir /mnt/boot > /dev/null 2>&1
+    mkdir ${CHROOT}/boot > /dev/null 2>&1
     mount ${BOOT_PART} "${CHROOT}/boot" > /dev/null 2>&1
 
     # SWAP
@@ -922,7 +922,8 @@ setup_resolvconf()
     wprintf "[+] Setting up /etc/resolv.conf"
     printf "\n\n"
 
-    cp "/etc/resolv.conf" "${CHROOT}/etc/resolv.conf"
+    mkdir -p "${CHROOT}/etc/" > ${VERBOSE} 2>&1
+    cp -L "/etc/resolv.conf" "${CHROOT}/etc/resolv.conf" > ${VERBOSE} 2>&1
 
     return $SUCCESS
 }
@@ -1049,7 +1050,7 @@ setup_bootloader()
         if [ ${LUKS} = ${TRUE} ]
         then
             cat >> "${CHROOT}/boot/loader/entries/arch.conf" << EOF
-title       Arch Linux
+title       BlackArch Linux
 linux       /vmlinuz-linux
 initrd      /initramfs-linux.img
 options     cryptdevice=UUID=${uuid}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT} rw
@@ -1057,7 +1058,7 @@ EOF
 
         else
             cat >> "${CHROOT}/boot/loader/entries/arch.conf" << EOF
-title       Arch Linux
+title       BlackArch Linux
 linux       /vmlinuz-linux
 initrd      /initramfs-linux.img
 options     root=UUID=${uuid} rw
@@ -1069,9 +1070,9 @@ EOF
 
         chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
 
-        if [ -f "data/boot/grub/splash.png" ]
+        if [ -f data/boot/grub/splash.png ]
         then
-            cp data/boot/grub/splash.png "${CHROOT}/boot/grub/splash.png"
+            cp data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
         else
             cp /usr/share/blackarckarch-installer/data/boot/grub/splash.png \
                 "${CHROOT}/boot/grub/splash.png"
@@ -1296,11 +1297,11 @@ update_etc()
     cp "/etc/pacman.conf" "${CHROOT}/etc/pacman.conf"
 
     # /etc/*
-    if [ -d "data/etc/" ]
+    if [ -d data/etc/ ]
     then
-        cp "data/etc/"* "${CHROOT}/etc/."
+        cp data/etc/* ${CHROOT}/etc/.
     else
-        cp "/usr/share/blackarch-installer/data/etc/"* "${CHROOT}/etc/."
+        cp /usr/share/blackarch-installer/data/etc/* ${CHROOT}/etc/.
     fi
 
     return $SUCCESS
@@ -1336,7 +1337,7 @@ ask_mirror()
     printf "\n"
 
     # bugfix: detected chars added sometimes - clear chars
-    _a=`printf "%s" $a | sed 's/[a-z]//Ig'`
+    _a=`printf "%s" $a | sed 's/[a-z]//Ig' 2> /dev/null`
 
     if [ -z "${_a}" ]
     then
@@ -1358,7 +1359,8 @@ ask_mirror()
 run_strap_sh()
 {
     strap_sh="/tmp/strap.sh"
-    orig_sha1="86eb4efb68918dbfdd1e22862a48fda20a8145ff"
+    orig_sha1="c7012b890bb6043a2b39ca749cf0dbb9daac606c"
+    #orig_sha1="86eb4efb68918dbfdd1e22862a48fda20a8145ff"
 
     title "BlackArch Linux Setup"
 
@@ -1374,7 +1376,7 @@ run_strap_sh()
         chmod a+x "${CHROOT}${strap_sh}"
         chroot ${CHROOT} sh ${strap_sh}
     else
-        cri "Wrong SHA1 sum for strap.sh: ${sha1} (orig: ${orig_sha1}). Aborting!"
+        err "Wrong SHA1 sum for strap.sh: ${sha1} (orig: ${orig_sha1}). Aborting!"
     fi
 
     # add blackarch linux mirror if we are in chroot
@@ -1546,7 +1548,7 @@ setup_blackarch_tools()
 
     if [ ${INSTALL_MODE} = ${INSTALL_REPO} ]
     then
-        chroot ${CHROOT} pacman -S --needed --force --noconfirm blackarch
+        chroot ${CHROOT} pacman -S --needed --force blackarch
     else
         warn "Installing all tools from source via blackman can take hours..."
         printf "\n"
@@ -1574,6 +1576,7 @@ update_user_groups()
     wprintf "[+] Adding user '${NORMAL_USER}' to groups"
     printf "\n\n"
 
+    # TODO: more to add here
     chroot ${CHROOT} \
         usermod -G ${NORMAL_USER},video,audio,vboxsf,wireshark,stunnel
 
