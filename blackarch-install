@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.2.3"
+VERSION="v0.2.4"
 
 # true / false
 TRUE=0
@@ -542,7 +542,7 @@ net_conf_auto()
 # check for internet connection
 check_inet_conn()
 {
-    if ! ping -c 1 google.com > /dev/null 2>&1
+    if ! host -W 5 -t a blackarch.org > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
