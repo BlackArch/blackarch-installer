@@ -665,7 +665,7 @@ get_partitions()
         read BOOT_FS_TYPE
         wprintf "[?] Root partition (/dev/sdXY): "
         read ROOT_PART
-        wprintf "[?] Root FS type (ext2, ext3, ext4): "
+        wprintf "[?] Root FS type (ext2, ext3, ext4, btrfs): "
         read ROOT_FS_TYPE
         wprintf "[?] Swap parition (/dev/sdXY - empty for none): "
         read SWAP_PART
@@ -794,7 +794,12 @@ make_root_partition()
         title "Hard Drive Setup"
         wprintf "[+] Creating ROOT partition"
         printf "\n\n"
-        mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART}
+        if [ "${ROOT_FS_TYPE}" = "btrfs" ]
+        then
+            mkfs.${ROOT_FS_TYPE} -f ${ROOT_PART}
+        else
+            mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART}
+        fi
         sleep_clear 1
     fi
 
