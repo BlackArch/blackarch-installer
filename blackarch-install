@@ -1183,8 +1183,8 @@ setup_extra_packages()
 
     network="wicd-gtk wicd bridge-utils darkhttpd atftp bind-tools dnsmasq
     dhclient dnsutils gnu-netcat ipw2100-fw ipw2200-fw lftp nfs-utils ntp
-    openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc
-    wireless_tools wpa_actiond wvdial xl2tpd zd1211-firmware"
+    openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog
+    wireless_tools wpa_actiond wvdial xl2tpd zd1211-firmware iw wpa_supplicant"
 
     xorg="xf86-video-ark xf86-video-ati xf86-video-chips
     xf86-video-dummy xf86-video-fbdev xf86-video-glint
