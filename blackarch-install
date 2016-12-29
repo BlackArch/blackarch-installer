@@ -16,15 +16,15 @@
 
 
 # blackarch-installer version
-VERSION="v0.2.5"
+VERSION="v0.3"
 
 # true / false
 TRUE=0
 FALSE=1
 
 # return codes
-SUCCESS=1337
-FAILURE=31337
+SUCCESS=0
+FAILURE=1
 
 # verbose mode - default: quiet
 VERBOSE="/dev/null"
@@ -69,8 +69,9 @@ NET_CONF_MODE=""
 
 # network configuration modes
 NET_CONF_AUTO="1"
-NET_CONF_MANUAL="2"
-NET_CONF_SKIP="3"
+NET_CONF_WLAN="2"
+NET_CONF_MANUAL="3"
+NET_CONF_SKIP="4"
 
 # hostname
 HOST_NAME=""
@@ -135,8 +136,17 @@ X_SETUP=$FALSE
 # VirtualBox setup - default: false
 VBOX_SETUP=$FALSE
 
+# VMware setup - default: false
+VMWARE_SETUP=$FALSE
+
 # BlackArch Linux tools setup - default: false
 BA_TOOLS_SETUP=$FALSE
+
+# wlan ssid
+WLAN_SSID=""
+
+# wlan passphrase
+WLAN_PASSPHRASE=""
 
 
 # print formatted output
@@ -460,15 +470,17 @@ ask_net_conf_mode()
 {
     while [ \
         "${NET_CONF_MODE}" != "${NET_CONF_AUTO}" -a \
+        "${NET_CONF_MODE}" != "${NET_CONF_WLAN}" -a \
         "${NET_CONF_MODE}" != "${NET_CONF_MANUAL}" -a \
         "${NET_CONF_MODE}" != "${NET_CONF_SKIP}" ]
     do
         title "Network Setup"
         wprintf "[+] Network interface configuration:"
         printf "\n
-    1. Auto DHCP (use this if you work in the kitchen)
-    2. Manual (use this if you are 1337)
-    3. Skip (use this if you are already connected)\n\n"
+    1. Auto DHCP (use this for auto connect via dhcp on selected interface)
+    2. WiFi WPA Setup (use if you need to connect to a wlan before)
+    3. Manual (use this if you are 1337)
+    4. Skip (use this if you are already connected)\n\n"
         wprintf "[?] Please choose a mode: "
         read NET_CONF_MODE
         clear
@@ -532,6 +544,47 @@ net_conf_auto()
     title "Network Setup"
     wprintf "[+] Configuring network interface '${NET_IF}' via DHCP: "
     printf "\n\n"
+
+    dhcpcd ${opts} -i ${NET_IF}
+
+    return $SUCCESS
+}
+
+
+# ask for wlan data (ssid, wpa passphrase, etc.)
+ask_wlan_data()
+{
+    while [ "${WLAN_SSID}" = "" -o "${WLAN_PASSPHRASE}" = "" ]
+    do
+        title "Network Setup"
+        wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
+        printf "\n
+    > W-LAN SSID
+    > WPA Passphrase
+        \n"
+        wprintf "[?] W-LAN SSID: "
+        read WLAN_SSID
+        wprintf "[?] WPA Passphrase: "
+        read WLAN_PASSPHRASE
+        clear
+    done
+
+    return $SUCCESS
+}
+
+
+# wifi and auto dhcp network interface configuration
+net_conf_wlan()
+{
+    wpasup="`mktemp`"
+    opts="-h noleak -i noleak -v ,noleak -I noleak"
+
+    title "Network Setup"
+    wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
+    printf "\n\n"
+
+    wpa_passphrase "${WLAN_SSID}" "${WLAN_PASSPHRASE}" > ${wpasup}
+    wpa_supplicant -B -i ${NET_IF} -c ${wpasup}
 
     dhcpcd ${opts} -i ${NET_IF}
 
@@ -661,11 +714,11 @@ get_partitions()
 
         wprintf "[?] Boot partition (/dev/sdXY): "
         read BOOT_PART
-        wprintf "[?] Boot FS type (ext2, ext3, ext4, fat32): "
+        wprintf "[?] Boot FS type (ext2, ext3, ext4, btrfs, fat32): "
         read BOOT_FS_TYPE
         wprintf "[?] Root partition (/dev/sdXY): "
         read ROOT_PART
-        wprintf "[?] Root FS type (ext2, ext3, ext4): "
+        wprintf "[?] Root FS type (ext2, ext3, ext4, btrfs): "
         read ROOT_FS_TYPE
         wprintf "[?] Swap parition (/dev/sdXY - empty for none): "
         read SWAP_PART
@@ -788,13 +841,23 @@ make_root_partition()
         title "Hard Drive Setup"
         wprintf "[+] Creating encrypted ROOT partition"
         printf "\n\n"
-        mkfs.${ROOT_FS_TYPE} "/dev/mapper/${CRYPT_ROOT}"
+        if [ "${ROOT_FS_TYPE}" = "btrfs" ]
+        then
+            mkfs.${ROOT_FS_TYPE} -f "/dev/mapper/${CRYPT_ROOT}"
+        else
+            mkfs.${ROOT_FS_TYPE} -F "/dev/mapper/${CRYPT_ROOT}"
+        fi
         sleep_clear 1
     else
         title "Hard Drive Setup"
         wprintf "[+] Creating ROOT partition"
         printf "\n\n"
-        mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART}
+        if [ "${ROOT_FS_TYPE}" = "btrfs" ]
+        then
+            mkfs.${ROOT_FS_TYPE} -f ${ROOT_PART}
+        else
+            mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART}
+        fi
         sleep_clear 1
     fi
 
@@ -813,7 +876,7 @@ make_boot_partition()
     then
         mkfs.fat -F32 ${BOOT_PART}
     else
-        mkfs.${BOOT_FS_TYPE} -F ${BOOT_PART}
+        mkfs.${BOOT_FS_TYPE} ${BOOT_PART}
     fi
 
     return $SUCCESS
@@ -1105,6 +1168,21 @@ ask_user_account()
 }
 
 
+# setup blackarch test user (not active + lxdm issue)
+setup_testuser()
+{
+    title "Base System Setup"
+
+    wprintf "[+] Setting up test user blackarchtest account"
+    printf "\n\n"
+    warn "Remove this user if you added a normal system user account"
+    printf "\n"
+
+    chroot ${CHROOT} useradd -d /home/blackarchtest/ -s "/sbin/nologin" -m \
+        blackarchtest
+}
+
+
 # setup user account, password and environment
 setup_user()
 {
@@ -1193,8 +1271,8 @@ setup_extra_packages()
     xf86-video-nv xf86-video-openchrome xf86-video-r128 xf86-video-rendition
     xf86-video-s3 xf86-video-s3virge xf86-video-savage xf86-video-siliconmotion
     xf86-video-sis xf86-video-sisusb xf86-video-tdfx xf86-video-trident
-    xf86-video-tseng xf86-video-vesa xf86-video-vmware xf86-video-voodoo
-    xorg-server xorg-xinit xorg-server-utils xterm"
+    xf86-video-tseng xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit
+    xorg-server-utils xterm"
 
     all="${arch} ${bluetooth} ${browser} ${editor} ${filesystem} ${fonts}"
     all="${all} ${kernel} ${misc} ${network} ${xorg}"
@@ -1267,6 +1345,9 @@ setup_base_system()
     then
         setup_user "${NORMAL_USER}"
         sleep_clear 1
+    else
+        setup_testuser
+        sleep_clear 2
     fi
 
     if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
@@ -1290,15 +1371,12 @@ update_etc()
     wprintf "[+] Updating /etc files"
     printf "\n\n"
 
-    # /etc/pacman.conf
-    cp "/etc/pacman.conf" "${CHROOT}/etc/pacman.conf"
-
     # /etc/*
     if [ -d data/etc/ ]
     then
-        cp data/etc/* ${CHROOT}/etc/.
+        cp -r data/etc/. ${CHROOT}/etc/.
     else
-        cp /usr/share/blackarch-installer/data/etc/* ${CHROOT}/etc/.
+        cp -r /usr/share/blackarch-installer/data/etc/. ${CHROOT}/etc/.
     fi
 
     return $SUCCESS
@@ -1392,7 +1470,7 @@ run_strap_sh()
 # ask user for X (display + window manager) setup
 ask_x_setup()
 {
-    if confirm "BlackArch Linux Setup" "[?] Setup X display + window managers [y/n]: "
+    if confirm "BlackArch Linux Setup" "[?] Setup X11 + window managers [y/n]: "
     then
         X_SETUP=$TRUE
         printf "\n"
@@ -1408,7 +1486,7 @@ setup_display_manager()
 {
     title "BlackArch Linux Setup"
 
-    wprintf "[+] Setting up LXDM display manager"
+    wprintf "[+] Setting up LXDM"
     printf "\n"
 
     printf "
@@ -1418,14 +1496,13 @@ setup_display_manager()
     sleep 2
 
     # install lxdm packages
-    chroot ${CHROOT} pacman -S lxdm blackarch-config-lxdm blackarch-config-gtk \
-        --needed --force --noconfirm
+    chroot ${CHROOT} pacman -S lxdm --needed --force --noconfirm
 
     # config files
-    chroot ${CHROOT} cp -a /etc/lxdm-blackarch/. /etc/lxdm/.
-    chroot ${CHROOT} cp -a /usr/share/lxdm-blackarch/. /usr/share/lxdm/.
-    chroot ${CHROOT} mv /usr/share/xsessions-blackarch/ /usr/share/xsessions/
-    chroot ${CHROOT} cp -a /usr/share/gtk-blackarch/. /usr/share/gtk-2.0/.
+    cp -r data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
+    cp -r data/usr/share/lxdm/. ${CHROOT}/usr/share/lxdm/.
+    cp -r data/usr/share/xsessions-blackarch/. ${CHROOT}/usr/share/xsessions/
+    cp -r data/usr/share/gtk-2.0/. ${CHROOT}/usr/share/gtk-2.0/.
 
     # enable in systemd
     chroot ${CHROOT} systemctl enable lxdm
@@ -1454,32 +1531,31 @@ setup_window_managers()
     sleep 2
 
     chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii dwm spectrwm \
-        blackarch-config-fluxbox blackarch-config-openbox \
-        blackarch-config-awesome blackarch-config-wmii \
-        blackarch-config-spectrwm --needed --force --noconfirm
+        --needed --force --noconfirm
 
     # awesome
-    chroot ${CHROOT} cp /etc/xdg/awesome/rc.lua.blackarch \
-        /etc/xdg/awesome/rc.lua
+    cp -r data/etc/xdg/awesome/. ${CHROOT}/etc/xdg/awesome/.
+    cp -r data/usr/share/awesome/. ${CHROOT}/usr/share/awesome/.
 
     # fluxbox
-    chroot ${CHROOT} cp -a /usr/share/fluxbox-blackarch/. /usr/share/fluxbox/.
+    cp -r data/usr/share/fluxbox/. ${CHROOT}/usr/share/fluxbox/.
 
     # openbox
-    chroot ${CHROOT} cp -a /etc/xdg/openbox-blackarch/. /etc/xdg/openbox/.
-    chroot ${CHROOT} mv /usr/share/themes/blackarch/openbox-3-blackarch/ \
-        /usr/share/themes/blackarch/openbox-3
+    cp -r data/etc/xdg/openbox/. ${CHROOT}/etc/xdg/openbox/.
+    cp -r data/usr/share/themes/blackarch ${CHROOT}/usr/share/themes/.
 
     # spectrwm
-    chroot ${CHROOT} cp -a /usr/share/spectrwm-blackarch/spectrwm.conf \
-        /etc/spectrwm.conf
+    cp -r data/etc/spectrwm.conf ${CHROOT}/etc/spectrwm.conf
 
     # wmii
-    chroot ${CHROOT} cp -a /usr/share/wmii-blackarch/. /etc/wmii/.
+    cp -r data/etc/wmii/. ${CHROOT}/etc/wmii/.
 
     # remove wrong xsession entries
     chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
     chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
+
+    # wallpaper
+    cp -r data/usr/share/blackarch ${CHROOT}/usr/share/blackarch
 
     return $SUCCESS
 }
@@ -1515,6 +1591,35 @@ setup_vbox_utils()
 
     printf "vboxguest\nvboxsf\nvboxvideo\n" \
         > "${CHROOT}/etc/modules-load.d/vbox.conf"
+
+    return $SUCCESS
+}
+
+
+# ask user for VirtualBox modules+utils setup
+ask_vmware_setup()
+{
+    if confirm "BlackArch Linux Setup" "[?] Setup VMware modules [y/n]: "
+    then
+        VMWARE_SETUP=$TRUE
+    fi
+
+    return $SUCCESS
+}
+
+
+# setup vmware utils
+setup_vmware_utils()
+{
+    title "BlackArch Linux Setup"
+
+    wprintf "[+] Setting up VMware utils"
+    printf "\n\n"
+
+    chroot ${CHROOT} pacman -S open-vm-tools xf86-video-vmware \
+        xf86-input-vmmouse --force --needed --noconfirm
+
+    chroot ${CHROOT} systemctl enable vmware-vmblock-fuse.service
 
     return $SUCCESS
 }
@@ -1646,6 +1751,18 @@ setup_blackarch()
             sleep_clear 1
         fi
 
+        ask_vmware_setup
+        sleep_clear 1
+
+        if [ $VMWARE_SETUP -eq $TRUE ]
+        then
+            setup_vmware_utils
+            sleep_clear 1
+        fi
+
+        update_etc
+        sleep_clear 1
+
         ask_ba_tools_setup
         sleep_clear 1
 
@@ -1727,6 +1844,10 @@ main()
     case "${NET_CONF_MODE}" in
         "${NET_CONF_AUTO}")
             net_conf_auto
+            ;;
+        "${NET_CONF_WLAN}")
+            ask_wlan_data
+            net_conf_wlan
             ;;
         "${NET_CONF_MANUAL}")
             ask_net_addr

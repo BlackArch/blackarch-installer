@@ -3,7 +3,7 @@ ChangeLog and TODO list for blackarch-installer
 
 [ ] task to be performed
 [.] ongoing task
-[X] finished task
+[x] finished task
 
 
 ===> 0.x
@@ -25,6 +25,12 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: sort installation routines (order of sections)
     [ ] CODE REFACTORING / optional: split code to multiple files
 
+
+===> 0.3
+    [x] add wireless setup support
+    [x] add btrfs support
+    [x] use local data/ config files (lxdm, WMs, etc.)
+    [x] update config files
 
 ===> 0.2
 
