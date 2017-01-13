@@ -1,6 +1,7 @@
 ChangeLog and TODO list for blackarch-installer
 ===============================================
 
+
 [ ] task to be performed
 [.] ongoing task
 [x] finished task
@@ -23,14 +24,24 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
     [ ] update: more error handling
     [ ] update: sort installation routines (order of sections)
-    [ ] CODE REFACTORING / optional: split code to multiple files
+    [ ] update: check if on live or netinstall iso -> skip relevant options then
+    [ ] update: CODE REFACTORING + split code to multiple files
+
+
+===> 0.3.2
+
+    [x] update: make cryptsetup use batch-mode to avoid useless confirmations
+    [x] bugfix: remove non-existing x11 video driver packages
+    [x] bugfix: fix wrong path to 'data' dir (configs, x11-settings, etc)
 
 
 ===> 0.3
+
     [x] add wireless setup support
     [x] add btrfs support
     [x] use local data/ config files (lxdm, WMs, etc.)
     [x] update config files
+
 
 ===> 0.2
 

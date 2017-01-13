@@ -16,7 +16,10 @@
 
 
 # blackarch-installer version
-VERSION="v0.3.1"
+VERSION="v0.3.2"
+
+# path to blackarch-installer
+BI_PATH="/usr/share/blackarch-installer"
 
 # true / false
 TRUE=0
@@ -793,8 +796,9 @@ make_luks_partition()
     title "Hard Drive Setup"
 
     wprintf "[+] Creating LUKS partition"
-    printf "\n"
-    cryptsetup -y -v -s 512 luksFormat "${part}"
+    printf "\n\n"
+
+    cryptsetup -q -y -v -s 512 luksFormat "${part}"
 
     return $SUCCESS
 }
@@ -1130,13 +1134,8 @@ EOF
 
         chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
 
-        if [ -f data/boot/grub/splash.png ]
-        then
-            cp data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
-        else
-            cp /usr/share/blackarckarch-installer/data/boot/grub/splash.png \
-                "${CHROOT}/boot/grub/splash.png"
-        fi
+        cp ${BI_PATH}/data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
+
         if [ ${LUKS} = ${TRUE} ]
         then
             sed -i "s|quiet|cryptdevice=${ROOT_PART}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT}|" "${CHROOT}/etc/default/grub"
@@ -1198,8 +1197,7 @@ setup_user()
     then
         chroot ${CHROOT} groupadd ${user}
         chroot ${CHROOT} useradd -g ${user} -d "/home/${user}" -s "/bin/bash" \
-            -G "wheel,users" -m ${user}
-        chroot ${CHROOT} usermod -G "${user},video,audio" ${user}
+            -G "${user},wheel,users,video,audio" -m ${user}
         chroot ${CHROOT} chown -R ${user}:${user} "/home/${user}"
         wprintf "[+] Added user: ${user}"
         printf "\n\n"
@@ -1208,15 +1206,9 @@ setup_user()
     # environment
     if [ -z ${NORMAL_USER} ]
     then
-        if [ -d "data/root" ]
-        then
-            cp -r data/root/. "${CHROOT}/root/."
-        else
-            cp -r /usr/share/blackarckarch-installer/data/root/. \
-                "${CHROOT}/root/."
-        fi
+        cp -r ${BI_PATH}/data/root/. "${CHROOT}/root/."
     else
-        cp -r data/user/. "${CHROOT}/home/${user}/."
+        cp -r ${BI_PATH}/data/user/. "${CHROOT}/home/${user}/."
     fi
 
     # password
@@ -1264,15 +1256,9 @@ setup_extra_packages()
     openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog iw
     wireless_tools wpa_actiond wvdial xl2tpd zd1211-firmware wpa_supplicant"
 
-    xorg="xf86-video-ark xf86-video-ati xf86-video-chips
-    xf86-video-dummy xf86-video-fbdev xf86-video-glint
-    xf86-video-i128 xf86-video-i740 xf86-video-intel xf86-video-mach64
-    xf86-video-neomagic xf86-video-nouveau
-    xf86-video-nv xf86-video-openchrome xf86-video-r128 xf86-video-rendition
-    xf86-video-s3 xf86-video-s3virge xf86-video-savage xf86-video-siliconmotion
-    xf86-video-sis xf86-video-sisusb xf86-video-tdfx xf86-video-trident
-    xf86-video-tseng xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit
-    xorg-server-utils xterm"
+    xorg="xf86-video-ati xf86-video-dummy xf86-video-fbdev xf86-video-intel
+    xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb xf86-video-vesa
+    xf86-video-voodoo xorg-server xorg-xinit xorg-server-utils xterm"
 
     all="${arch} ${bluetooth} ${browser} ${editor} ${filesystem} ${fonts}"
     all="${all} ${kernel} ${misc} ${network} ${xorg}"
@@ -1372,12 +1358,7 @@ update_etc()
     printf "\n\n"
 
     # /etc/*
-    if [ -d data/etc/ ]
-    then
-        cp -r data/etc/. ${CHROOT}/etc/.
-    else
-        cp -r /usr/share/blackarch-installer/data/etc/. ${CHROOT}/etc/.
-    fi
+    cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/.
 
     return $SUCCESS
 }
@@ -1499,10 +1480,11 @@ setup_display_manager()
     chroot ${CHROOT} pacman -S lxdm --needed --force --noconfirm
 
     # config files
-    cp -r data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
-    cp -r data/usr/share/lxdm/. ${CHROOT}/usr/share/lxdm/.
-    cp -r data/usr/share/xsessions-blackarch/. ${CHROOT}/usr/share/xsessions/
-    cp -r data/usr/share/gtk-2.0/. ${CHROOT}/usr/share/gtk-2.0/.
+    cp -r ${BI_PATH}/data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
+    cp -r ${BI_PATH}/data/usr/share/lxdm/. ${CHROOT}/usr/share/lxdm/.
+    cp -r ${BI_PATH}/data/usr/share/xsessions-blackarch/. \
+        ${CHROOT}/usr/share/xsessions/
+    cp -r ${BI_PATH}/data/usr/share/gtk-2.0/. ${CHROOT}/usr/share/gtk-2.0/.
 
     # enable in systemd
     chroot ${CHROOT} systemctl enable lxdm
@@ -1534,28 +1516,28 @@ setup_window_managers()
         --needed --force --noconfirm
 
     # awesome
-    cp -r data/etc/xdg/awesome/. ${CHROOT}/etc/xdg/awesome/.
-    cp -r data/usr/share/awesome/. ${CHROOT}/usr/share/awesome/.
+    cp -r ${BI_PATH}/data/etc/xdg/awesome/. ${CHROOT}/etc/xdg/awesome/.
+    cp -r ${BI_PATH}/data/usr/share/awesome/. ${CHROOT}/usr/share/awesome/.
 
     # fluxbox
-    cp -r data/usr/share/fluxbox/. ${CHROOT}/usr/share/fluxbox/.
+    cp -r ${BI_PATH}/data/usr/share/fluxbox/. ${CHROOT}/usr/share/fluxbox/.
 
     # openbox
-    cp -r data/etc/xdg/openbox/. ${CHROOT}/etc/xdg/openbox/.
-    cp -r data/usr/share/themes/blackarch ${CHROOT}/usr/share/themes/.
+    cp -r ${BI_PATH}/data/etc/xdg/openbox/. ${CHROOT}/etc/xdg/openbox/.
+    cp -r ${BI_PATH}/data/usr/share/themes/blackarch ${CHROOT}/usr/share/themes/.
 
     # spectrwm
-    cp -r data/etc/spectrwm.conf ${CHROOT}/etc/spectrwm.conf
+    cp -r ${BI_PATH}/data/etc/spectrwm.conf ${CHROOT}/etc/spectrwm.conf
 
     # wmii
-    cp -r data/etc/wmii/. ${CHROOT}/etc/wmii/.
+    cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
+
+    # wallpaper
+    cp -r ${BI_PATH}/data/usr/share/blackarch ${CHROOT}/usr/share/blackarch
 
     # remove wrong xsession entries
     chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
     chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
-
-    # wallpaper
-    cp -r data/usr/share/blackarch ${CHROOT}/usr/share/blackarch
 
     return $SUCCESS
 }
@@ -1732,7 +1714,7 @@ setup_blackarch()
     if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     then
         ask_x_setup
-        sleep_clear 2
+        sleep_clear 3
 
         if [ $X_SETUP -eq $TRUE ]
         then
