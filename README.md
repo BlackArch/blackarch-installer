@@ -13,7 +13,8 @@ On Arch Linux, run:
 ```sh
 pacman -S blackarch-installer
 ```
-On any other distribution clone this repository.
+On any other distribution clone this repository and copy it to
+/usr/share/blackarch-installer.
 
 Usage
 -----
