@@ -1294,15 +1294,14 @@ setup_base_system()
     setup_resolvconf
     sleep_clear 1
 
-    install_base_packages
-    sleep_clear 1
-
     if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
     then
         dump_live_iso
-        sleep_clear 1
+    else
+        install_base_packages
     fi
-
+    sleep_clear 1
+    
     setup_resolvconf
     sleep_clear 1
 
