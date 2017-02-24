@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.3.2"
+VERSION="v0.3.3"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -352,21 +352,30 @@ set_keymap()
 # enable multilib in pacman.conf if x86_64 present
 enable_pacman_multilib()
 {
+    path="${1}"
+
+    if [ "${path}" = "chroot" ]
+    then
+        path="${CHROOT}"
+    else
+        path=""
+    fi
+
     title "Pacman Setup"
 
     if [ "`uname -m`" = "x86_64" ]
     then
         wprintf "[+] Enabling multilib support"
         printf "\n\n"
-        if grep -q "#\[multilib\]" /etc/pacman.conf
+        if grep -q "#\[multilib\]" ${path}/etc/pacman.conf
         then
             # it exists but commented
-            sed -i '/\[multilib\]/{ s/^#//; n; s/^#//; }' /etc/pacman.conf
-        elif ! grep -q "\[multilib\]" /etc/pacman.conf
+            sed -i '/\[multilib\]/{ s/^#//; n; s/^#//; }' ${path}/etc/pacman.conf
+        elif ! grep -q "\[multilib\]" ${path}/etc/pacman.conf
         then
             # it does not exist at all
             printf "[multilib]\nInclude = /etc/pacman.d/mirrorlist\n" \
-                >> /etc/pacman.conf
+                >> ${path}/etc/pacman.conf
         fi
     fi
 
@@ -377,12 +386,21 @@ enable_pacman_multilib()
 # enable color mode in pacman.conf
 enable_pacman_color()
 {
+    path="${1}"
+
+    if [ "${path}" = "chroot" ]
+    then
+        path="${CHROOT}"
+    else
+        path=""
+    fi
+
     title "Pacman Setup"
 
     wprintf "[+] Enabling color mode"
     printf "\n\n"
 
-    sed -i 's/^#Color/Color/' /etc/pacman.conf
+    sed -i 's/^#Color/Color/' ${path}/etc/pacman.conf
 
     return $SUCCESS
 }
@@ -880,7 +898,7 @@ make_boot_partition()
     then
         mkfs.fat -F32 ${BOOT_PART}
     else
-        mkfs.${BOOT_FS_TYPE} ${BOOT_PART}
+        mkfs.${BOOT_FS_TYPE} -F ${BOOT_PART}
     fi
 
     return $SUCCESS
@@ -1482,8 +1500,7 @@ setup_display_manager()
     # config files
     cp -r ${BI_PATH}/data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
     cp -r ${BI_PATH}/data/usr/share/lxdm/. ${CHROOT}/usr/share/lxdm/.
-    cp -r ${BI_PATH}/data/usr/share/xsessions-blackarch/. \
-        ${CHROOT}/usr/share/xsessions/
+    cp -r ${BI_PATH}/data/usr/share/xsessions/. ${CHROOT}/usr/share/xsessions/
     cp -r ${BI_PATH}/data/usr/share/gtk-2.0/. ${CHROOT}/usr/share/gtk-2.0/.
 
     # enable in systemd
@@ -1743,6 +1760,12 @@ setup_blackarch()
         fi
 
         update_etc
+        sleep_clear 1
+
+        enable_pacman_multilib "chroot"
+        sleep_clear 1
+
+        enable_pacman_color "chroot"
         sleep_clear 1
 
         ask_ba_tools_setup

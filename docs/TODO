@@ -28,6 +28,13 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
+===> 0.3.3
+
+    [x] bugfix: fix copy of 'xsessions' path
+    [x] update: add force option for mkfs on boot partition
+    [x] bugfix: add multilib support for chroot ENV
+
+
 ===> 0.3.2
 
     [x] update: make cryptsetup use batch-mode to avoid useless confirmations
