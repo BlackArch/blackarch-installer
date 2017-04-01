@@ -1,7 +1,7 @@
 #!/bin/sh
 ################################################################################
 #                                                                              #
-# blackarch-installer - Simple installer for BlackArch Linux                   #
+# blackarch-installer - Simple Installer for BlackArch Linux                   #
 #                                                                              #
 # FILE                                                                         #
 # blackarch-install                                                            #
@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.3.4"
+VERSION="v0.3.5"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -703,16 +703,20 @@ boot, optional swap) [y/n]: "
 }
 
 
+# zero out partition if needed/chosen
 zero_part()
 {
-    if confirm "Hard Drive Setup" "[?] Start with an in-memory zeroed partition table [y/n]: "
+    if confirm "Hard Drive Setup" "[?] Start with an in-memory zeroed \
+partition table [y/n]: "
     then
-	cfdisk -z "${HD_DEV}"
-	sync
+        cfdisk -z "${HD_DEV}"
+        sync
     else
-	cfdisk "${HD_DEV}"
-	sync
+        cfdisk "${HD_DEV}"
+        sync
     fi
+
+    return $SUCCESS
 }
 
 
@@ -1064,7 +1068,7 @@ setup_time()
 {
     title "Base System Setup"
 
-    wprintf "[+] Setting up default time and timezone: Europe/Berlin"
+    wprintf "[+] Setting up default time and timezone"
     printf "\n\n"
 
     chroot ${CHROOT} tzselect
@@ -1419,7 +1423,7 @@ ask_mirror()
     done < "${mirror_file}"
 
     printf "\n"
-    wprintf "[?] Select a mirror number. Enter for default: "
+    wprintf "[?] Select a mirror number (enter for default): "
     read a
     printf "\n"
 
