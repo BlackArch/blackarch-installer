@@ -28,6 +28,18 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
+===> 0.3.5
+    
+    [x] modified: wget now check connection
+    [x] new option: timezone selection
+    [x] new option: rankmirrors added
+
+
+===> 0.3.4
+
+    [x] bugfix: fix force recreate partition table cfdisk
+
+
 ===> 0.3.3
 
     [x] bugfix: fix copy of 'xsessions' path
