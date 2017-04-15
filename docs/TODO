@@ -28,8 +28,8 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
-===> 0.3.5
-    
+===> 0.4
+
     [x] modified: wget now check connection
     [x] new option: timezone selection
     [x] new option: rankmirrors added

@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.3.5"
+VERSION="v0.4"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -623,7 +623,7 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-    if ! wget -q --tries=10 --timeout=20 --spider http://google.com > /dev/null 2>&1
+    if ! wget -q --tries=5 --timeout=10 --spider http://github.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
@@ -1846,7 +1846,7 @@ setup_blackarch()
         enable_pacman_color "chroot"
         sleep_clear 1
 
-	        ask_ba_tools_setup
+	      ask_ba_tools_setup
         sleep_clear 1
 
         if [ $BA_TOOLS_SETUP -eq $TRUE ]
