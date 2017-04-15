@@ -133,6 +133,13 @@ NORMAL_USER=""
 # default BlackArch Linux repository URL
 BA_REPO_URL='https://www.mirrorservice.org/sites/blackarch.org/blackarch/$repo/os/$arch'
 
+# default ArchLinux repository URL
+AR_REPO_URL=(
+'https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
+'http://mirrors.evowise.com/archlinux/$repo/os/$arch'
+'http://mirror.rackspace.com/archlinux/$repo/os/$arch'
+)
+
 # X (display + window managers ) setup - default: false
 X_SETUP=$FALSE
 
@@ -616,7 +623,7 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-    if ! ping -c 1 github.com > /dev/null 2>&1
+    if ! wget -q --tries=10 --timeout=20 --spider http://google.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
@@ -1063,18 +1070,41 @@ setup_locale()
 }
 
 
-# setup time and timezone
+# setup timezone
 setup_time()
 {
-    title "Base System Setup"
+    if confirm "Default Time zone: Europe/Berlin" "[?] Choose other timezone [y/n]: "
+    then
+        timedatectl list-timezones
+        wprintf "[?] What is your (Zone/SubZone): "
+        read timezone
+        chroot ${CHROOT} ln -sf /usr/share/zoneinfo/$timezone /etc/localtime > /dev/null 2>&1
+        if [ $? -eq 1 ]
+        then
+            err "\n[!] Do you live on Mars?\n"
+            sleep 1
+            default_time
+        else
+            wprintf "\n[+] Time zone setup correctly\n"
+        fi
+    else
+        default_time
+    fi
 
+    sleep 2
     wprintf "[+] Setting up default time and timezone"
     printf "\n\n"
 
-    chroot ${CHROOT} tzselect
-
-
     return $SUCCESS
+}
+
+
+# default time and timezone
+default_time()
+{
+    warn "Setting up default time and timezone: Europe/Berlin"
+    printf "\n\n"
+    chroot ${CHROOT} ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 }
 
 
@@ -1445,6 +1475,37 @@ ask_mirror()
     return $SUCCESS
 }
 
+# ask for archlinux server
+ask_mirror_arch()
+{
+    declare mirrold="cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup"
+    if confirm "ArchLinux mirrorlist config" "Worldwide mirror will be used\n[?] Look for the best server? [y/n]: "
+    then
+	printf "\n"
+	warn "This may take time depending on your connection"
+	$mirrold
+	sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+	rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
+    else
+	printf "\n"
+	warn "Using Worldwide mirror server"
+	$mirrold
+	echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" > /etc/pacman.d/mirrorlist
+
+	for wore in "${AR_REPO_URL[@]}"
+	do
+	    echo "Server = $wore" >> /etc/pacman.d/mirrorlist
+	done
+    fi
+
+}
+
+#pass correct config
+pass_mirror_conf()
+{
+    cp -f /etc/pacman.d/mirrorlist ${CHROOT}/etc/pacman.d/mirrorlist
+}
+
 
 # run strap.sh
 run_strap_sh()
@@ -1785,7 +1846,7 @@ setup_blackarch()
         enable_pacman_color "chroot"
         sleep_clear 1
 
-        ask_ba_tools_setup
+	        ask_ba_tools_setup
         sleep_clear 1
 
         if [ $BA_TOOLS_SETUP -eq $TRUE ]
@@ -1876,7 +1937,6 @@ main()
             net_conf_manual
             ;;
         "${NET_CONF_SKIP}")
-            break
             ;;
         *)
             ;;
@@ -1886,8 +1946,10 @@ main()
     sleep_clear 1
 
     # pacman
+    ask_mirror_arch
+    sleep_clear 5
     update_pacman
-    sleep_clear 1
+
 
     # hard drive
     get_hd_devs
@@ -1908,7 +1970,11 @@ main()
     sleep_clear 1
 
     # arch linux
+    pass_mirror_conf
+    sleep_clear 1
     setup_base_system
+    sleep_clear 1
+    setup_time
     sleep_clear 1
 
     # blackarch Linux
