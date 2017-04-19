@@ -1697,6 +1697,7 @@ setup_vmware_utils()
         xf86-input-vmmouse --force --needed --noconfirm
 
     chroot ${CHROOT} systemctl enable vmware-vmblock-fuse.service
+    chroot ${CHROOT} systemctl enable vmtoolsd.service
 
     return $SUCCESS
 }
