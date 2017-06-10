@@ -9,12 +9,11 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.x
 
-    [ ] new option: choose archlinux mirror
     [ ] new option: add optional verbose / quiet mode
-    [ ] new option: choose blackarch-groups rather than all/single tools
-    [ ] new option: install window manager(s) by choice rather than all
+    [ ] new option: blackarch-groups optionally rather than all/single tools
     [ ] new option: if possible add 'skip' for each asking sections
     [ ] new option: add resume functionality
+    [ ] new option: add restart installer option
     [ ] new option: go back to previous section
     [ ] new option: ask for optional partitions
     [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
@@ -28,9 +27,21 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
+===> 0.5
+
+    [x] new option: install window manager(s) by choice rather than all
+
+
+===> 0.4.1
+
+    [x] update: removed unavailable extra packages
+    [x] update: added more ${VERBOSE} redirects
+    [x] update: style fixes
+
+
 ===> 0.4
 
-    [x] modified: wget now check connection
+    [x] update: wget now check connection
     [x] new option: timezone selection
     [x] new option: rankmirrors added
 

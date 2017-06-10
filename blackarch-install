@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.4"
+VERSION="v0.5"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -134,11 +134,9 @@ NORMAL_USER=""
 BA_REPO_URL='https://www.mirrorservice.org/sites/blackarch.org/blackarch/$repo/os/$arch'
 
 # default ArchLinux repository URL
-AR_REPO_URL=(
-'https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
-'http://mirrors.evowise.com/archlinux/$repo/os/$arch'
-'http://mirror.rackspace.com/archlinux/$repo/os/$arch'
-)
+AR_REPO_URL="https://archlinux.surlyjake.com/archlinux/\$repo/os/\$arch"
+AR_REPO_URL="${AR_REPO_URL} http://mirrors.evowise.com/archlinux/\$repo/os/\$arch"
+AR_REPO_URL="${AR_REPO_URL} http://mirror.rackspace.com/archlinux/\$repo/os/\$arch"
 
 # X (display + window managers ) setup - default: false
 X_SETUP=$FALSE
@@ -157,6 +155,9 @@ WLAN_SSID=""
 
 # wlan passphrase
 WLAN_PASSPHRASE=""
+
+# check type of ISO (live? netinst?)
+ISO_TYPE=""
 
 
 # print formatted output
@@ -207,7 +208,21 @@ banner()
 
     printf "${REDB}%*s${NC}\n\n\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
 
-    return "$SUCCESS"
+    return $SUCCESS
+}
+
+
+# check type of iso
+check_iso_type()
+{
+    if [ "`which dnsspider 2> /dev/null`" = "/usr/bin/dnsspider" ]
+    then
+        ISO_TYPE="live"
+    else
+        ISO_TYPE="net"
+    fi
+
+    return $SUCCESS
 }
 
 
@@ -1075,24 +1090,30 @@ setup_time()
 {
     if confirm "Default Time zone: Europe/Berlin" "[?] Choose other timezone [y/n]: "
     then
-        timedatectl list-timezones
-        wprintf "[?] What is your (Zone/SubZone): "
+        for t in `timedatectl list-timezones`
+        do
+            echo "    > `echo ${t}`"
+        done
+
+        wprintf "\n[?] What is your (Zone/SubZone): "
         read timezone
-        chroot ${CHROOT} ln -sf /usr/share/zoneinfo/$timezone /etc/localtime > /dev/null 2>&1
+        chroot ${CHROOT} ln -sf /usr/share/zoneinfo/$timezone /etc/localtime \
+            > /dev/null 2>&1
+
         if [ $? -eq 1 ]
         then
-            err "\n[!] Do you live on Mars?\n"
+            warn "Do you live on Mars? Setting default time zone..."
             sleep 1
             default_time
         else
             wprintf "\n[+] Time zone setup correctly\n"
         fi
     else
+        wprintf "\n[+] Setting up default time and timezone"
+        sleep 2
         default_time
     fi
 
-    sleep 2
-    wprintf "[+] Setting up default time and timezone"
     printf "\n\n"
 
     return $SUCCESS
@@ -1102,9 +1123,12 @@ setup_time()
 # default time and timezone
 default_time()
 {
-    warn "Setting up default time and timezone: Europe/Berlin"
+    echo
+    warn "\nSetting up default time and timezone: Europe/Berlin"
     printf "\n\n"
     chroot ${CHROOT} ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+    return $SUCCESS
 }
 
 
@@ -1271,9 +1295,9 @@ setup_user()
     # environment
     if [ -z ${NORMAL_USER} ]
     then
-        cp -r ${BI_PATH}/data/root/. "${CHROOT}/root/."
+        cp -r ${BI_PATH}/data/root/. "${CHROOT}/root/." > ${VERBOSE} 2>&1
     else
-        cp -r ${BI_PATH}/data/user/. "${CHROOT}/home/${user}/."
+        cp -r ${BI_PATH}/data/user/. "${CHROOT}/home/${user}/." > ${VERBOSE} 2>&1
     fi
 
     # password
@@ -1293,7 +1317,7 @@ setup_user()
 # install extra (missing) packages
 setup_extra_packages()
 {
-    arch="abs arch-install-scripts archlinux-keyring pkgfile"
+    arch="arch-install-scripts archlinux-keyring pkgfile"
 
     bluetooth="bluez bluez-firmware bluez-hid2hci bluez-utils"
 
@@ -1323,7 +1347,7 @@ setup_extra_packages()
 
     xorg="xf86-video-ati xf86-video-dummy xf86-video-fbdev xf86-video-intel
     xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb xf86-video-vesa
-    xf86-video-voodoo xorg-server xorg-xinit xorg-server-utils xterm"
+    xf86-video-voodoo xorg-server xorg-xinit xterm"
 
     all="${arch} ${bluetooth} ${browser} ${editor} ${filesystem} ${fonts}"
     all="${all} ${kernel} ${misc} ${network} ${xorg}"
@@ -1423,7 +1447,7 @@ update_etc()
     printf "\n\n"
 
     # /etc/*
-    cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/.
+    cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/. > ${VERBOSE} 2>&1
 
     return $SUCCESS
 }
@@ -1479,31 +1503,36 @@ ask_mirror()
 ask_mirror_arch()
 {
     declare mirrold="cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup"
-    if confirm "ArchLinux mirrorlist config" "Worldwide mirror will be used\n[?] Look for the best server? [y/n]: "
-    then
-	printf "\n"
-	warn "This may take time depending on your connection"
-	$mirrold
-	sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
-	rankmirrors -n 6 /etc/pacman.d/mirrorlist.backup > /etc/pacman.d/mirrorlist
-    else
-	printf "\n"
-	warn "Using Worldwide mirror server"
-	$mirrold
-	echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" > /etc/pacman.d/mirrorlist
 
-	for wore in "${AR_REPO_URL[@]}"
-	do
-	    echo "Server = $wore" >> /etc/pacman.d/mirrorlist
-	done
+    if confirm "ArchLinux Mirrorlist Setup" \
+        "[+] Worldwide mirror will be used\n\n[?] Look for the best server? [y/n]: "
+    then
+        printf "\n"
+        warn "This may take time depending on your connection"
+        $mirrold
+        sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
+        rankmirrors -n 3 /etc/pacman.d/mirrorlist.backup \
+            > /etc/pacman.d/mirrorlist
+    else
+	    printf "\n"
+	    warn "Using Worldwide mirror server"
+	    $mirrold
+	    echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" \
+            > /etc/pacman.d/mirrorlist
+
+	    for wore in ${AR_REPO_URL}
+	    do
+	        echo "Server = ${wore}" >> /etc/pacman.d/mirrorlist
+	    done
     fi
 
 }
 
-#pass correct config
+# pass correct config
 pass_mirror_conf()
 {
-    cp -f /etc/pacman.d/mirrorlist ${CHROOT}/etc/pacman.d/mirrorlist
+    cp -f /etc/pacman.d/mirrorlist ${CHROOT}/etc/pacman.d/mirrorlist \
+        > ${VERBOSE} 2>&1
 }
 
 
@@ -1596,43 +1625,106 @@ setup_window_managers()
     wprintf "[+] Setting up window managers"
     printf "\n"
 
-    printf "
-    > Awesome
-    > Dwm
-    > Fluxbox
-    > I3-wm
-    > Openbox
-    > Spectrwm
+    while true
+    do
+        printf "
+    1. Awesome
+    2. Dwm
+    3. Fluxbox
+    4. I3-wm
+    5. Openbox
+    6. Spectrwm
+    7. Wmii
+    8. All of the above
     \n"
+        sleep 2
+        wprintf "[?] Choose an option [8]: "
+        read choice
+        echo
+        case $choice in
+            1)
+                chroot ${CHROOT} pacman -S awesome --needed --force --noconfirm
+                cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
+                    ${CHROOT}/etc/xdg/awesome/.
+                cp -r ${BI_PATH}/data/usr/share/awesome/. \
+                    ${CHROOT}/usr/share/awesome/.
+                break
+                ;;
+            2)
+                chroot ${CHROOT} pacman -S dwm --needed --force --noconfirm
+                break
+                ;;
+            3)
+                chroot ${CHROOT} pacman -S fluxbox --needed --force --noconfirm
+                cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
+                    ${CHROOT}/usr/share/fluxbox/.
+                break
+                ;;
+            4)
+                chroot ${CHROOT} pacman -S i3-wm --needed --force --noconfirm
+                break
+                ;;
+            5)
+                chroot ${CHROOT} pacman -S openbox --needed --force --noconfirm
+                cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
+                    ${CHROOT}/etc/xdg/openbox/.
+                cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
+                    ${CHROOT}/usr/share/themes/.
+                break
+                ;;
+            6)
+                chroot ${CHROOT} pacman -S spectrwm --needed --force --noconfirm
+                cp -r ${BI_PATH}/data/etc/spectrwm.conf \
+                    ${CHROOT}/etc/spectrwm.conf
+                break
+                ;;
+            7)
+                chroot ${CHROOT} pacman -S wmii --needed --force --noconfirm
+                cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
+                break
+                ;;
+            *)
+                chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii \
+                    dwm spectrwm --needed --force --noconfirm
 
-    sleep 2
+                # awesome
+                cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
+                    ${CHROOT}/etc/xdg/awesome/.
+                cp -r ${BI_PATH}/data/usr/share/awesome/. \
+                    ${CHROOT}/usr/share/awesome/.
 
-    chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii dwm spectrwm \
-        --needed --force --noconfirm
+                # fluxbox
+                cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
+                    ${CHROOT}/usr/share/fluxbox/.
 
-    # awesome
-    cp -r ${BI_PATH}/data/etc/xdg/awesome/. ${CHROOT}/etc/xdg/awesome/.
-    cp -r ${BI_PATH}/data/usr/share/awesome/. ${CHROOT}/usr/share/awesome/.
+                # openbox
+                cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
+                    ${CHROOT}/etc/xdg/openbox/.
+                cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
+                    ${CHROOT}/usr/share/themes/.
 
-    # fluxbox
-    cp -r ${BI_PATH}/data/usr/share/fluxbox/. ${CHROOT}/usr/share/fluxbox/.
+                # spectrwm
+                cp -r ${BI_PATH}/data/etc/spectrwm.conf \
+                    ${CHROOT}/etc/spectrwm.conf
 
-    # openbox
-    cp -r ${BI_PATH}/data/etc/xdg/openbox/. ${CHROOT}/etc/xdg/openbox/.
-    cp -r ${BI_PATH}/data/usr/share/themes/blackarch ${CHROOT}/usr/share/themes/.
+                # wmii
+                cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
 
-    # spectrwm
-    cp -r ${BI_PATH}/data/etc/spectrwm.conf ${CHROOT}/etc/spectrwm.conf
-
-    # wmii
-    cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
+                break
+                ;;
+        esac
+    done
 
     # wallpaper
     cp -r ${BI_PATH}/data/usr/share/blackarch ${CHROOT}/usr/share/blackarch
 
     # remove wrong xsession entries
-    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop"
-    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop"
+    chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop" \
+        > ${VERBOSE} 2>&1
+    chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop" \
+        > ${VERBOSE} 2>&1
+
+    sleep 30
 
     return $SUCCESS
 }
@@ -1847,7 +1939,7 @@ setup_blackarch()
         enable_pacman_color "chroot"
         sleep_clear 1
 
-	      ask_ba_tools_setup
+	    ask_ba_tools_setup
         sleep_clear 1
 
         if [ $BA_TOOLS_SETUP -eq $TRUE ]
@@ -1911,6 +2003,7 @@ main()
     clear
     check_uid
     check_env
+    check_iso_type
 
     # install mode
     ask_install_mode
