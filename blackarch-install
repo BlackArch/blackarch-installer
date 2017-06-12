@@ -1189,8 +1189,6 @@ setup_hostname()
 # setup boot loader for UEFI/GPT or BIOS/MBR
 setup_bootloader()
 {
-    uuid="`blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2`"
-
     title "Base System Setup"
 
     if [ "${PART_LABEL}" = "gpt" ]
@@ -1199,6 +1197,7 @@ setup_bootloader()
         printf "\n\n"
 
         chroot ${CHROOT} bootctl install
+        uuid="`blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2`"
 
         if [ ${LUKS} = ${TRUE} ]
         then
