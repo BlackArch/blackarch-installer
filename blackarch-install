@@ -1221,12 +1221,13 @@ EOF
         printf "\n\n"
 
         chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
+        uuid="`lsblk -o UUID ${ROOT_PART} | sed -n 2p`"
 
         cp ${BI_PATH}/data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
 
         if [ ${LUKS} = ${TRUE} ]
         then
-            sed -i "s|quiet|cryptdevice=${ROOT_PART}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT}|" "${CHROOT}/etc/default/grub"
+            sed -i "s|quiet|cryptdevice=UUID=${uuid}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT}|" "${CHROOT}/etc/default/grub"
         fi
         sed -i 's/quiet//g' "${CHROOT}/etc/default/grub"
         sed -i 's/Arch/BlackArch/g' "${CHROOT}/etc/default/grub"
