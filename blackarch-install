@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.5"
+VERSION="v0.5.1"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -638,7 +638,7 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-    if ! wget -q --tries=5 --timeout=10 --spider http://github.com > /dev/null 2>&1
+    if ! wget -q --tries=3 --timeout=10 --spider http://github.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
@@ -1109,7 +1109,7 @@ setup_time()
             wprintf "\n[+] Time zone setup correctly\n"
         fi
     else
-        wprintf "\n[+] Setting up default time and timezone"
+        wprintf "\n[+] Setting up default time and timezone\n"
         sleep 2
         default_time
     fi
@@ -1124,7 +1124,7 @@ setup_time()
 default_time()
 {
     echo
-    warn "\nSetting up default time and timezone: Europe/Berlin"
+    warn "Setting up default time and timezone: Europe/Berlin"
     printf "\n\n"
     chroot ${CHROOT} ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 

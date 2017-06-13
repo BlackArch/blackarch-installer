@@ -27,6 +27,13 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
+===> 0.5.1
+
+    [x] bugfix: typo in newline for a warning message in time zone setup
+    [x] update: internet connection check (try 3 times instead of 5)
+    [x] bugfix: 'luks not found' issue thanks to CompSciMaj13 @github
+
+
 ===> 0.5
 
     [x] new option: install window manager(s) by choice rather than all
