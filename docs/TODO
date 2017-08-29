@@ -27,6 +27,11 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: CODE REFACTORING + split code to multiple files
 
 
+===> 0.5.2
+
+    [x] update: update SHA1 sum of strap.sh
+
+
 ===> 0.5.1
 
     [x] bugfix: typo in newline for a warning message in time zone setup

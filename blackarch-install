@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.5.1"
+VERSION="v0.5.2"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1540,7 +1540,7 @@ pass_mirror_conf()
 run_strap_sh()
 {
     strap_sh="/tmp/strap.sh"
-    orig_sha1="34b1a3698a4c971807fb1fe41463b9d25e1a4a09"
+    orig_sha1="6f152b79419491db92c1fdde3fad2d445f09aae3"
 
     title "BlackArch Linux Setup"
 
