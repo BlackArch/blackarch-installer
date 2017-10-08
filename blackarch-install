@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.5.2"
+VERSION="v0.5.3"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -603,12 +603,12 @@ ask_wlan_data()
         wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
         printf "\n
     > W-LAN SSID
-    > WPA Passphrase
+    > WPA Passphrase (will not echo)
         \n"
         wprintf "[?] W-LAN SSID: "
         read WLAN_SSID
         wprintf "[?] WPA Passphrase: "
-        read WLAN_PASSPHRASE
+        read -s WLAN_PASSPHRASE
         clear
     done
 
@@ -627,9 +627,13 @@ net_conf_wlan()
     printf "\n\n"
 
     wpa_passphrase "${WLAN_SSID}" "${WLAN_PASSPHRASE}" > ${wpasup}
-    wpa_supplicant -B -i ${NET_IF} -c ${wpasup}
+    wpa_supplicant -B -c ${wpasup} -i ${NET_IF}
+
+    sleep 2
 
     dhcpcd ${opts} -i ${NET_IF}
+
+    sleep 5
 
     return $SUCCESS
 }
@@ -638,7 +642,7 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-    if ! wget -q --tries=3 --timeout=10 --spider http://github.com > /dev/null 2>&1
+    if ! wget -q --tries=5 --timeout=10 --spider http://github.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
     fi
@@ -1505,7 +1509,7 @@ ask_mirror_arch()
     declare mirrold="cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup"
 
     if confirm "ArchLinux Mirrorlist Setup" \
-        "[+] Worldwide mirror will be used\n\n[?] Look for the best server? [y/n]: "
+        "[+] Worldwide mirror will be used\n\n[?] Look for the best server [y/n]: "
     then
         printf "\n"
         warn "This may take time depending on your connection"
