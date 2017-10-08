@@ -23,8 +23,15 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
     [ ] update: more error handling
     [ ] update: sort installation routines (order of sections)
-    [ ] update: check if on live or netinstall iso -> skip relevant options then
-    [ ] update: CODE REFACTORING + split code to multiple files
+
+
+===> 0.6
+
+    [.] update: check if on live or netinstall iso -> skip relevant options then
+    [x] update: don't echo passphrase for wpa_supplicant
+    [x] update: add sleeps between wpa_supplicant and dhcpcd calls
+    [x] update: reorder wpa_supplicant opts
+    [x] update: style fix (rank mirrors)
 
 
 ===> 0.5.2
