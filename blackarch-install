@@ -1825,7 +1825,7 @@ setup_blackarch_tools()
     then
         chroot ${CHROOT} pacman -S --needed --force blackarch
     else
-        warn "Installing all tools from source via blackman can take hours..."
+        warn "Installing all tools from source via blackman can take hours"
         printf "\n"
         wprintf "[+] <Control-c> to abort ... "
         while [ $foo -gt 0 ]
@@ -1879,7 +1879,7 @@ dump_live_iso()
 
     for d in ${live_dirs}
     do
-        wprintf "[+] Installing ${d}, please wait ... "
+        wprintf "[+] Installing ${d}, please wait... "
         cp -aRp ${d} ${CHROOT}
         wprintf "done\n"
     done
