@@ -250,7 +250,7 @@ confirm()
         case $input in
             y|Y|yes|YES|Yes) return $TRUE ;;
             n|N|no|NO|No) return $FALSE ;;
-            *) continue ;;
+            *) clear ; continue ;;
         esac
     done
 
