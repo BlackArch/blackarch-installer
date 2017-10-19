@@ -306,6 +306,13 @@ ask_install_mode()
     3. Install from sources using blackman (online)\n\n"
         wprintf "[?] Choose an installation mode: "
         read INSTALL_MODE
+        if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+        then
+            if [ "${ISO_TYPE}" = "net" ]
+            then
+                err "WTF, Live-ISO mode with Netinstall? Nope, sorry!"
+            fi
+        fi
     clear
     done
 
