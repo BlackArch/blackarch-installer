@@ -1144,6 +1144,12 @@ setup_initramfs()
     wprintf "[+] Setting up initramfs"
     printf "\n\n"
 
+    if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+    then
+        cp /run/archiso/bootmnt/blackarch/boot/x86_64/vmlinuz \
+            ${CHROOT}/boot/vmlinuz-linux
+    fi
+
     if [ ${LUKS} = ${TRUE} ]
     then
         sed -i 's/block filesystems/block keymap encrypt filesystems/g' \
@@ -1225,6 +1231,13 @@ EOF
         printf "\n\n"
 
         uuid="`lsblk -o UUID ${ROOT_PART} | sed -n 2p`"
+
+        if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+        then
+            chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
+        else
+            mkdir -p ${CHROOT}/boot/grub
+        fi
 
         cp ${BI_PATH}/data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
 
@@ -1865,7 +1878,7 @@ update_user_groups()
 # dump data from the live-iso
 dump_live_iso()
 {
-    live_dirs="/bin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
+    live_dirs="/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
     foo=5
 
     title "BlackArch Linux Setup"
