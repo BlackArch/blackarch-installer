@@ -28,6 +28,8 @@ ChangeLog and TODO list for blackarch-installer
 ===> 0.6
 
     [.] update: check if on live or netinstall iso -> skip relevant options then
+    [x] update: add more /dev/null redirections
+    [x] update: add amdgpu xf86 video driver
     [x] update: don't echo passphrase for wpa_supplicant
     [x] update: add sleeps between wpa_supplicant and dhcpcd calls
     [x] update: reorder wpa_supplicant opts

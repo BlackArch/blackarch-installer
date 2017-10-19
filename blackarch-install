@@ -336,11 +336,13 @@ ask_keymap()
         if [ "${keymap_opt}" = "${SET_KEYMAP}" ]
         then
             break
-        fi
-        if [ "${keymap_opt}" = "${LIST_KEYMAP}" ]
+        elif [ "${keymap_opt}" = "${LIST_KEYMAP}" ]
         then
             localectl list-keymaps
             echo
+        else
+            clear
+            continue
         fi
         clear
     done
@@ -361,6 +363,9 @@ set_keymap()
     # default keymap
     if [ -z "${KEYMAP}" ]
     then
+        echo
+        warn "Setting default keymap: US"
+        sleep 1
         KEYMAP="us"
     fi
 
@@ -1102,7 +1107,7 @@ setup_time()
         wprintf "\n[?] What is your (Zone/SubZone): "
         read timezone
         chroot ${CHROOT} ln -sf /usr/share/zoneinfo/$timezone /etc/localtime \
-            > /dev/null 2>&1
+            > ${VERBOSE} 2>&1
 
         if [ $? -eq 1 ]
         then
@@ -1290,7 +1295,7 @@ setup_user()
     then
         chroot ${CHROOT} groupadd ${user}
         chroot ${CHROOT} useradd -g ${user} -d "/home/${user}" -s "/bin/bash" \
-            -G "${user},wheel,users,video,audio" -m ${user}
+            -G "${user},wheel,users,video,audio" -m ${user} > ${VERBOSE} 2>&1
         chroot ${CHROOT} chown -R ${user}:${user} "/home/${user}"
         wprintf "[+] Added user: ${user}"
         printf "\n\n"
@@ -1349,9 +1354,9 @@ setup_extra_packages()
     openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog iw
     wireless_tools wpa_actiond wvdial xl2tpd zd1211-firmware wpa_supplicant"
 
-    xorg="xf86-video-ati xf86-video-dummy xf86-video-fbdev xf86-video-intel
-    xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb xf86-video-vesa
-    xf86-video-voodoo xorg-server xorg-xinit xterm"
+    xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
+    xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
+    xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
 
     all="${arch} ${bluetooth} ${browser} ${editor} ${filesystem} ${fonts}"
     all="${all} ${kernel} ${misc} ${network} ${xorg}"
@@ -1853,7 +1858,8 @@ update_user_groups()
 
     # TODO: more to add here
     chroot ${CHROOT} \
-        usermod -G ${NORMAL_USER},video,audio,vboxsf,wireshark,stunnel
+        usermod -G ${NORMAL_USER},video,audio,vboxsf,wireshark,stunnel \
+        > ${VERBOSE} 2>&1
 
     return $SUCCESS
 }
