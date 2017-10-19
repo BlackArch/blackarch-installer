@@ -1384,20 +1384,23 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
-    setup_resolvconf
-    sleep_clear 1
-
-    install_base_packages
-    sleep_clear 1
-
     if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
     then
         dump_live_iso
         sleep_clear 1
     fi
 
-    setup_resolvconf
-    sleep_clear 1
+    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    then
+        setup_resolvconf
+        sleep_clear 1
+
+        install_base_packages
+        sleep_clear 1
+
+        setup_resolvconf
+        sleep_clear 1
+    fi
 
     setup_fstab
     sleep_clear 1
@@ -1904,54 +1907,51 @@ setup_blackarch()
     run_strap_sh
     sleep_clear 1
 
-    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    ask_x_setup
+    sleep_clear 3
+
+    if [ $X_SETUP -eq $TRUE ]
     then
-        ask_x_setup
-        sleep_clear 3
-
-        if [ $X_SETUP -eq $TRUE ]
-        then
-            setup_display_manager
-            sleep_clear 1
-            setup_window_managers
-            sleep_clear 1
-        fi
-
-        ask_vbox_setup
+        setup_display_manager
         sleep_clear 1
-
-        if [ $VBOX_SETUP -eq $TRUE ]
-        then
-            setup_vbox_utils
-            sleep_clear 1
-        fi
-
-        ask_vmware_setup
+        setup_window_managers
         sleep_clear 1
+    fi
 
-        if [ $VMWARE_SETUP -eq $TRUE ]
-        then
-            setup_vmware_utils
-            sleep_clear 1
-        fi
+    ask_vbox_setup
+    sleep_clear 1
 
-        update_etc
+    if [ $VBOX_SETUP -eq $TRUE ]
+    then
+        setup_vbox_utils
         sleep_clear 1
+    fi
 
-        enable_pacman_multilib "chroot"
+    ask_vmware_setup
+    sleep_clear 1
+
+    if [ $VMWARE_SETUP -eq $TRUE ]
+    then
+        setup_vmware_utils
         sleep_clear 1
+    fi
 
-        enable_pacman_color "chroot"
+    update_etc
+    sleep_clear 1
+
+    enable_pacman_multilib "chroot"
+    sleep_clear 1
+
+    enable_pacman_color "chroot"
+    sleep_clear 1
+
+    ask_ba_tools_setup
+    sleep_clear 1
+
+    if [ $BA_TOOLS_SETUP -eq $TRUE ]
+    then
+        setup_blackarch_tools
         sleep_clear 1
-
-        ask_ba_tools_setup
-        sleep_clear 1
-
-        if [ $BA_TOOLS_SETUP -eq $TRUE ]
-        then
-            setup_blackarch_tools
-            sleep_clear 1
-        fi
     fi
 
     if [ -n "${NORMAL_USER}" ]
@@ -2079,8 +2079,11 @@ main()
     sleep_clear 1
 
     # blackarch Linux
-    setup_blackarch
-    sleep_clear 1
+    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    then
+        setup_blackarch
+        sleep_clear 1
+    fi
 
     # epilog
     umount_filesystems
