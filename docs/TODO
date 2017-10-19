@@ -19,14 +19,14 @@ ChangeLog and TODO list for blackarch-installer
     [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
     [ ] update: check for available disk space before starting to install pkgs
     [ ] update: add help text for each section and sub-section
-    [ ] update: add check for mkfs.* status before proceeding (-> $?)
-    [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
     [ ] update: more error handling
     [ ] update: sort installation routines (order of sections)
 
 
 ===> 0.6
 
+    [ ] update: add check for mkfs.* status before proceeding (-> $?)
+    [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
     [.] update: further improvements and bug fixes
     [x] update: check iso type and skip unnecessary parts for live-iso
     [x] update: add more /dev/null redirections
