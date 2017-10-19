@@ -247,16 +247,11 @@ confirm()
         title "${header}"
         wprintf "${ask}"
         read input
-        if [ "${input}" = "y" -o "${input}" = "Y" ]
-        then
-            return $TRUE
-        elif [ "${input}" = "n" -o "${input}" = "N" ]
-        then
-            return $FALSE
-        else
-            clear
-            continue
-        fi
+        case $input in
+            y|Y|yes|YES|Yes) return $TRUE ;;
+            n|N|no|NO|No) return $FALSE ;;
+            *) continue ;;
+        esac
     done
 
     return $SUCCESS
@@ -727,7 +722,7 @@ boot, optional swap) [y/n]: "
         zero_part
     else
         echo
-        err "Are you kidding me? No partitions no fun!"
+        warn "You chose not to make partitions. Make sure you have them already configured."
     fi
 
     return $SUCCESS
@@ -1523,16 +1518,16 @@ ask_mirror_arch()
         rankmirrors -n 3 /etc/pacman.d/mirrorlist.backup \
             > /etc/pacman.d/mirrorlist
     else
-	    printf "\n"
-	    warn "Using Worldwide mirror server"
-	    $mirrold
-	    echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" \
+        printf "\n"
+        warn "Using Worldwide mirror server"
+        $mirrold
+        echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" \
             > /etc/pacman.d/mirrorlist
 
-	    for wore in ${AR_REPO_URL}
-	    do
-	        echo "Server = ${wore}" >> /etc/pacman.d/mirrorlist
-	    done
+        for wore in ${AR_REPO_URL}
+        do
+            echo "Server = ${wore}" >> /etc/pacman.d/mirrorlist
+        done
     fi
 
 }
@@ -1949,7 +1944,7 @@ setup_blackarch()
         enable_pacman_color "chroot"
         sleep_clear 1
 
-	    ask_ba_tools_setup
+        ask_ba_tools_setup
         sleep_clear 1
 
         if [ $BA_TOOLS_SETUP -eq $TRUE ]
@@ -2061,7 +2056,7 @@ main()
     umount_filesystems "harddrive"
     sleep_clear 1
     ask_cfdisk
-    sleep_clear 1
+    sleep_clear 3
     ask_luks
     get_partition_label
     get_partitions
