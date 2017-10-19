@@ -1224,7 +1224,6 @@ EOF
         wprintf "[+] Setting up GRUB boot loader"
         printf "\n\n"
 
-        chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
         uuid="`lsblk -o UUID ${ROOT_PART} | sed -n 2p`"
 
         cp ${BI_PATH}/data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
