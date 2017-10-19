@@ -1870,7 +1870,7 @@ dump_live_iso()
 
     title "BlackArch Linux Setup"
 
-    wprintf "[+] Dumping data from Live-ISO (grab a coffee)"
+    wprintf "[+] Dumping data from Live-ISO... Grab a coffee or make sex()!"
     printf "\n"
 
     for d in ${live_dirs}
