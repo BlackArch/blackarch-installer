@@ -1014,6 +1014,7 @@ umount_filesystems()
     wprintf "[+] Unmounting filesystems"
     printf "\n\n"
 
+    # hardcore style ... TODO: tune this
     umount -Rf ${CHROOT} > /dev/null 2>&1
     umount -Rf "${BOOT_PART}" > /dev/null 2>&1
     umount -Rf "${CHROOT}/proc" > /dev/null 2>&1
