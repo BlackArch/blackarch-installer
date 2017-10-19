@@ -1,4 +1,11 @@
+===> 0.6
+
+    * archlinux-2017.-dual.iso
+    * blackarchlinux-live-2017.08.30-x86_64
+    * blackarchlinux-netinst-2017.08.30-x86_64
+
 ===> 0.1
+
     * archlinux-2016.04.01-dual.iso (kernel 4.4.5)
     * blackarchlinux-netinst-2016.01.10-x86_64.iso (kernel 4.3.3)
     * blackarchlinux-live-2016.01.10-x86_64.iso (kernel 4.3.3)
