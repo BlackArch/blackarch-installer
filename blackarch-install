@@ -620,7 +620,7 @@ ask_wlan_data()
 net_conf_wlan()
 {
     wpasup="`mktemp`"
-    opts="-h noleak -i noleak -v ,noleak -I noleak"
+    dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak"
 
     title "Network Setup"
     wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
@@ -631,7 +631,7 @@ net_conf_wlan()
 
     sleep 2
 
-    dhcpcd ${opts} -i ${NET_IF}
+    dhcpcd ${dhcp_opts} -i ${NET_IF}
 
     sleep 5
 
