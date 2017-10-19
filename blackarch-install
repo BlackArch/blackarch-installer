@@ -864,7 +864,8 @@ make_luks_partition()
     wprintf "[+] Creating LUKS partition"
     printf "\n\n"
 
-    cryptsetup -q -y -v -s 512 luksFormat "${part}"
+    cryptsetup -q -y -v -s 512 luksFormat "${part}" ||
+        err "Could not create filesystem"
 
     return $SUCCESS
 }
@@ -893,7 +894,7 @@ make_swap_partition()
 
     wprintf "[+] Creating SWAP partition"
     printf "\n\n"
-    mkswap "${SWAP_PART}"
+    mkswap "${SWAP_PART}" || err "Could not create filesystem"
 
     return $SUCCESS
 }
@@ -913,9 +914,11 @@ make_root_partition()
         printf "\n\n"
         if [ "${ROOT_FS_TYPE}" = "btrfs" ]
         then
-            mkfs.${ROOT_FS_TYPE} -f "/dev/mapper/${CRYPT_ROOT}"
+            mkfs.${ROOT_FS_TYPE} -f "/dev/mapper/${CRYPT_ROOT}" ||
+                err "Could not create filesystem"
         else
-            mkfs.${ROOT_FS_TYPE} -F "/dev/mapper/${CRYPT_ROOT}"
+            mkfs.${ROOT_FS_TYPE} -F "/dev/mapper/${CRYPT_ROOT}" ||
+                err "Could not create filesystem"
         fi
         sleep_clear 1
     else
@@ -924,9 +927,11 @@ make_root_partition()
         printf "\n\n"
         if [ "${ROOT_FS_TYPE}" = "btrfs" ]
         then
-            mkfs.${ROOT_FS_TYPE} -f ${ROOT_PART}
+            mkfs.${ROOT_FS_TYPE} -f ${ROOT_PART} ||
+                err "Could not create filesystem"
         else
-            mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART}
+            mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART} ||
+                err "Could not create filesystem"
         fi
         sleep_clear 1
     fi
@@ -944,9 +949,10 @@ make_boot_partition()
     printf "\n\n"
     if [ "${PART_LABEL}" = "gpt" ]
     then
-        mkfs.fat -F32 ${BOOT_PART}
+        mkfs.fat -F32 ${BOOT_PART} || err "Could not create filesystem"
     else
-        mkfs.${BOOT_FS_TYPE} -F ${BOOT_PART}
+        mkfs.${BOOT_FS_TYPE} -F ${BOOT_PART} ||
+            err "Could not create filesystem"
     fi
 
     return $SUCCESS
