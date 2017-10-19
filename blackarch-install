@@ -629,11 +629,13 @@ net_conf_wlan()
     wpa_passphrase "${WLAN_SSID}" "${WLAN_PASSPHRASE}" > ${wpasup}
     wpa_supplicant -B -c ${wpasup} -i ${NET_IF}
 
-    sleep 2
+    warn "We need to wait a bit for wpa_supplicant and dhcpcd"
+
+    sleep 5
 
     dhcpcd ${dhcp_opts} -i ${NET_IF}
 
-    sleep 5
+    sleep 10
 
     return $SUCCESS
 }
