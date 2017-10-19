@@ -301,9 +301,9 @@ ask_install_mode()
         title "Welcome to the BlackArch Linux installer!"
         wprintf "[+] Available installation modes:"
         printf "\n
-    1. Install from BlackArch repository
-    2. Install from BlackArch Live-ISO
-    3. Install from sources using blackman\n\n"
+    1. Install from BlackArch repository (online)
+    2. Install from BlackArch Live-ISO (offline)
+    3. Install from sources using blackman (online)\n\n"
         wprintf "[?] Choose an installation mode: "
         read INSTALL_MODE
     clear
@@ -1870,7 +1870,7 @@ dump_live_iso()
 
     title "BlackArch Linux Setup"
 
-    wprintf "[+] Dumping data from Live-ISO... Grab a coffee or make sex()!"
+    wprintf "[+] Dumping data from Live-ISO. Grab a coffee or make sex!"
     printf "\n"
 
     for d in ${live_dirs}
