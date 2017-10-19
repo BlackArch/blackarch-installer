@@ -27,7 +27,8 @@ ChangeLog and TODO list for blackarch-installer
 
     [ ] update: add check for mkfs.* status before proceeding (-> $?)
     [ ] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
-    [.] update: further improvements and bug fixes
+    [x] update: support for live-iso complete 100% offline installation
+    [x] update: further improvements and bug fixes
     [x] update: check iso type and skip unnecessary parts for live-iso
     [x] update: add more /dev/null redirections
     [x] update: add amdgpu xf86 video driver
