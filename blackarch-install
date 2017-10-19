@@ -2020,35 +2020,37 @@ main()
 
     # network
     ask_hostname
-    get_net_ifs
-    ask_net_if
-    ask_net_conf_mode
-    case "${NET_CONF_MODE}" in
-        "${NET_CONF_AUTO}")
-            net_conf_auto
-            ;;
-        "${NET_CONF_WLAN}")
-            ask_wlan_data
-            net_conf_wlan
-            ;;
-        "${NET_CONF_MANUAL}")
-            ask_net_addr
-            net_conf_manual
-            ;;
-        "${NET_CONF_SKIP}")
-            ;;
-        *)
-            ;;
-    esac
-    sleep_clear 1
-    check_inet_conn
-    sleep_clear 1
+    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    then
+        get_net_ifs
+        ask_net_if
+        ask_net_conf_mode
+        case "${NET_CONF_MODE}" in
+            "${NET_CONF_AUTO}")
+                net_conf_auto
+                ;;
+            "${NET_CONF_WLAN}")
+                ask_wlan_data
+                net_conf_wlan
+                ;;
+            "${NET_CONF_MANUAL}")
+                ask_net_addr
+                net_conf_manual
+                ;;
+            "${NET_CONF_SKIP}")
+                ;;
+            *)
+                ;;
+        esac
+        sleep_clear 1
+        check_inet_conn
+        sleep_clear 1
 
-    # pacman
-    ask_mirror_arch
-    sleep_clear 5
-    update_pacman
-
+        # pacman
+        ask_mirror_arch
+        sleep_clear 5
+        update_pacman
+    fi
 
     # hard drive
     get_hd_devs
