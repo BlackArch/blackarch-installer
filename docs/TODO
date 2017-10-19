@@ -25,7 +25,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.6
 
-    [.] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
+    [x] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
     [x] update: add check for mkfs.* status before proceeding (-> $?)
     [x] update: support for live-iso complete 100% offline installation
     [x] update: further improvements and bug fixes
