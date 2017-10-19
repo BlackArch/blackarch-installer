@@ -644,6 +644,9 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
+    title "Network Setup"
+    wprintf "[+] Checking for internet connection..."
+
     if ! wget -q --tries=5 --timeout=10 --spider http://github.com > /dev/null 2>&1
     then
         err "No Internet connection! Check your network (settings)."
