@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.6"
+VERSION="v0.6.1"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -215,7 +215,7 @@ banner()
 # check type of iso
 check_iso_type()
 {
-    if [ "`which dnsspider 2> /dev/null`" = "/usr/bin/dnsspider" ]
+    if [ "`which dnsspider 2> /dev/null`" ]
     then
         ISO_TYPE="live"
     else
