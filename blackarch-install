@@ -849,7 +849,7 @@ print_partitions()
 ask_formatting()
 {
     if confirm "Hard Drive Setup" "[?] Formatting partitions. Are you sure? \
-[y/n]: "
+No crying afterwards? [y/n]: "
     then
         return $SUCCESS
     else
