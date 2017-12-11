@@ -1302,8 +1302,8 @@ setup_testuser()
     warn "Remove this user if you added a normal system user account"
     printf "\n"
 
-    chroot ${CHROOT} useradd -d /home/blackarchtest/ -s "/sbin/nologin" -m \
-        blackarchtest
+    chroot ${CHROOT} useradd -d /home/blackarchtest/ -s "/sbin/nologin" \
+        -m blackarchtest
 }
 
 
@@ -1756,8 +1756,6 @@ setup_window_managers()
         > ${VERBOSE} 2>&1
     chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop" \
         > ${VERBOSE} 2>&1
-
-    sleep 30
 
     return $SUCCESS
 }
