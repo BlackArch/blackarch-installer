@@ -1882,7 +1882,7 @@ update_user_groups()
 
     # TODO: more to add here
     chroot ${CHROOT} \
-        usermod -G ${NORMAL_USER},video,audio,vboxsf > ${VERBOSE} 2>&1
+        usermod -G ${NORMAL_USER},video,audio > ${VERBOSE} 2>&1
 
     return $SUCCESS
 }
@@ -1979,11 +1979,11 @@ setup_blackarch()
         sleep_clear 1
     fi
 
-    if [ -n "${NORMAL_USER}" ]
-    then
-        update_user_groups
-        sleep_clear 1
-    fi
+    #if [ -n "${NORMAL_USER}" ]
+    #then
+        #update_user_groups
+        #sleep_clear 1
+    #fi
 
     return $SUCCESS
 }
