@@ -1137,7 +1137,7 @@ setup_time()
         default_time
     fi
 
-    printf "\n\n"
+    printf "\n"
 
     return $SUCCESS
 }
@@ -1673,8 +1673,7 @@ setup_window_managers()
     4. I3-wm
     5. Openbox
     6. Spectrwm
-    7. Wmii
-    8. All of the above
+    7. All of the above
     \n"
         sleep 2
         wprintf "[?] Choose an option [8]: "
@@ -1717,11 +1716,6 @@ setup_window_managers()
                     ${CHROOT}/etc/spectrwm.conf
                 break
                 ;;
-            7)
-                chroot ${CHROOT} pacman -S wmii --needed --force --noconfirm
-                cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
-                break
-                ;;
             *)
                 chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii \
                     dwm spectrwm --needed --force --noconfirm
@@ -1762,8 +1756,6 @@ setup_window_managers()
         > ${VERBOSE} 2>&1
     chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop" \
         > ${VERBOSE} 2>&1
-
-    sleep 30
 
     return $SUCCESS
 }
