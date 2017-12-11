@@ -1717,7 +1717,7 @@ setup_window_managers()
                 break
                 ;;
             *)
-                chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm wmii \
+                chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm dwm \
                     dwm spectrwm --needed --force --noconfirm
 
                 # awesome
