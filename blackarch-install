@@ -1302,6 +1302,7 @@ setup_testuser()
     warn "Remove this user if you added a normal system user account"
     printf "\n"
 
+    chroot ${CHROOT} groupadd blackarchtest
     chroot ${CHROOT} useradd -d /home/blackarchtest/ -s /sbin/nologin \
         -m blackarchtest
 }
