@@ -1757,6 +1757,8 @@ setup_window_managers()
     chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop" \
         > ${VERBOSE} 2>&1
 
+    sleep 30
+
     return $SUCCESS
 }
 
@@ -1880,8 +1882,7 @@ update_user_groups()
 
     # TODO: more to add here
     chroot ${CHROOT} \
-        usermod -G ${NORMAL_USER},video,audio,vboxsf,wireshark,stunnel \
-        > ${VERBOSE} 2>&1
+        usermod -G ${NORMAL_USER},video,audio,vboxsf > ${VERBOSE} 2>&1
 
     return $SUCCESS
 }
