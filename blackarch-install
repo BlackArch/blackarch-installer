@@ -16,7 +16,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.6.1"
+VERSION="v0.6.2"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -638,7 +638,7 @@ net_conf_wlan()
 
     warn "We need to wait a bit for wpa_supplicant and dhcpcd"
 
-    sleep 5
+    sleep 8
 
     dhcpcd ${dhcp_opts} -i ${NET_IF}
 
@@ -768,7 +768,7 @@ get_partition_label()
 
 
 # get partitions
-get_partitions()
+ask_partitions()
 {
     partitions=`ls ${HD_DEV}* | grep -v "${HD_DEV}\>"`
 
@@ -2093,7 +2093,7 @@ main()
     sleep_clear 3
     ask_luks
     get_partition_label
-    get_partitions
+    ask_partitions
     print_partitions
     ask_formatting
     clear
