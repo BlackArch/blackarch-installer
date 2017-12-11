@@ -1303,8 +1303,8 @@ setup_testuser()
     printf "\n"
 
     chroot ${CHROOT} groupadd blackarchtest
-    chroot ${CHROOT} useradd -d /home/blackarchtest/ -s /sbin/nologin \
-        -m blackarchtest
+    chroot ${CHROOT} useradd -g blackarchtest -d /home/blackarchtest/ \
+        -s /sbin/nologin -m blackarchtest
 }
 
 
