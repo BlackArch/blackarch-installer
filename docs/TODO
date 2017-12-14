@@ -23,6 +23,14 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: sort installation routines (order of sections)
 
 
+===> 0.6.2
+
+    [x] update: style fixes, tweaks
+    [x] update: menus
+    [x] update: increase sleep time between wpa_supplicand and dhcpcd
+    [x] bugfix: fix installation fuck-ups (wmii, useradd/groupadd, etc.)
+
+
 ===> 0.6
 
     [x] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
