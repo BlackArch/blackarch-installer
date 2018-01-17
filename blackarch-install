@@ -1580,7 +1580,7 @@ pass_mirror_conf()
 run_strap_sh()
 {
     strap_sh="/tmp/strap.sh"
-    orig_sha1="6f152b79419491db92c1fdde3fad2d445f09aae3"
+    orig_sha1="$(curl -s https://blackarch.org/checksums/strap)"
 
     title "BlackArch Linux Setup"
 
@@ -1588,9 +1588,9 @@ run_strap_sh()
     printf "\n\n"
 
     curl -s -o "${strap_sh}" "https://www.blackarch.org/strap.sh"
-    sha1=`sha1sum ${strap_sh} | awk '{print $1}'`
+    sha1="$(sha1sum ${strap_sh} | awk '{print $1}')"
 
-    if [ "${sha1}" = ${orig_sha1} ]
+    if [ "${sha1}" = "${orig_sha1}" ]
     then
         mv ${strap_sh} "${CHROOT}${strap_sh}"
         chmod a+x "${CHROOT}${strap_sh}"
