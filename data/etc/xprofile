@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 
 VBoxClient-all &
-vmware-user-suid-wrapper &
-vmware-xdg-detect-de &
-feh --bg-scale /usr/share/blackarch/art/wallpaper.png
+feh --bg-scale /usr/share/blackarch/wallpaper.png
