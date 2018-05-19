@@ -25,6 +25,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.7
 
+  [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
   [x] update: add virtualbox guest modules
   [x] update: add support for online sha1 sum check
   [x] update: data files (WMs, ENV, bash, editor, etc.)

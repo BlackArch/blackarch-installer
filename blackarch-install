@@ -1332,14 +1332,19 @@ setup_user()
   fi
 
   # password
+  res=1337
   wprintf "[?] Set password for ${user}: "
   printf "\n\n"
-  if [ "${user}" = "root" ]
-  then
-    chroot ${CHROOT} passwd
-  else
-    chroot ${CHROOT} passwd "${user}"
-  fi
+  while [ $res -ne 0 ]
+  do
+    if [ "${user}" = "root" ]
+    then
+      chroot ${CHROOT} passwd
+    else
+      chroot ${CHROOT} passwd "${user}"
+    fi
+    res=$?
+  done
 
   return $SUCCESS
 }
