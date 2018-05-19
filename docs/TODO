@@ -9,138 +9,140 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.x
 
-    [ ] new option: add optional verbose / quiet mode
-    [ ] new option: blackarch-groups optionally rather than all/single tools
-    [ ] new option: if possible add 'skip' for each asking sections
-    [ ] new option: add resume functionality
-    [ ] new option: add restart installer option
-    [ ] new option: go back to previous section
-    [ ] new option: ask for optional partitions
-    [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
-    [ ] update: check for available disk space before starting to install pkgs
-    [ ] update: add help text for each section and sub-section
-    [ ] update: more error handling
-    [ ] update: sort installation routines (order of sections)
+  [ ] new option: add optional verbose / quiet mode
+  [ ] new option: blackarch-groups optionally rather than all/single tools
+  [ ] new option: if possible add 'skip' for each asking sections
+  [ ] new option: add resume functionality
+  [ ] new option: add restart installer option
+  [ ] new option: go back to previous section
+  [ ] new option: ask for optional partitions
+  [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
+  [ ] update: check for available disk space before starting to install pkgs
+  [ ] update: add help text for each section and sub-section
+  [ ] update: more error handling
+  [ ] update: sort installation routines (order of sections)
 
 
 ===> 0.7
 
-    [ ]
-    [x] update: data files (WMs, ENV, bash, editor, etc.)
+  [x] update: add virtualbox guest modules
+  [x] update: add support for online sha1 sum check
+  [x] update: data files (WMs, ENV, bash, editor, etc.)
+  [x] update: set tabstop + shiftwidth to '2'
 
 
 ===> 0.6.2
 
-    [x] update: style fixes, tweaks
-    [x] update: menus
-    [x] update: increase sleep time between wpa_supplicand and dhcpcd
-    [x] bugfix: fix installation fuck-ups (wmii, useradd/groupadd, etc.)
+  [x] update: style fixes, tweaks
+  [x] update: menus
+  [x] update: increase sleep time between wpa_supplicand and dhcpcd
+  [x] bugfix: fix installation fuck-ups (wmii, useradd/groupadd, etc.)
 
 
 ===> 0.6
 
-    [x] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
-    [x] update: add check for mkfs.* status before proceeding (-> $?)
-    [x] update: support for live-iso complete 100% offline installation
-    [x] update: further improvements and bug fixes
-    [x] update: check iso type and skip unnecessary parts for live-iso
-    [x] update: add more /dev/null redirections
-    [x] update: add amdgpu xf86 video driver
-    [x] update: don't echo passphrase for wpa_supplicant
-    [x] update: add sleeps between wpa_supplicant and dhcpcd calls
-    [x] update: reorder wpa_supplicant opts
-    [x] update: style fix (rank mirrors)
+  [x] update: check for wrong inputs (f.e.: wrong partition / devices, etc.)
+  [x] update: add check for mkfs.* status before proceeding (-> $?)
+  [x] update: support for live-iso complete 100% offline installation
+  [x] update: further improvements and bug fixes
+  [x] update: check iso type and skip unnecessary parts for live-iso
+  [x] update: add more /dev/null redirections
+  [x] update: add amdgpu xf86 video driver
+  [x] update: don't echo passphrase for wpa_supplicant
+  [x] update: add sleeps between wpa_supplicant and dhcpcd calls
+  [x] update: reorder wpa_supplicant opts
+  [x] update: style fix (rank mirrors)
 
 
 ===> 0.5.2
 
-    [x] update: update SHA1 sum of strap.sh
+  [x] update: update SHA1 sum of strap.sh
 
 
 ===> 0.5.1
 
-    [x] bugfix: typo in newline for a warning message in time zone setup
-    [x] update: internet connection check (try 3 times instead of 5)
-    [x] bugfix: 'luks not found' issue thanks to CompSciMaj13 @github
+  [x] bugfix: typo in newline for a warning message in time zone setup
+  [x] update: internet connection check (try 3 times instead of 5)
+  [x] bugfix: 'luks not found' issue thanks to CompSciMaj13 @github
 
 
 ===> 0.5
 
-    [x] new option: install window manager(s) by choice rather than all
+  [x] new option: install window manager(s) by choice rather than all
 
 
 ===> 0.4.1
 
-    [x] update: removed unavailable extra packages
-    [x] update: added more ${VERBOSE} redirects
-    [x] update: style fixes
+  [x] update: removed unavailable extra packages
+  [x] update: added more ${VERBOSE} redirects
+  [x] update: style fixes
 
 
 ===> 0.4
 
-    [x] update: wget now check connection
-    [x] new option: timezone selection
-    [x] new option: rankmirrors added
+  [x] update: wget now check connection
+  [x] new option: timezone selection
+  [x] new option: rankmirrors added
 
 
 ===> 0.3.4
 
-    [x] bugfix: fix force recreate partition table cfdisk
+  [x] bugfix: fix force recreate partition table cfdisk
 
 
 ===> 0.3.3
 
-    [x] bugfix: fix copy of 'xsessions' path
-    [x] update: add force option for mkfs on boot partition
-    [x] bugfix: add multilib support for chroot ENV
+  [x] bugfix: fix copy of 'xsessions' path
+  [x] update: add force option for mkfs on boot partition
+  [x] bugfix: add multilib support for chroot ENV
 
 
 ===> 0.3.2
 
-    [x] update: make cryptsetup use batch-mode to avoid useless confirmations
-    [x] bugfix: remove non-existing x11 video driver packages
-    [x] bugfix: fix wrong path to 'data' dir (configs, x11-settings, etc)
+  [x] update: make cryptsetup use batch-mode to avoid useless confirmations
+  [x] bugfix: remove non-existing x11 video driver packages
+  [x] bugfix: fix wrong path to 'data' dir (configs, x11-settings, etc)
 
 
 ===> 0.3
 
-    [x] add wireless setup support
-    [x] add btrfs support
-    [x] use local data/ config files (lxdm, WMs, etc.)
-    [x] update config files
+  [x] add wireless setup support
+  [x] add btrfs support
+  [x] use local data/ config files (lxdm, WMs, etc.)
+  [x] update config files
 
 
 ===> 0.2
 
-    [x] fix titles for EFI loader
-    [x] update header titles
-    [x] update sha1 sum check for strap.sh
-    [x] fix grub boot splash
+  [x] fix titles for EFI loader
+  [x] update header titles
+  [x] update sha1 sum check for strap.sh
+  [x] fix grub boot splash
 
 
 ===> 0.1.4
 
-    [x] bump version
+  [x] bump version
 
 
 ===> 0.1.3
 
-    [x] bump version
+  [x] bump version
 
 
 ===> 0.1.2
 
-    [x] bump version
+  [x] bump version
 
 
 ===> 0.1.1
 
-    [x] update: cp resolv.conf to chroot prior to base pkgs installation
-    [x] update: change menu order for installation mode
-    [x] new option: install from Live-ISO
+  [x] update: cp resolv.conf to chroot prior to base pkgs installation
+  [x] update: change menu order for installation mode
+  [x] new option: install from Live-ISO
 
 
 ===> 0.1
 
-    [x] update: print partition table before asking for partitions
-    [x] initial release
+  [x] update: print partition table before asking for partitions
+  [x] initial release
