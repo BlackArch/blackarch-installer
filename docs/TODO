@@ -23,6 +23,12 @@ ChangeLog and TODO list for blackarch-installer
     [ ] update: sort installation routines (order of sections)
 
 
+===> 0.7
+
+    [ ]
+    [x] update: data files (WMs, ENV, bash, editor, etc.)
+
+
 ===> 0.6.2
 
     [x] update: style fixes, tweaks
