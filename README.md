@@ -1,14 +1,10 @@
-# blackarch-installer
+## Description
 
-The official BlackArch Linux installer.
+The official BlackArch Linux installer. You can run it on any Linux systems.
+It is recommend to use it with Arch or BlackArch Linux ISOs though.
 
-Overview
---------
-This is the official BlackArch Linux installer. It can be run on any Linux
-systems. It is recommend to use it with Arch or BlackArch Linux ISOs though.
+## Installation
 
-Installation
-------------
 On Arch Linux, run:
 ```sh
 pacman -S blackarch-installer
@@ -16,8 +12,8 @@ pacman -S blackarch-installer
 On any other distribution clone this repository and copy it to
 /usr/share/blackarch-installer.
 
-Usage
------
+## Usage
+
 Simply run:
 ```sh
 $ blackarch-install
