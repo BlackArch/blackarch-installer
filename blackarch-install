@@ -1163,6 +1163,11 @@ setup_initramfs()
       ${CHROOT}/boot/vmlinuz-linux
   fi
 
+  # terminus font
+  sed -i 's/keyboard fsck/keyboard fsck consolefont/g' \
+    "${CHROOT}/etc/mkinitcpio.conf"
+  echo 'FONT=ter-114n' >> "${CHROOT}/etc/vconsole.conf"
+
   if [ ${LUKS} = ${TRUE} ]
   then
     sed -i 's/block filesystems/block keymap encrypt filesystems/g' \
