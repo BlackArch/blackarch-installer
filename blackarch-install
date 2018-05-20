@@ -1378,8 +1378,8 @@ setup_extra_packages()
   misc="acpi alsa-utils b43-fwcutter bash-completion bc btrfs-progs cmake
   ctags expac feh flashplugin git gpm grml-zsh-config haveged hdparm htop
   inotify-tools ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
-  mpv mtools mupdf p7zip rsync rtorrent scrot smartmontools speedtouch strace
-  sudo tzdata unace unrar unzip usb_modeswitch zip zsh"
+  mpv mtools p7zip rsync rtorrent scrot smartmontools speedtouch strace sudo
+  tzdata unace unrar unzip usb_modeswitch zip zsh"
 
   network="wicd-gtk wicd bridge-utils darkhttpd atftp bind-tools dnsmasq
   dhclient dnsutils gnu-netcat ipw2100-fw ipw2200-fw lftp nfs-utils ntp
@@ -1703,7 +1703,8 @@ setup_window_managers()
         break
         ;;
       4)
-        chroot ${CHROOT} pacman -S i3-wm --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S i3-wm i3status i3lock dmenu --needed \
+          --force --noconfirm
         cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
           ${CHROOT}/root/.
         break
@@ -1885,8 +1886,10 @@ update_user_groups()
   printf "\n\n"
 
   # TODO: more to add here
-  chroot ${CHROOT} \
-    usermod -G ${NORMAL_USER},video,audio > ${VERBOSE} 2>&1
+  if [ $VBOX_SETUP -eq $TRUE ]
+  then
+    chroot ${CHROOT} usermod -G ${NORMAL_USER},vboxusers > ${VERBOSE} 2>&1
+  fi
 
   return $SUCCESS
 }
@@ -1983,11 +1986,11 @@ setup_blackarch()
     sleep_clear 1
   fi
 
-  #if [ -n "${NORMAL_USER}" ]
-  #then
-    #update_user_groups
-    #sleep_clear 1
-  #fi
+  if [ -n "${NORMAL_USER}" ]
+  then
+    update_user_groups
+    sleep_clear 1
+  fi
 
   return $SUCCESS
 }
