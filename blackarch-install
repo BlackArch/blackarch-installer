@@ -1704,6 +1704,8 @@ setup_window_managers()
         ;;
       4)
         chroot ${CHROOT} pacman -S i3-wm --needed --force --noconfirm
+        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
+          ${CHROOT}/root/.
         break
         ;;
       5)
