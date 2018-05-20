@@ -1680,7 +1680,6 @@ setup_window_managers()
   6. Spectrwm
   7. All of the above
   \n"
-    sleep 2
     wprintf "[?] Choose an option [7]: "
     read choice
     echo
