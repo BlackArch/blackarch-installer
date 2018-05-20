@@ -2047,6 +2047,8 @@ sync_disk()
 main()
 {
   clear
+
+  # do some ENV checks
   check_uid
   check_env
   check_iso_type
