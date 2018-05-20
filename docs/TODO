@@ -19,13 +19,13 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
   [ ] update: check for available disk space before starting to install pkgs
   [ ] update: add help text for each section and sub-section
-  [ ] update: more error handling
   [ ] update: sort installation routines (order of sections)
 
 
 ===> 0.7
 
-  [.] update: check exit satuses and peform/set (default) actions if needed
+  [.] update: more error handling / check exit satuses and peform/set (default)
+      actions if required
   [x] update: update grub splash file
   [x] update: add terminus-font for console (consolefont)
   [x] update: really skip network stuff if '4. skip' was selected
