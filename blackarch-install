@@ -1724,7 +1724,7 @@ setup_window_managers()
         break
         ;;
       *)
-        chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm dwm \
+        chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm i3status \
           dwm spectrwm --needed --force --noconfirm
 
         # awesome
@@ -1736,6 +1736,10 @@ setup_window_managers()
         # fluxbox
         cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
           ${CHROOT}/usr/share/fluxbox/.
+
+        # i3
+        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
+          ${CHROOT}/root/.
 
         # openbox
         cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
