@@ -154,6 +154,22 @@ WLAN_PASSPHRASE=""
 ISO_TYPE=""
 
 
+# check exit status
+check()
+{
+  es=$1
+  func="$2"
+  info="$3"
+
+  if [ $es -ne 0 ]
+  then
+    echo
+    warn "Something went wrong with ${func}. ${info}."
+    sleep 5
+  fi
+}
+
+
 # print formatted output
 wprintf()
 {
@@ -366,7 +382,10 @@ set_keymap()
   fi
 
   localectl set-keymap --no-convert "${KEYMAP}"
-  loadkeys "${KEYMAP}"
+  loadkeys "${KEYMAP}" > ${VERBOSE} 2>&1
+  check $? "setting keymap" "Choosing default for you: US"
+  localectl set-keymap --no-conver "us"
+  loadkeys "us"
 
   return $SUCCESS
 }
