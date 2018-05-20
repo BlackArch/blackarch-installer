@@ -1725,7 +1725,7 @@ setup_window_managers()
         ;;
       *)
         chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm i3status \
-          dwm spectrwm --needed --force --noconfirm
+          i3lock dwm spectrwm --needed --force --noconfirm
 
         # awesome
         cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
