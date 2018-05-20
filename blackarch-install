@@ -1045,7 +1045,7 @@ install_base_packages()
   wprintf "[+] Installing ArchLinux base packages"
   printf "\n\n"
 
-  pacstrap ${CHROOT} base base-devel
+  pacstrap ${CHROOT} base base-devel terminus-font
   chroot ${CHROOT} pacman -Syy --force
 
   return $SUCCESS
@@ -1298,7 +1298,7 @@ setup_testuser()
 
   wprintf "[+] Setting up test user blackarchtest account"
   printf "\n\n"
-  warn "Remove this user if you added a normal system user account"
+  warn "Remove this user after you added a normal system user account"
   printf "\n"
 
   chroot ${CHROOT} groupadd blackarchtest
