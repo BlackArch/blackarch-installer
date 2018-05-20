@@ -1041,16 +1041,16 @@ umount_filesystems()
   printf "\n\n"
 
   # hardcore style ... TODO: tune this
-  umount -Rf ${CHROOT} > /dev/null 2>&1
-  umount -Rf "${BOOT_PART}" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/proc" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/sys" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/dev" > /dev/null 2>&1
-  umount -Rf "${BOOT_PART}" > /dev/null 2>&1
-  umount -Rf "${ROOT_PART}" > /dev/null 2>&1
-  umount -Rf "/dev/mapper/${CRYPT_ROOT}" > /dev/null 2>&1
-  cryptsetup luksClose "${CRYPT_ROOT}" > /dev/null 2>&1
-  swapoff "${SWAP_PART}" > /dev/null 2>&1
+  umount -Rf ${CHROOT} > ${VERBOSE} 2>&1
+  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "${CHROOT}/proc" > ${VERBOSE} 2>&1
+  umount -Rf "${CHROOT}/sys" > ${VERBOE} 2>&1
+  umount -Rf "${CHROOT}/dev" > ${VERBOSE} 2>&1
+  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "${ROOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "/dev/mapper/${CRYPT_ROOT}" > ${VERBOSE} 2>&1
+  cryptsetup luksClose "${CRYPT_ROOT}" > ${VERBOSE} 2>&1
+  swapoff "${SWAP_PART}" > ${VERBOSE} 2>&1
 
   return $SUCCESS
 }
