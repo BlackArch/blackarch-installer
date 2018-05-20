@@ -26,6 +26,7 @@ ChangeLog and TODO list for blackarch-installer
 ===> 0.7
 
   [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
+  [x] update: ask first for net conf mode before asking for interfaces
   [x] update: add virtualbox guest modules
   [x] update: added i3-wm config files
   [x] update: updated window managers (menus, config files)

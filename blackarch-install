@@ -2046,8 +2046,11 @@ main()
   if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
   then
     get_net_ifs
-    ask_net_if
     ask_net_conf_mode
+    if [ "${NET_CONF_MODE}" != "${NET_CONF_SKIP}" ]
+    then
+      ask_net_if
+    fi
     case "${NET_CONF_MODE}" in
       "${NET_CONF_AUTO}")
         net_conf_auto
