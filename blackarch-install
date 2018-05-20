@@ -1400,14 +1400,14 @@ setup_extra_packages()
 
   printf "
   > ArchLinux   : `echo ${arch} | wc -w` packages
-  > Browser   : `echo ${browser} | wc -w` packages
+  > Browser     : `echo ${browser} | wc -w` packages
   > Bluetooth   : `echo ${bluetooth} | wc -w` packages
-  > Editor    : `echo ${editor} | wc -w` packages
+  > Editor      : `echo ${editor} | wc -w` packages
   > Filesystem  : `echo ${filesystem} | wc -w` packages
-  > Fonts     : `echo ${fonts} | wc -w` packages
-  > Misc      : `echo ${misc} | wc -w` packages
-  > Network   : `echo ${network} | wc -w` packages
-  > Xorg      : `echo ${xorg} | wc -w` packages
+  > Fonts       : `echo ${fonts} | wc -w` packages
+  > Misc        : `echo ${misc} | wc -w` packages
+  > Network     : `echo ${network} | wc -w` packages
+  > Xorg        : `echo ${xorg} | wc -w` packages
   \n"
 
   sleep 2
@@ -1687,10 +1687,6 @@ setup_window_managers()
     case $choice in
       1)
         chroot ${CHROOT} pacman -S awesome --needed --force --noconfirm
-        cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
-          ${CHROOT}/etc/xdg/awesome/.
-        cp -r ${BI_PATH}/data/usr/share/awesome/. \
-          ${CHROOT}/usr/share/awesome/.
         break
         ;;
       2)
@@ -1699,8 +1695,6 @@ setup_window_managers()
         ;;
       3)
         chroot ${CHROOT} pacman -S fluxbox --needed --force --noconfirm
-        cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
-          ${CHROOT}/usr/share/fluxbox/.
         break
         ;;
       4)
@@ -1709,16 +1703,10 @@ setup_window_managers()
         ;;
       5)
         chroot ${CHROOT} pacman -S openbox --needed --force --noconfirm
-        cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
-          ${CHROOT}/etc/xdg/openbox/.
-        cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
-          ${CHROOT}/usr/share/themes/.
         break
         ;;
       6)
         chroot ${CHROOT} pacman -S spectrwm --needed --force --noconfirm
-        cp -r ${BI_PATH}/data/etc/spectrwm.conf \
-          ${CHROOT}/etc/spectrwm.conf
         break
         ;;
       *)
