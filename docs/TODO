@@ -26,6 +26,7 @@ ChangeLog and TODO list for blackarch-installer
 ===> 0.7
 
   [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
+  [x] update: add terminus-font for console (consolefont)
   [x] update: really skip network stuff if '4. skip' was selected
   [x] update: ask first for net conf mode before asking for interfaces
   [x] update: add virtualbox guest modules
