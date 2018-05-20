@@ -27,6 +27,8 @@ ChangeLog and TODO list for blackarch-installer
 
   [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
   [x] update: add virtualbox guest modules
+  [x] update: added i3-wm config files
+  [x] update: updated window managers (menus, config files)
   [x] update: add support for online sha1 sum check
   [x] update: data files (WMs, ENV, bash, editor, etc.)
   [x] update: set tabstop + shiftwidth to '2'
