@@ -25,8 +25,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.7
 
-  [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
-  [x] bugfix: fix awesome-wm quit()/exit() issue
+  [.] update: check exit satuses and peform/set (default) actions if needed
   [x] update: update grub splash file
   [x] update: add terminus-font for console (consolefont)
   [x] update: really skip network stuff if '4. skip' was selected
@@ -37,6 +36,8 @@ ChangeLog and TODO list for blackarch-installer
   [x] update: add support for online sha1 sum check
   [x] update: data files (WMs, ENV, bash, editor, etc.)
   [x] update: set tabstop + shiftwidth to '2'
+  [x] bugfix: https://github.com/BlackArch/blackarch-installer/issues/23
+  [x] bugfix: fix awesome-wm quit()/exit() issue
 
 
 ===> 0.6.2
