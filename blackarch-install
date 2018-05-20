@@ -1692,7 +1692,7 @@ setup_window_managers()
           ${CHROOT}/usr/share/awesome/.
         # fix bullshit exit() issue
         sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          ${CHROOT}/usr/share/awesome/lib/aweful/menu.lua
+          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
         break
         ;;
       2)
@@ -1736,7 +1736,7 @@ setup_window_managers()
         cp -r ${BI_PATH}/data/usr/share/awesome/. \
           ${CHROOT}/usr/share/awesome/.
         sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          ${CHROOT}/usr/share/awesome/lib/aweful/menu.lua
+          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
 
         # fluxbox
         cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
