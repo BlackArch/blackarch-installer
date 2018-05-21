@@ -153,6 +153,22 @@ WLAN_PASSPHRASE=""
 ISO_TYPE=""
 
 
+# check exit status
+check()
+{
+  es=$1
+  func="$2"
+  info="$3"
+
+  if [ $es -ne 0 ]
+  then
+    echo
+    warn "Something went wrong with ${func}. ${info}."
+    sleep 5
+  fi
+}
+
+
 # print formatted output
 wprintf()
 {
@@ -364,7 +380,10 @@ set_keymap()
   fi
 
   localectl set-keymap --no-convert "${KEYMAP}"
-  loadkeys "${KEYMAP}"
+  loadkeys "${KEYMAP}" > ${VERBOSE} 2>&1
+  check $? "setting keymap" "Choosing default for you: US"
+  localectl set-keymap --no-conver "us"
+  loadkeys "us"
 
   return $SUCCESS
 }
@@ -644,9 +663,10 @@ net_conf_wlan()
 check_inet_conn()
 {
   title "Network Setup"
-  wprintf "[+] Checking for internet connection..."
+  wprintf "[+] Checking for Internet connection..."
 
-  if ! wget -q --tries=5 --timeout=10 --spider http://google.com > /dev/null 2>&1
+  if ! wget -q --tries=5 --timeout=10 --spider \
+    http://github.com > /dev/null 2>&1
   then
     err "No Internet connection! Check your network (settings)."
   fi
@@ -1020,16 +1040,16 @@ umount_filesystems()
   printf "\n\n"
 
   # hardcore style ... TODO: tune this
-  umount -Rf ${CHROOT} > /dev/null 2>&1
-  umount -Rf "${BOOT_PART}" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/proc" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/sys" > /dev/null 2>&1
-  umount -Rf "${CHROOT}/dev" > /dev/null 2>&1
-  umount -Rf "${BOOT_PART}" > /dev/null 2>&1
-  umount -Rf "${ROOT_PART}" > /dev/null 2>&1
-  umount -Rf "/dev/mapper/${CRYPT_ROOT}" > /dev/null 2>&1
-  cryptsetup luksClose "${CRYPT_ROOT}" > /dev/null 2>&1
-  swapoff "${SWAP_PART}" > /dev/null 2>&1
+  umount -Rf ${CHROOT} > ${VERBOSE} 2>&1
+  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "${CHROOT}/proc" > ${VERBOSE} 2>&1
+  umount -Rf "${CHROOT}/sys" > ${VERBOSE} 2>&1
+  umount -Rf "${CHROOT}/dev" > ${VERBOSE} 2>&1
+  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "${ROOT_PART}" > ${VERBOSE} 2>&1
+  umount -Rf "/dev/mapper/${CRYPT_ROOT}" > ${VERBOSE} 2>&1
+  cryptsetup luksClose "${CRYPT_ROOT}" > ${VERBOSE} 2>&1
+  swapoff "${SWAP_PART}" > ${VERBOSE} 2>&1
 
   return $SUCCESS
 }
@@ -1043,7 +1063,7 @@ install_base_packages()
   wprintf "[+] Installing ArchLinux base packages"
   printf "\n\n"
 
-  pacstrap ${CHROOT} base base-devel
+  pacstrap ${CHROOT} base base-devel terminus-font
   chroot ${CHROOT} pacman -Syy --force
 
   return $SUCCESS
@@ -1160,6 +1180,11 @@ setup_initramfs()
     cp /run/archiso/bootmnt/blackarch/boot/x86_64/vmlinuz \
       ${CHROOT}/boot/vmlinuz-linux
   fi
+
+  # terminus font
+  sed -i 's/keyboard fsck/keyboard fsck consolefont/g' \
+    "${CHROOT}/etc/mkinitcpio.conf"
+  echo 'FONT=ter-114n' >> "${CHROOT}/etc/vconsole.conf"
 
   if [ ${LUKS} = ${TRUE} ]
   then
@@ -1291,7 +1316,7 @@ setup_testuser()
 
   wprintf "[+] Setting up test user blackarchtest account"
   printf "\n\n"
-  warn "Remove this user if you added a normal system user account"
+  warn "Remove this user after you added a normal system user account"
   printf "\n"
 
   chroot ${CHROOT} groupadd blackarchtest
@@ -1371,8 +1396,8 @@ setup_extra_packages()
   misc="acpi alsa-utils b43-fwcutter bash-completion bc btrfs-progs cmake
   ctags expac feh flashplugin git gpm grml-zsh-config haveged hdparm htop
   inotify-tools ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
-  mpv mtools mupdf p7zip rsync rtorrent scrot smartmontools speedtouch strace
-  sudo tzdata unace unrar unzip usb_modeswitch zip zsh"
+  mpv mtools p7zip rsync rtorrent scrot smartmontools speedtouch strace sudo
+  tzdata unace unrar unzip usb_modeswitch zip zsh"
 
   network="wicd-gtk wicd bridge-utils darkhttpd atftp bind-tools dnsmasq
   dhclient dnsutils gnu-netcat ipw2100-fw ipw2200-fw lftp nfs-utils ntp
@@ -1393,14 +1418,14 @@ setup_extra_packages()
 
   printf "
   > ArchLinux   : `echo ${arch} | wc -w` packages
-  > Browser   : `echo ${browser} | wc -w` packages
+  > Browser     : `echo ${browser} | wc -w` packages
   > Bluetooth   : `echo ${bluetooth} | wc -w` packages
-  > Editor    : `echo ${editor} | wc -w` packages
+  > Editor      : `echo ${editor} | wc -w` packages
   > Filesystem  : `echo ${filesystem} | wc -w` packages
-  > Fonts     : `echo ${fonts} | wc -w` packages
-  > Misc      : `echo ${misc} | wc -w` packages
-  > Network   : `echo ${network} | wc -w` packages
-  > Xorg      : `echo ${xorg} | wc -w` packages
+  > Fonts       : `echo ${fonts} | wc -w` packages
+  > Misc        : `echo ${misc} | wc -w` packages
+  > Network     : `echo ${network} | wc -w` packages
+  > Xorg        : `echo ${xorg} | wc -w` packages
   \n"
 
   sleep 2
@@ -1673,7 +1698,6 @@ setup_window_managers()
   6. Spectrwm
   7. All of the above
   \n"
-    sleep 2
     wprintf "[?] Choose an option [7]: "
     read choice
     echo
@@ -1684,6 +1708,9 @@ setup_window_managers()
           ${CHROOT}/etc/xdg/awesome/.
         cp -r ${BI_PATH}/data/usr/share/awesome/. \
           ${CHROOT}/usr/share/awesome/.
+        # fix bullshit exit() issue
+        sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
+          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
         break
         ;;
       2)
@@ -1697,7 +1724,10 @@ setup_window_managers()
         break
         ;;
       4)
-        chroot ${CHROOT} pacman -S i3-wm --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S i3-wm i3status i3lock dmenu --needed \
+          --force --noconfirm
+        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
+          ${CHROOT}/root/.
         break
         ;;
       5)
@@ -1705,7 +1735,7 @@ setup_window_managers()
         cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
           ${CHROOT}/etc/xdg/openbox/.
         cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
-          ${CHROOT}/usr/share/themes/.
+          ${CHROOT}/usr/share/themes/i3lock .
         break
         ;;
       6)
@@ -1715,18 +1745,24 @@ setup_window_managers()
         break
         ;;
       *)
-        chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm dwm \
-          dwm spectrwm --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm i3status \
+          i3lock dwm spectrwm --needed --force --noconfirm
 
         # awesome
         cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
           ${CHROOT}/etc/xdg/awesome/.
         cp -r ${BI_PATH}/data/usr/share/awesome/. \
           ${CHROOT}/usr/share/awesome/.
+        sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
+          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
 
         # fluxbox
         cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
           ${CHROOT}/usr/share/fluxbox/.
+
+        # i3
+        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
+          ${CHROOT}/root/.
 
         # openbox
         cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
@@ -1877,8 +1913,10 @@ update_user_groups()
   printf "\n\n"
 
   # TODO: more to add here
-  chroot ${CHROOT} \
-    usermod -G ${NORMAL_USER},video,audio > ${VERBOSE} 2>&1
+  if [ $VBOX_SETUP -eq $TRUE ]
+  then
+    chroot ${CHROOT} usermod -G ${NORMAL_USER},vboxusers > ${VERBOSE} 2>&1
+  fi
 
   return $SUCCESS
 }
@@ -1985,11 +2023,11 @@ setup_blackarch()
     sleep_clear 1
   fi
 
-  #if [ -n "${NORMAL_USER}" ]
-  #then
-    #update_user_groups
-    #sleep_clear 1
-  #fi
+  if [ -n "${NORMAL_USER}" ]
+  then
+    update_user_groups
+    sleep_clear 1
+  fi
 
   return $SUCCESS
 }
@@ -2037,6 +2075,8 @@ sync_disk()
 main()
 {
   clear
+
+  # do some ENV checks
   check_uid
   check_env
   check_iso_type
