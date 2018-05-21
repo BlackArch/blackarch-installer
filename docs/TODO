@@ -17,6 +17,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: go back to previous section
   [ ] new option: ask for optional partitions
   [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
+  [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add progressbar for offline installation mode
   [ ] update: check for available disk space before starting to install pkgs
   [ ] update: add help text for each section and sub-section
@@ -26,6 +27,7 @@ ChangeLog and TODO list for blackarch-installer
 ===> 0.7
 
   [x] new option: add self-updater
+  [x] update: skip asking for BA mirror 2nd time
   [x] update: more error handling
   [x] update: clean-up files after live-iso dump
   [x] update: update grub splash file

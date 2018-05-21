@@ -1619,7 +1619,7 @@ run_strap_sh()
   then
     mv ${strap_sh} "${CHROOT}${strap_sh}"
     chmod a+x "${CHROOT}${strap_sh}"
-    chroot ${CHROOT} sh ${strap_sh}
+    chroot ${CHROOT} echo ${BA_REPO_URL} | sh ${CHROOT}${strap_sh}
   else
     err "Wrong SHA1 sum for strap.sh: ${sha1} (orig: ${orig_sha1}). Aborting!"
   fi
