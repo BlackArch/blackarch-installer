@@ -17,6 +17,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: go back to previous section
   [ ] new option: ask for optional partitions
   [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
+  [ ] update: add progressbar for offline installation mode
   [ ] update: check for available disk space before starting to install pkgs
   [ ] update: add help text for each section and sub-section
   [ ] update: sort installation routines (order of sections)
