@@ -748,7 +748,7 @@ boot, optional swap) [y/n]: "
     zero_part
   else
     echo
-    warn "You chose not to make partitions. Make sure you have them already configured."
+    warn "You chosed not to make partitions. Make sure you have them already configured."
   fi
 
   return $SUCCESS
