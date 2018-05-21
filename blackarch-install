@@ -1959,7 +1959,7 @@ dump_live_iso()
   rm -ff ${CHROOT}/root/{.automated_script.sh,.zlogin}
   rm -ff ${CHROOT}/etc/mkinitcpio-archiso.conf
   rm -rf ${CHROOT}/etc/initcpio
-  rm -rf ${CHROOT}/etc/{group*,passwd*,shadow*,gshadow*}
+  #rm -rf ${CHROOT}/etc/{group*,passwd*,shadow*,gshadow*}
   wprintf "done\n"
 
   return $SUCCESS
