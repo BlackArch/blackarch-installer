@@ -2077,7 +2077,8 @@ sync_disk()
 self_updater()
 {
   title "Self Updater"
-  wprintf "[+] Checking for a new version of myself"
+  wprintf "[+] Checking for a new version of myself... "
+  printf "\n\n"
 
   pacman -Syy > ${VERBOSE} 2>&1
   ver="v$(pacman -Ss blackarch-install | head -1 | cut -d ' ' -f 2)"
