@@ -1045,7 +1045,7 @@ umount_filesystems()
   umount -Rf ${CHROOT} > ${VERBOSE} 2>&1
   umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
   umount -Rf "${CHROOT}/proc" > ${VERBOSE} 2>&1
-  umount -Rf "${CHROOT}/sys" > ${VERBOE} 2>&1
+  umount -Rf "${CHROOT}/sys" > ${VERBOSE} 2>&1
   umount -Rf "${CHROOT}/dev" > ${VERBOSE} 2>&1
   umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
   umount -Rf "${ROOT_PART}" > ${VERBOSE} 2>&1
