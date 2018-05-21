@@ -2078,18 +2078,18 @@ self_updater()
 {
   title "Self Updater"
   wprintf "[+] Checking for a new version of myself..."
-  printf "\n\n"
 
   pacman -Syy > ${VERBOSE} 2>&1
   ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2)"
 
   if [ "${ver}" != "${VERSION}" ]
   then
-    warn "A new version is available! Going to update myself."
+    printf "\n\n"
+    warn "A new version is available! Going to fuck, err, update myself."
     printf "\n"
     pacman -S --force --noconfirm blackarch-installer
-    wprintf "[+] Updated successfully. Please restart the installer now!"
-    sleep 5
+    wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
+    sleep 3
     exit $SUCCESS
   fi
 
