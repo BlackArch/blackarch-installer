@@ -2148,6 +2148,7 @@ main()
     self_updater
 
     # pacman
+    sleep_clear 1
     ask_mirror_arch
     sleep_clear 1
     update_pacman
