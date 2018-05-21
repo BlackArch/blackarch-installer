@@ -1895,6 +1895,9 @@ dump_live_iso()
   wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
   printf "\n"
 
+  wprintf "    > fetching total size to tranfer, please wait..."
+  printf "\n"
+
   for d in ${live_dirs}
   do
     printf "
