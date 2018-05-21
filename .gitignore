@@ -19,3 +19,5 @@ tags
 
 .MTREE
 .PKGINFO
+
+.vim.session
