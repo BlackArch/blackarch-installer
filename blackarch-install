@@ -2145,8 +2145,8 @@ main()
     esac
     sleep_clear 1
     check_inet_conn
-    self_updater
     sleep_clear 1
+    self_updater
 
     # pacman
     ask_mirror_arch
