@@ -8,7 +8,6 @@
 #                                                                              #
 ################################################################################
 
-
 # blackarch-installer version
 VERSION="v0.7"
 
@@ -27,16 +26,16 @@ FAILURE=1
 VERBOSE="/dev/null"
 
 # colors
-WHITE="`tput setaf 7`"
-WHITEB="`tput bold ; tput setaf 7`"
-GREEN="`tput setaf 2`"
-GREENB="`tput bold ; tput setaf 2`"
-RED="`tput setaf 1`"
-REDB="`tput bold; tput setaf 1`"
-YELLOW="`tput setaf 3`"
-YELLOWB="`tput bold ; tput setaf 3`"
-BLINK="`tput blink`"
-NC="`tput sgr0`"
+WHITE="$(tput setaf 7)"
+WHITEB="$(tput bold ; tput setaf 7)"
+GREEN="$(tput setaf 2)"
+GREENB="$(tput bold ; tput setaf 2)"
+RED="$(tput setaf 1)"
+REDB="$(tput bold; tput setaf 1)"
+YELLOW="$(tput setaf 3)"
+YELLOWB="$(tput bold ; tput setaf 3)"
+BLINK="$(tput blink)"
+NC="$(tput sgr0)"
 
 # installation mode
 INSTALL_MODE=""
@@ -195,9 +194,8 @@ warn()
 err()
 {
   printf "%s[-] ERROR: %s%s\n" "${RED}" "${@}" "${NC}"
-  exit $FAILURE
 
-  return $SUCCESS
+  exit $FAILURE
 }
 
 
@@ -225,7 +223,7 @@ banner()
 # check type of iso
 check_iso_type()
 {
-  if [ "`which dnsspider 2> /dev/null`" ]
+  if [ "$(which dnsspider 2> /dev/null)" ]
   then
     ISO_TYPE="live"
   else
@@ -291,7 +289,7 @@ check_env()
 # check user id
 check_uid()
 {
-  if [ `id -u` -ne 0 ]
+  if [ "$(id -u)" -ne 0 ]
   then
     err "You must be root to run the BlackArch installer!"
   fi
@@ -405,7 +403,7 @@ enable_pacman_multilib()
 
   title "Pacman Setup"
 
-  if [ "`uname -m`" = "x86_64" ]
+  if [ "$(uname -m)" = "x86_64" ]
   then
     wprintf "[+] Enabling multilib support"
     printf "\n\n"
@@ -495,7 +493,7 @@ ask_hostname()
 # get available network interfaces
 get_net_ifs()
 {
-  NET_IFS="`ls /sys/class/net`"
+  NET_IFS="$(ls /sys/class/net)"
 
   return $SUCCESS
 }
@@ -639,7 +637,7 @@ ask_wlan_data()
 # wifi and auto dhcp network interface configuration
 net_conf_wlan()
 {
-  wpasup="`mktemp`"
+  wpasup="$(mktemp)"
   dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak"
 
   title "Network Setup"
@@ -701,7 +699,7 @@ ask_luks()
 # get available hard disks
 get_hd_devs()
 {
-  HD_DEVS="`lsblk | grep disk | awk '{print $1}'`"
+  HD_DEVS="$(lsblk | grep disk | awk '{print $1}')"
 
   return $SUCCESS
 }
@@ -775,7 +773,7 @@ partition table [y/n]: "
 # get partition label
 get_partition_label()
 {
-  PART_LABEL="`parted -m ${HD_DEV} print | grep ${HD_DEV} | cut -d ':' -f 6`"
+  PART_LABEL="$(parted -m ${HD_DEV} print | grep ${HD_DEV} | cut -d ':' -f 6)"
 
   return $SUCCESS
 }
@@ -784,7 +782,7 @@ get_partition_label()
 # get partitions
 ask_partitions()
 {
-  partitions=`ls ${HD_DEV}* | grep -v "${HD_DEV}\>"`
+  partitions=$(ls ${HD_DEV}* | grep -v "${HD_DEV}\>")
 
   while [ \
     "${BOOT_PART}" = "" -o \
@@ -1125,16 +1123,16 @@ setup_locale()
 # setup timezone
 setup_time()
 {
-  if confirm "Default Time zone: Europe/Berlin" "[?] Choose other timezone [y/n]: "
+  if confirm "Default Time zone: UTC" "[?] Choose other timezone [y/n]: "
   then
-    for t in `timedatectl list-timezones`
+    for t in $(timedatectl list-timezones)
     do
-      echo "    > `echo ${t}`"
+      echo "    > $(echo ${t})"
     done
 
     wprintf "\n[?] What is your (Zone/SubZone): "
     read timezone
-    chroot ${CHROOT} ln -sf /usr/share/zoneinfo/$timezone /etc/localtime \
+    chroot ${CHROOT} ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime \
       > ${VERBOSE} 2>&1
 
     if [ $? -eq 1 ]
@@ -1161,9 +1159,9 @@ setup_time()
 default_time()
 {
   echo
-  warn "Setting up default time and timezone: Europe/Berlin"
+  warn "Setting up default time and timezone: UTC"
   printf "\n\n"
-  chroot ${CHROOT} ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+  chroot ${CHROOT} ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
   return $SUCCESS
 }
@@ -1245,7 +1243,7 @@ setup_bootloader()
     printf "\n\n"
 
     chroot ${CHROOT} bootctl install
-    uuid="`blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2`"
+    uuid="$(blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2)"
 
     if [ ${LUKS} = ${TRUE} ]
     then
@@ -1268,7 +1266,7 @@ EOF
     wprintf "[+] Setting up GRUB boot loader"
     printf "\n\n"
 
-    uuid="`lsblk -o UUID ${ROOT_PART} | sed -n 2p`"
+    uuid="$(lsblk -o UUID ${ROOT_PART} | sed -n 2p)"
 
     if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     then
@@ -1432,7 +1430,7 @@ setup_extra_packages()
 
   sleep 2
 
-  chroot ${CHROOT} pacman -S --needed --force --noconfirm `echo ${all}`
+  chroot ${CHROOT} pacman -S --needed --force --noconfirm $(echo ${all})
 
   return $SUCCESS
 }
@@ -1935,6 +1933,9 @@ dump_live_iso()
   wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
   printf "\n"
 
+  wprintf "    > fetching total size to transfer, please wait..."
+  printf "\n"
+
   for d in ${live_dirs}
   do
     printf "
@@ -1942,15 +1943,22 @@ dump_live_iso()
   done
   printf "\n\n"
 
-  for d in ${live_dirs}
-  do
-    wprintf "[+] Installing ${d}, please wait... "
-    cp -aRp ${d} ${CHROOT}
-    wprintf "done\n"
-  done
+  wprintf "[+] Installing /, please wait (it should take some time)... "
+  cp -ax / ${CHROOT}
+  wprintf "done\n"
 
-  # clean up files (it will be created later)
-  rm -rf "${CHROOT}/etc"{group*,passwd*,shadow*,gshadow*}
+  # clean up files
+  wprintf "[+] Cleaning Live Environment files, please wait... "
+  sed -i 's/Storage=volatile/#Storage=auto/' ${CHROOT}/etc/systemd/journald.conf
+  rm -rf ${CHROOT}/etc/udev/rules.d/81-dhcpcd.rules
+  rm -rf ${CHROOT}/etc/systemd/system/{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
+  rm -ff ${CHROOT}/etc/systemd/scripts/choose-mirror
+  rm -ff ${CHROOT}/etc/systemd/system/getty@tty1.service.d/autologin.conf
+  rm -ff ${CHROOT}/root/{.automated_script.sh,.zlogin}
+  rm -ff ${CHROOT}/etc/mkinitcpio-archiso.conf
+  rm -rf ${CHROOT}/etc/initcpio
+  rm -rf ${CHROOT}/etc/{group*,passwd*,shadow*,gshadow*}
+  wprintf "done\n"
 
   return $SUCCESS
 }
