@@ -1895,7 +1895,7 @@ dump_live_iso()
   wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
   printf "\n"
 
-  wprintf "    > fetching total size to tranfer, please wait..."
+  wprintf "    > fetching total size to transfer, please wait..."
   printf "\n"
 
   for d in ${live_dirs}
@@ -1905,7 +1905,7 @@ dump_live_iso()
   done
   printf "\n\n"
 
-  wprintf "[+] Installing /, please wait... "
+  wprintf "[+] Installing /, please wait (it should take some time)... "
   cp -ax / ${CHROOT}
   wprintf "done\n"
 
