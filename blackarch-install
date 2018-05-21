@@ -1946,7 +1946,7 @@ dump_live_iso()
   done
   printf "\n\n"
 
-  wprintf "[+] Installing /, please wait (it should take some time)... "
+  wprintf "[+] Installing /, please wait. This will take some time..."
   cp -ax / ${CHROOT}
   wprintf "done\n"
 
