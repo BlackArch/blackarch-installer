@@ -2077,17 +2077,17 @@ sync_disk()
 self_updater()
 {
   title "Self Updater"
-  wprintf "[+] Checking for a new version of myself... "
+  wprintf "[+] Checking for a new version of myself..."
   printf "\n\n"
 
   pacman -Syy > ${VERBOSE} 2>&1
-  ver="v$(pacman -Ss blackarch-install | head -1 | cut -d ' ' -f 2)"
+  ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2)"
 
   if [ "${ver}" != "${VERSION}" ]
   then
     warn "A new version is available! Going to update myself."
     printf "\n\n"
-    pacman -S --force blackarch-install
+    pacman -S --force blackarch-installer
     wprintf "[+] Updated successfully. Please restart the installer now!"
     sleep 5
     exit $SUCCESS
