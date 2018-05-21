@@ -2086,8 +2086,8 @@ self_updater()
   if [ "${ver}" != "${VERSION}" ]
   then
     warn "A new version is available! Going to update myself."
-    printf "\n\n"
-    pacman -S --force blackarch-installer
+    printf "\n"
+    pacman -S --force --noconfirm blackarch-installer
     wprintf "[+] Updated successfully. Please restart the installer now!"
     sleep 5
     exit $SUCCESS
