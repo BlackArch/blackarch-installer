@@ -1933,9 +1933,9 @@ dump_live_iso()
   title "BlackArch Linux Setup"
 
   wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
-  printf "\n"
+  printf "\n\n"
 
-  wprintf "    > fetching total size to transfer, please wait..."
+  wprintf "[+] Fetching total size to transfer, please wait..."
   printf "\n"
 
   for d in ${live_dirs}
