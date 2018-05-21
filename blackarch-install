@@ -196,6 +196,8 @@ err()
   printf "%s[-] ERROR: %s%s\n" "${RED}" "${@}" "${NC}"
 
   exit $FAILURE
+
+  return $SUCCESS
 }
 
 
@@ -2071,6 +2073,31 @@ sync_disk()
 }
 
 
+# check if new version available. perform self-update and exit
+self_updater()
+{
+  title "Self Updater"
+
+  wprintf "[+] Checking for a new version of myself..."
+  printf "\n\n"
+
+  pacman -Syy > ${VERBOSE} 2>&1
+  ver="v$(pacman -Ss blackarch-install | head -1 | cut -d ' ' -f 2)"
+
+  if [ "${ver}" != "${VERSION}" ]
+  then
+    warn "A new version is available! Going to update myself."
+    printf "\n\n"
+    pacman -S --force blackarch-install
+    wprintf "[+] Updated successfully. Please restart the installer now!"
+    sleep 5
+    exit $SUCCESS
+  fi
+
+  return $SUCCESS
+}
+
+
 # controller and program flow
 main()
 {
@@ -2118,6 +2145,7 @@ main()
     esac
     sleep_clear 1
     check_inet_conn
+    self_updater
     sleep_clear 1
 
     # pacman

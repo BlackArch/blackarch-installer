@@ -24,8 +24,10 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 0.7
 
+  [x] new option: add self-updater
   [.] update: more error handling / check exit satuses and peform/set (default)
       actions if required
+  [x] update: clean-up files after live-iso dump
   [x] update: update grub splash file
   [x] update: add terminus-font for console (consolefont)
   [x] update: really skip network stuff if '4. skip' was selected
