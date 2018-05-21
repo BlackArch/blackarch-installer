@@ -649,7 +649,7 @@ net_conf_wlan()
 
   warn "We need to wait a bit for wpa_supplicant and dhcpcd"
 
-  sleep 8
+  sleep 10
 
   dhcpcd ${dhcp_opts} -i ${NET_IF}
 
