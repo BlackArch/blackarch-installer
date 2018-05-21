@@ -1929,7 +1929,6 @@ update_user_groups()
 dump_live_iso()
 {
   live_dirs="/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
-  foo=5
 
   title "BlackArch Linux Setup"
 
