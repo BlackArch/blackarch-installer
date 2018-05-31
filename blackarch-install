@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.7.1"
+VERSION="v0.7.2"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1575,6 +1575,7 @@ ask_mirror_arch()
     printf "\n"
     warn "This may take time depending on your connection"
     $mirrold
+    pacman -Syy --noconfirm && pacman -S --noconfirm pacman-contrib
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 3 /etc/pacman.d/mirrorlist.backup \
       > /etc/pacman.d/mirrorlist
