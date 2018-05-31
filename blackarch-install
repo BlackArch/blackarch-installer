@@ -1575,7 +1575,8 @@ ask_mirror_arch()
     printf "\n"
     warn "This may take time depending on your connection"
     $mirrold
-    pacman -Syy --noconfirm && pacman -S --noconfirm pacman-contrib
+    pacman -Syy --noconfirm > ${VERBOSE} 2>&1
+    pacman -S --noconfirm pacman-contrib > ${VERBOSE} 2>&1
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 3 /etc/pacman.d/mirrorlist.backup \
       > /etc/pacman.d/mirrorlist
