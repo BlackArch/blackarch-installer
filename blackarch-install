@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.7"
+VERSION="v0.7.1"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -2080,7 +2080,8 @@ self_updater()
   wprintf "[+] Checking for a new version of myself..."
 
   pacman -Syy > ${VERBOSE} 2>&1
-  ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2)"
+  ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
+    cut -d '-' -f 1)"
 
   if [ "${ver}" != "${VERSION}" ]
   then
