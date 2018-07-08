@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.7.4"
+VERSION="v0.7.5"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1067,7 +1067,7 @@ install_base_packages()
   printf "\n\n"
 
   pacstrap ${CHROOT} base base-devel terminus-font
-  chroot ${CHROOT} pacman -Syy --force
+  chroot ${CHROOT} pacman -Syy --overwrite '*'
 
   return $SUCCESS
 }
@@ -1273,7 +1273,7 @@ EOF
 
     if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
     then
-      chroot ${CHROOT} pacman -S grub --noconfirm --force --needed
+      chroot ${CHROOT} pacman -S grub --noconfirm --overwrite '*' --needed
     else
       mkdir -p ${CHROOT}/boot/grub
     fi
@@ -1433,7 +1433,7 @@ setup_extra_packages()
 
   sleep 2
 
-  chroot ${CHROOT} pacman -S --needed --force --noconfirm $(echo ${all})
+  chroot ${CHROOT} pacman -S --needed --overwrite '*' --noconfirm $(echo ${all})
 
   return $SUCCESS
 }
@@ -1669,7 +1669,7 @@ setup_display_manager()
   sleep 2
 
   # install lxdm packages
-  chroot ${CHROOT} pacman -S lxdm --needed --force --noconfirm
+  chroot ${CHROOT} pacman -S lxdm --needed --overwrite '*' --noconfirm
 
   # config files
   cp -r ${BI_PATH}/data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
@@ -1708,7 +1708,7 @@ setup_window_managers()
     echo
     case $choice in
       1)
-        chroot ${CHROOT} pacman -S awesome --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S awesome --needed --overwrite '*' --noconfirm
         cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
           ${CHROOT}/etc/xdg/awesome/.
         cp -r ${BI_PATH}/data/usr/share/awesome/. \
@@ -1719,24 +1719,24 @@ setup_window_managers()
         break
         ;;
       2)
-        chroot ${CHROOT} pacman -S dwm --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S dwm --needed --overwrite '*' --noconfirm
         break
         ;;
       3)
-        chroot ${CHROOT} pacman -S fluxbox --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S fluxbox --needed --overwrite '*' --noconfirm
         cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
           ${CHROOT}/usr/share/fluxbox/.
         break
         ;;
       4)
         chroot ${CHROOT} pacman -S i3-wm i3status i3lock dmenu --needed \
-          --force --noconfirm
+          --overwrite '*' --noconfirm
         cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
           ${CHROOT}/root/.
         break
         ;;
       5)
-        chroot ${CHROOT} pacman -S openbox --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S openbox --needed --overwrite '*' --noconfirm
         cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
           ${CHROOT}/etc/xdg/openbox/.
         cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
@@ -1744,14 +1744,14 @@ setup_window_managers()
         break
         ;;
       6)
-        chroot ${CHROOT} pacman -S spectrwm --needed --force --noconfirm
+        chroot ${CHROOT} pacman -S spectrwm --needed --overwrite '*' --noconfirm
         cp -r ${BI_PATH}/data/etc/spectrwm.conf \
           ${CHROOT}/etc/spectrwm.conf
         break
         ;;
       *)
         chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm i3status \
-          i3lock dwm spectrwm --needed --force --noconfirm
+          i3lock dwm spectrwm --needed --overwrite '*' --noconfirm
 
         # awesome
         cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
@@ -1821,7 +1821,7 @@ setup_vbox_utils()
   printf "\n\n"
 
   chroot ${CHROOT} pacman -S virtualbox-guest-utils \
-    virtualbox-guest-modules-arch --force --needed --noconfirm
+    virtualbox-guest-modules-arch --overwrite '*' --needed --noconfirm
 
   chroot ${CHROOT} systemctl enable vboxservice
   chroot ${CHROOT} systemctl enable vboxadd
@@ -1856,7 +1856,7 @@ setup_vmware_utils()
   printf "\n\n"
 
   chroot ${CHROOT} pacman -S open-vm-tools xf86-video-vmware \
-    xf86-input-vmmouse --force --needed --noconfirm
+    xf86-input-vmmouse --overwrite '*' --needed --noconfirm
 
   chroot ${CHROOT} systemctl enable vmware-vmblock-fuse.service
   chroot ${CHROOT} systemctl enable vmtoolsd.service
@@ -1889,7 +1889,7 @@ setup_blackarch_tools()
 
   if [ ${INSTALL_MODE} = ${INSTALL_REPO} ]
   then
-    chroot ${CHROOT} pacman -S --needed --force blackarch
+    chroot ${CHROOT} pacman -S --needed --overwrite '*' blackarch
   else
     warn "Installing all tools from source via blackman can take hours"
     printf "\n"
@@ -1901,7 +1901,7 @@ setup_blackarch_tools()
       foo=`expr $foo - 1`
     done
     printf "\n"
-    chroot ${CHROOT} pacman -S --needed --force blackman
+    chroot ${CHROOT} pacman -S --needed --overwrite '*' blackman
     blackman -a
   fi
 
@@ -2090,7 +2090,7 @@ self_updater()
     printf "\n\n"
     warn "A new version is available! Going to fuck, err, update myself."
     printf "\n"
-    pacman -S --force --noconfirm blackarch-installer
+    pacman -S --overwrite '*' --noconfirm blackarch-installer
     wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
     chmod +x /usr/share/blackarch-installer/blackarch-install > ${VERBOSE}
     sleep 2
