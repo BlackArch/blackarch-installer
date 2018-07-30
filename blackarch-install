@@ -1503,16 +1503,20 @@ setup_base_system()
 }
 
 
-# update /etc files
+# update /etc files and set up iptables
 update_etc()
 {
   title "BlackArch Linux Setup"
 
-  wprintf "[+] Updating /etc files"
+  wprintf "[+] Updating /etc files and setting up iptables"
   printf "\n\n"
 
   # /etc/*
   cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/. > ${VERBOSE} 2>&1
+  
+  # iptables
+  chroot ${CHROOT} systemctl enable iptables
+  chroot ${CHROOT} systemctl enable ip6tables
 
   return $SUCCESS
 }
