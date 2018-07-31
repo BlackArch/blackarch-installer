@@ -24,6 +24,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: sort installation routines (order of sections)
 
 
+===> 0.8
+
+  [x] update: remove old packages
+  [x] update: add hardening options (iptables + sysctl)
+
+
 ===> 0.7.5
 
   [x] update: replace '--force' with "--overwrite '*'" option

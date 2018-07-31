@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.7.5"
+VERSION="v0.8"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1513,7 +1513,7 @@ update_etc()
 
   # /etc/*
   cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/. > ${VERBOSE} 2>&1
-  
+
   # iptables
   chroot ${CHROOT} systemctl enable iptables
   chroot ${CHROOT} systemctl enable ip6tables
