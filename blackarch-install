@@ -1379,7 +1379,7 @@ setup_user()
 # install extra (missing) packages
 setup_extra_packages()
 {
-  arch="arch-audit arch-install-scripts archlinux-keyring pkgfile"
+  arch="arch-install-scripts archlinux-keyring pkgfile"
 
   bluetooth="bluez bluez-firmware bluez-hid2hci bluez-utils"
 
