@@ -53,7 +53,7 @@ LOCALE=""
 SET_LOCALE="1"
 
 # list locales
-LIST_LOCALES="2"
+LIST_LOCALE="2"
 
 # chosen keymap
 KEYMAP=""
@@ -378,16 +378,16 @@ ask_locale()
 set_locale()
 {
   title "Locale Setup"
-  wprintf "[?] Set locale [en_US.UTF-8 UTF-8]: "
+  wprintf "[?] Set locale [en_US.UTF-8]: "
   read LOCALE
 
   # default locale
   if [ -z "${LOCALE}" ]
   then
     echo
-    warn "Setting default locale: en_US.UTF-8 UTF-8"
+    warn "Setting default locale: en_US.UTF-8"
     sleep 1
-    LOCALE="en_US.UTF-8 UTF-8"
+    LOCALE="en_US.UTF-8"
   fi
   return $SUCCESS
 }
@@ -1176,11 +1176,10 @@ setup_locale()
 
   wprintf "[+] Setting up "${LOCALE}" locale"
   printf "\n\n"
-  sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' "${CHROOT}/etc/locale.gen"
-  sed -i '/'"${LOCALE}"'/s/^#//g' "${CHROOT}/etc/locale.gen"
+  sed -i "s/^#en_US.UTF-8/en_US.UTF-8/" "${CHROOT}/etc/locale.gen"
+  sed -i "s/^#${LOCALE}/${LOCALE}/" "${CHROOT}/etc/locale.gen"
   chroot ${CHROOT} locale-gen
-  echo "LANG="${LOCALE}"" > "${CHROOT}/etc/locale.conf"
-  sed -i 's/ .*//g' /etc/locale.conf
+  echo "LANG=${LOCALE}" > "${CHROOT}/etc/locale.conf"
   echo "KEYMAP=${KEYMAP}" > "${CHROOT}/etc/vconsole.conf"
 
   return $SUCCESS
