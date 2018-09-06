@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v0.8"
+VERSION="v0.9"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -2197,7 +2197,7 @@ main()
   ask_locale
   set_locale
   clear
-  
+
   # keymap
   ask_keymap
   set_keymap
