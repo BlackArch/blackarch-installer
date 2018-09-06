@@ -46,6 +46,15 @@ INSTALL_REPO="1"
 INSTALL_LIVE_ISO="2"
 INSTALL_BLACKMAN="3"
 
+# chosen locale
+LOCALE=""
+
+# set locale
+SET_LOCALE="1"
+
+# list locales
+LIST_LOCALE="2"
+
 # chosen keymap
 KEYMAP=""
 
@@ -327,6 +336,59 @@ ask_install_mode()
   clear
   done
 
+  return $SUCCESS
+}
+
+
+# ask for locale to use
+ask_locale()
+{
+  while [ \
+    "${locale_opt}" != "${SET_LOCALE}" -a \
+    "${locale_opt}" != "${LIST_LOCALE}" ]
+  do
+    title "Locale Setup"
+    wprint "[+] Available locale options:"
+    printf "\n
+  1. Set a locale
+  2. List available locales\n\n"
+    wprintf "[?] Make a choice: "
+    read locale_opt
+    if [ "${locale_opt}" = "${SET_LOCALE}" ]
+    then
+      break
+    elif [ "${locale_opt}" = "${LIST_LOCALE}" ]
+    then
+      less /etc/locale.gen
+      echo
+    else
+      clear
+      continue
+    fi
+    clear
+  done
+
+  clear
+
+  return $SUCCESS
+}
+
+
+# set locale to use
+set_locale()
+{
+  title "Locale Setup"
+  wprintf "[?] Set locale [en_US.UTF-8]: "
+  read LOCALE
+
+  # default locale
+  if [ -z "${LOCALE}" ]
+  then
+    echo
+    warn "Setting default locale: en_US.UTF-8"
+    sleep 1
+    LOCALE="en_US.UTF-8"
+  fi
   return $SUCCESS
 }
 
@@ -1112,11 +1174,12 @@ setup_locale()
 {
   title "Base System Setup"
 
-  wprintf "[+] Setting up default locale (en_US.UTF-8)"
+  wprintf "[+] Setting up "${LOCALE}" locale"
   printf "\n\n"
-
-  sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' "${CHROOT}/etc/locale.gen"
+  sed -i "s/^#en_US.UTF-8/en_US.UTF-8/" "${CHROOT}/etc/locale.gen"
+  sed -i "s/^#${LOCALE}/${LOCALE}/" "${CHROOT}/etc/locale.gen"
   chroot ${CHROOT} locale-gen
+  echo "LANG=${LOCALE}" > "${CHROOT}/etc/locale.conf"
   echo "KEYMAP=${KEYMAP}" > "${CHROOT}/etc/vconsole.conf"
 
   return $SUCCESS
@@ -2118,6 +2181,11 @@ main()
   # install mode
   ask_install_mode
 
+  # locale
+  ask_locale
+  set_locale
+  clear
+  
   # keymap
   ask_keymap
   set_keymap
