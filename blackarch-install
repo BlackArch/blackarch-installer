@@ -1394,7 +1394,7 @@ setup_extra_packages()
   xorg-fonts-alias xorg-fonts-misc xorg-mkfontscale xorg-mkfontdir
   ttf-indic-otf"
 
-  kernel="linux-api-headers linux-headers linux-hardened linux-hardened-headers usbctl"
+  kernel="linux-api-headers linux-headers"
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc btrfs-progs cmake
   ctags expac feh flashplugin git gpm grml-zsh-config haveged hdparm htop
