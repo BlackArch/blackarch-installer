@@ -24,6 +24,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: sort installation routines (order of sections)
 
 
+===> 0.9.1
+
+  [x] bugfix: fix a wrong wprint() call
+
+
 ===> 0.9
 
   [x] update: remove not needed packages
