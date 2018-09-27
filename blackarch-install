@@ -348,7 +348,7 @@ ask_locale()
     "${locale_opt}" != "${LIST_LOCALE}" ]
   do
     title "Locale Setup"
-    wprint "[+] Available locale options:"
+    wprintf "[+] Available locale options:"
     printf "\n
   1. Set a locale
   2. List available locales\n\n"
