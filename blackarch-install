@@ -1466,9 +1466,9 @@ setup_extra_packages()
   unace unrar unzip usb_modeswitch zip zsh"
 
   network="wicd-gtk wicd bridge-utils darkhttpd atftp bind-tools dnsmasq
-  dhclient dnsutils gnu-netcat ipw2100-fw ipw2200-fw lftp nfs-utils ntp
-  openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog iw
-  wireless_tools wpa_actiond wvdial xl2tpd wpa_supplicant"
+  dhclient dnscrypt-proxy dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw lftp
+  nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog
+  iw wireless_tools wpa_actiond wvdial xl2tpd wpa_supplicant"
 
   xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
   xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
