@@ -24,6 +24,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: sort installation routines (order of sections)
 
 
+===> 0.9.3
+
+  [x] version bump only
+
+
 ===> 0.9.2
 
   [x] update: remove/add new packages to extra.
