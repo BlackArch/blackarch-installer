@@ -1311,8 +1311,6 @@ setup_bootloader()
     chroot ${CHROOT} bootctl install
     uuid="$(blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2)"
 
-    mkdir -p "${CHROOT}/boot/loader/entries/"
-
     if [ ${LUKS} = ${TRUE} ]
     then
       cat >> "${CHROOT}/boot/loader/entries/arch.conf" << EOF
