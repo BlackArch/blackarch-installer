@@ -24,6 +24,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: sort installation routines (order of sections)
 
 
+===> 0.9.5
+
+  [x] github commit id: f0d668b3f174e26b2b8a4f2bc06e858469c99f90
+  [x] github coomit id: d22a63e02f2dd6b8348377cbb14ee3943835cd9f
+
+
 ===> 0.9.4
 
   [x] Revert "blackarch-install: added mkdir."
