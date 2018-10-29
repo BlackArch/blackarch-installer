@@ -442,13 +442,12 @@ set_keymap()
     warn "Setting default keymap: US"
     sleep 1
     KEYMAP="us"
+    localectl set-keymap --no-convert "us"
+    loadkeys "us"
   fi
-
+  check $? "setting keymap" 
   localectl set-keymap --no-convert "${KEYMAP}"
   loadkeys "${KEYMAP}" > ${VERBOSE} 2>&1
-  check $? "setting keymap" "Choosing default for you: US"
-  localectl set-keymap --no-conver "us"
-  loadkeys "us"
 
   return $SUCCESS
 }
