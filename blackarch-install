@@ -441,7 +441,6 @@ set_keymap()
     echo
     warn "Setting default keymap: US"
     sleep 1
-    KEYMAP="us"
     localectl set-keymap --no-convert "us"
     loadkeys "us"
   fi
