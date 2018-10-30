@@ -7,10 +7,9 @@ ChangeLog and TODO list for blackarch-installer
 [x] finished task
 
 
-===> 0.x
+===> 1.x.x
 
   [ ] new option: add optional verbose / quiet mode
-  [ ] new option: blackarch-groups optionally rather than all/single tools
   [ ] new option: if possible add 'skip' for each asking sections
   [ ] new option: add resume functionality
   [ ] new option: add restart installer option
@@ -20,8 +19,14 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add progressbar for offline installation mode
   [ ] update: check for available disk space before starting to install pkgs
+
+
+===> 1.0
+
   [ ] update: add help text for each section and sub-section
   [ ] update: sort installation routines (order of sections)
+  [.] bugfix: test reported bugs, find bugs, fix them
+  [x] new option: blackarch-groups optionally rather than all/single tools
 
 
 ===> 0.9.5
