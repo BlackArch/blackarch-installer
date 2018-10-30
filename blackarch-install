@@ -39,105 +39,105 @@ BLINK="$(tput blink)"
 NC="$(tput sgr0)"
 
 # installation mode
-INSTALL_MODE=""
+INSTALL_MODE=''
 
 # install modes
-INSTALL_REPO="1"
-INSTALL_LIVE_ISO="2"
-INSTALL_BLACKMAN="3"
+INSTALL_REPO='1'
+INSTALL_LIVE_ISO='2'
+INSTALL_BLACKMAN='3'
 
 # chosen locale
-LOCALE=""
+LOCALE=''
 
 # set locale
-SET_LOCALE="1"
+SET_LOCALE='1'
 
 # list locales
-LIST_LOCALE="2"
+LIST_LOCALE='2'
 
 # chosen keymap
-KEYMAP=""
+KEYMAP=''
 
 # set keymap
-SET_KEYMAP="1"
+SET_KEYMAP='1'
 
 # list keymaps
-LIST_KEYMAP="2"
+LIST_KEYMAP='2'
 
 # network interfaces
-NET_IFS=""
+NET_IFS=''
 
 # chosen network interface
-NET_IF=""
+NET_IF=''
 
 # network configuration mode
-NET_CONF_MODE=""
+NET_CONF_MODE=''
 
 # network configuration modes
-NET_CONF_AUTO="1"
-NET_CONF_WLAN="2"
-NET_CONF_MANUAL="3"
-NET_CONF_SKIP="4"
+NET_CONF_AUTO='1'
+NET_CONF_WLAN='2'
+NET_CONF_MANUAL='3'
+NET_CONF_SKIP='4'
 
 # hostname
-HOST_NAME=""
+HOST_NAME=''
 
 # host ipv4 address
-HOST_IPV4=""
+HOST_IPV4=''
 
 # gateway ipv4 address
-GATEWAY=""
+GATEWAY=''
 
 # subnet mask
-SUBNETMASK=""
+SUBNETMASK=''
 
 # broadcast address
-BROADCAST=""
+BROADCAST=''
 
 # nameserver address
-NAMESERVER=""
+NAMESERVER=''
 
 # LUKS flag
-LUKS=""
+LUKS=''
 
 # avalable hard drive
-HD_DEVS=""
+HD_DEVS=''
 
 # chosen hard drive device
-HD_DEV=""
+HD_DEV=''
 
 # partition label: gpt or msdos
-PART_LABEL=""
+PART_LABEL=''
 
 # boot partition
-BOOT_PART=""
+BOOT_PART=''
 
 # root partition
-ROOT_PART=""
+ROOT_PART=''
 
 # crypted root
-CRYPT_ROOT="r00t"
+CRYPT_ROOT='r00t'
 
 # swap partition
-SWAP_PART=""
+SWAP_PART=''
 
 # boot fs type - default: ext4
-BOOT_FS_TYPE=""
+BOOT_FS_TYPE=''
 
 # root fs type - default: ext4
-ROOT_FS_TYPE=""
+ROOT_FS_TYPE=''
 
 # chroot directory / blackarch linux installation
-CHROOT="/mnt"
+CHROOT='/mnt'
 
 # normal system user
-NORMAL_USER=""
+NORMAL_USER=''
 
 # default BlackArch Linux repository URL
-BA_REPO_URL='https://www.mirrorservice.org/sites/blackarch.org/blackarch/$repo/os/$arch'
+BA_REPO_URL='https://www.blackarch.org/blackarch/$repo/os/$arch'
 
 # default ArchLinux repository URL
-AR_REPO_URL="https://archlinux.surlyjake.com/archlinux/\$repo/os/\$arch"
+AR_REPO_URL='https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
 AR_REPO_URL="${AR_REPO_URL} http://mirrors.evowise.com/archlinux/\$repo/os/\$arch"
 AR_REPO_URL="${AR_REPO_URL} http://mirror.rackspace.com/archlinux/\$repo/os/\$arch"
 
