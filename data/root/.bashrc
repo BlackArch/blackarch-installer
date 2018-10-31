@@ -15,12 +15,19 @@ export LD_PRELOAD=""
 export EDITOR="vim"
 
 # alias
-alias ls="ls --color"
-alias vi="vim"
-alias shred="shred -zf"
-alias python="python2"
-alias wget="wget -U 'noleak'"
+alias c="clear"
+alias cd..="cd .."
 alias curl="curl --user-agent 'noleak'"
+alias l="ls -ahls --color"
+alias ls="ls --color"
+alias mount="mount | column -t"
+alias python="python2"
+alias r="reset"
+alias shred="shred -zf"
+alias sl="ls --color"
+alias vi="vim"
+alias wget="wget -c --user-agent 'noleak'"
+alias www="python -m SimpleHTTPServer"
 
 # source files
 [ -r /usr/share/bash-completion/completions ] &&
