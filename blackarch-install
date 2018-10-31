@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v1.0-dev"
+VERSION="v1.0.0-dev"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -138,8 +138,8 @@ BA_REPO_URL='https://www.blackarch.org/blackarch/$repo/os/$arch'
 
 # default ArchLinux repository URL
 AR_REPO_URL='https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
-AR_REPO_URL="${AR_REPO_URL} http://mirrors.evowise.com/archlinux/\$repo/os/\$arch"
-AR_REPO_URL="${AR_REPO_URL} http://mirror.rackspace.com/archlinux/\$repo/os/\$arch"
+AR_REPO_URL="$AR_REPO_URL http://mirrors.evowise.com/archlinux/\$repo/os/\$arch"
+AR_REPO_URL="$AR_REPO_URL http://mirror.rackspace.com/archlinux/\$repo/os/\$arch"
 
 # X (display + window managers ) setup - default: false
 X_SETUP=$FALSE
@@ -173,7 +173,7 @@ check()
   if [ $es -ne 0 ]
   then
     echo
-    warn "Something went wrong with ${func}. ${info}."
+    warn "Something went wrong with $func. $info."
     sleep 5
   fi
 }
@@ -185,7 +185,7 @@ wprintf()
   fmt="${1}"
 
   shift
-  printf "%s${fmt}%s" "${WHITE}" "${@}" "${NC}"
+  printf "%s$fmt%s" "$WHITE" "$@" "$NC"
 
   return $SUCCESS
 }
@@ -194,7 +194,7 @@ wprintf()
 # print warning
 warn()
 {
-  printf "%s[!] WARNING: %s%s\n" "${YELLOW}" "${@}" "${NC}"
+  printf "%s[!] WARNING: %s%s\n" "$YELLOW" "$@" "$NC"
 
   return $SUCCESS
 }
@@ -203,7 +203,7 @@ warn()
 # print error and exit
 err()
 {
-  printf "%s[-] ERROR: %s%s\n" "${RED}" "${@}" "${NC}"
+  printf "%s[-] ERROR: %s%s\n" "$RED" "$@" "$NC"
 
   exit $FAILURE
 
@@ -215,15 +215,15 @@ err()
 banner()
 {
   columns="$(tput cols)"
-  str="--==[ blackarch-installer ${VERSION} ]==--"
+  str="--==[ blackarch-installer $VERSION ]==--"
 
   printf "${REDB}%*s${NC}\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
 
-  echo "${str}" |
+  echo "$str" |
   while IFS= read -r line
   do
-    printf "%s%*s\n%s" "${WHITEB}" $(( (${#line} + columns) / 2)) \
-      "$line" "${NC}"
+    printf "%s%*s\n%s" "$WHITEB" $(( (${#line} + columns) / 2)) \
+      "$line" "$NC"
   done
 
   printf "${REDB}%*s${NC}\n\n\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
@@ -259,13 +259,13 @@ sleep_clear()
 # confirm user inputted yYnN
 confirm()
 {
-  header="${1}"
-  ask="${2}"
+  header="$1"
+  ask="$2"
 
   while true
   do
-    title "${header}"
-    wprintf "${ask}"
+    title "$header"
+    wprintf "$ask"
     read input
     case $input in
       y|Y|yes|YES|Yes) return $TRUE ;;
@@ -301,7 +301,7 @@ check_env()
 # check user id
 check_uid()
 {
-  if [ "$(id -u)" -ne 0 ]
+  if [ "$(id -u)" != "0" ]
   then
     err "You must be root to run the BlackArch installer!"
   fi
@@ -314,9 +314,9 @@ check_uid()
 ask_install_mode()
 {
   while [ \
-    "${INSTALL_MODE}" != "${INSTALL_REPO}" -a \
-    "${INSTALL_MODE}" != "${INSTALL_BLACKMAN}" -a \
-    "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    "$INSTALL_MODE" != "$INSTALL_REPO" -a \
+    "$INSTALL_MODE" != "$INSTALL_BLACKMAN" -a \
+    "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   do
     title "Welcome to the BlackArch Linux installer!"
     wprintf "[+] Available installation modes:"
@@ -326,9 +326,9 @@ ask_install_mode()
   3. Install from sources using blackman (online)\n\n"
     wprintf "[?] Choose an installation mode: "
     read INSTALL_MODE
-    if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+    if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
     then
-      if [ "${ISO_TYPE}" = "net" ]
+      if [ "$ISO_TYPE" = "net" ]
       then
         err "WTF, Live-ISO mode with Netinstall? Nope, sorry!"
       fi
@@ -344,8 +344,8 @@ ask_install_mode()
 ask_locale()
 {
   while [ \
-    "${locale_opt}" != "${SET_LOCALE}" -a \
-    "${locale_opt}" != "${LIST_LOCALE}" ]
+    "$locale_opt" != "$SET_LOCALE" -a \
+    "$locale_opt" != "$LIST_LOCALE" ]
   do
     title "Locale Setup"
     wprintf "[+] Available locale options:"
@@ -354,10 +354,10 @@ ask_locale()
   2. List available locales\n\n"
     wprintf "[?] Make a choice: "
     read locale_opt
-    if [ "${locale_opt}" = "${SET_LOCALE}" ]
+    if [ "$locale_opt" = "$SET_LOCALE" ]
     then
       break
-    elif [ "${locale_opt}" = "${LIST_LOCALE}" ]
+    elif [ "$locale_opt" = "$LIST_LOCALE" ]
     then
       less /etc/locale.gen
       echo
@@ -382,7 +382,7 @@ set_locale()
   read LOCALE
 
   # default locale
-  if [ -z "${LOCALE}" ]
+  if [ -z "$LOCALE" ]
   then
     echo
     warn "Setting default locale: en_US.UTF-8"
@@ -397,8 +397,8 @@ set_locale()
 ask_keymap()
 {
   while [ \
-    "${keymap_opt}" != "${SET_KEYMAP}" -a \
-    "${keymap_opt}" != "${LIST_KEYMAP}" ]
+    "$keymap_opt" != "$SET_KEYMAP" -a \
+    "$keymap_opt" != "$LIST_KEYMAP" ]
   do
     title "Keymap Setup"
     wprintf "[+] Available keymap options:"
@@ -408,10 +408,10 @@ ask_keymap()
     wprintf "[?] Make a choice: "
     read keymap_opt
 
-    if [ "${keymap_opt}" = "${SET_KEYMAP}" ]
+    if [ "$keymap_opt" = "$SET_KEYMAP" ]
     then
       break
-    elif [ "${keymap_opt}" = "${LIST_KEYMAP}" ]
+    elif [ "$keymap_opt" = "$LIST_KEYMAP" ]
     then
       localectl list-keymaps
       echo
@@ -436,7 +436,7 @@ set_keymap()
   read KEYMAP
 
   # default keymap
-  if [ -z "${KEYMAP}" ]
+  if [ -z "$KEYMAP" ]
   then
     echo
     warn "Setting default keymap: US"
@@ -446,7 +446,7 @@ set_keymap()
   fi
   check $? "setting keymap"
   localectl set-keymap --no-convert "${KEYMAP}"
-  loadkeys "${KEYMAP}" > ${VERBOSE} 2>&1
+  loadkeys "$KEYMAP" > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -455,11 +455,11 @@ set_keymap()
 # enable multilib in pacman.conf if x86_64 present
 enable_pacman_multilib()
 {
-  path="${1}"
+  path="$1"
 
-  if [ "${path}" = "chroot" ]
+  if [ "$path" = "chroot" ]
   then
-    path="${CHROOT}"
+    path="$CHROOT"
   else
     path=""
   fi
@@ -470,15 +470,15 @@ enable_pacman_multilib()
   then
     wprintf "[+] Enabling multilib support"
     printf "\n\n"
-    if grep -q "#\[multilib\]" ${path}/etc/pacman.conf
+    if grep -q "#\[multilib\]" "$path/etc/pacman.conf"
     then
       # it exists but commented
-      sed -i '/\[multilib\]/{ s/^#//; n; s/^#//; }' ${path}/etc/pacman.conf
-    elif ! grep -q "\[multilib\]" ${path}/etc/pacman.conf
+      sed -i '/\[multilib\]/{ s/^#//; n; s/^#//; }' "$path/etc/pacman.conf"
+    elif ! grep -q "\[multilib\]" "$path/etc/pacman.conf"
     then
       # it does not exist at all
       printf "[multilib]\nInclude = /etc/pacman.d/mirrorlist\n" \
-        >> ${path}/etc/pacman.conf
+        >> "$path/etc/pacman.conf"
     fi
   fi
 
@@ -489,11 +489,11 @@ enable_pacman_multilib()
 # enable color mode in pacman.conf
 enable_pacman_color()
 {
-  path="${1}"
+  path="$1"
 
-  if [ "${path}" = "chroot" ]
+  if [ "$path" = "chroot" ]
   then
-    path="${CHROOT}"
+    path="$CHROOT"
   else
     path=""
   fi
@@ -503,7 +503,7 @@ enable_pacman_color()
   wprintf "[+] Enabling color mode"
   printf "\n\n"
 
-  sed -i 's/^#Color/Color/' ${path}/etc/pacman.conf
+  sed -i 's/^#Color/Color/' "$path/etc/pacman.conf"
 
   return $SUCCESS
 }
@@ -542,7 +542,7 @@ update_pacman()
 # ask user for hostname
 ask_hostname()
 {
-  while [ -z "${HOST_NAME}" ]
+  while [ -z "$HOST_NAME" ]
   do
     title "Network Setup"
     wprintf "[?] Set your hostname: "
@@ -570,14 +570,14 @@ ask_net_if()
     title "Network Setup"
     wprintf "[+] Available network interfaces:"
     printf "\n\n"
-    for i in ${NET_IFS}
+    for i in $NET_IFS
     do
-      echo "    > ${i}"
+      echo "    > $i"
     done
     echo
     wprintf "[?] Please choose a network interface: "
     read NET_IF
-    if echo ${NET_IFS} | grep "\<${NET_IF}\>" > /dev/null
+    if echo $NET_IFS | grep "\<$NET_IF\>" > /dev/null
     then
       clear
       break
@@ -593,10 +593,10 @@ ask_net_if()
 ask_net_conf_mode()
 {
   while [ \
-    "${NET_CONF_MODE}" != "${NET_CONF_AUTO}" -a \
-    "${NET_CONF_MODE}" != "${NET_CONF_WLAN}" -a \
-    "${NET_CONF_MODE}" != "${NET_CONF_MANUAL}" -a \
-    "${NET_CONF_MODE}" != "${NET_CONF_SKIP}" ]
+    "$NET_CONF_MODE" != "$NET_CONF_AUTO" -a \
+    "$NET_CONF_MODE" != "$NET_CONF_WLAN" -a \
+    "$NET_CONF_MODE" != "$NET_CONF_MANUAL" -a \
+    "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
   do
     title "Network Setup"
     wprintf "[+] Network interface configuration:"
@@ -618,11 +618,11 @@ ask_net_conf_mode()
 ask_net_addr()
 {
   while [ \
-    "${HOST_IPV4}" = "" -o "${GATEWAY}" = "" -o "${SUBNETMASK}" = "" \
-    -o "${BROADCAST}" = "" -o "${NAMESERVER}" = "" ]
+    "$HOST_IPV4" = "" -o "$GATEWAY" = "" -o "$SUBNETMASK" = "" \
+    -o "$BROADCAST" = "" -o "$NAMESERVER" = "" ]
   do
     title "Network Setup"
-    wprintf "[+] Configuring network interface '${NET_IF}' via USER: "
+    wprintf "[+] Configuring network interface '$NET_IF' via USER: "
     printf "\n
   > Host ipv4
   > Gateway ipv4
@@ -650,11 +650,11 @@ ask_net_addr()
 # manual network interface configuration
 net_conf_manual()
 {
-  ip addr flush dev ${NET_IF}
-  ip link set ${NET_IF} up
-  ip addr add ${HOST_IPV4}/${SUBNETMASK} broadcast ${BROADCAST} dev ${NET_IF}
-  ip route add default via ${GATEWAY}
-  echo "nameserver ${NAMESERVER}" > /etc/resolv.conf
+  ip addr flush dev $NET_IF
+  ip link set $NET_IF up
+  ip addr add $HOST_IPV4/$SUBNETMASK broadcast $BROADCAST dev $NET_IF
+  ip route add default via $GATEWAY
+  echo "nameserver $NAMESERVER" > /etc/resolv.conf
 
   return $SUCCESS
 }
@@ -666,10 +666,10 @@ net_conf_auto()
   opts="-h noleak -i noleak -v ,noleak -I noleak"
 
   title "Network Setup"
-  wprintf "[+] Configuring network interface '${NET_IF}' via DHCP: "
+  wprintf "[+] Configuring network interface '$NET_IF' via DHCP: "
   printf "\n\n"
 
-  dhcpcd ${opts} -i ${NET_IF}
+  dhcpcd $opts -i $NET_IF
 
   return $SUCCESS
 }
@@ -678,10 +678,10 @@ net_conf_auto()
 # ask for wlan data (ssid, wpa passphrase, etc.)
 ask_wlan_data()
 {
-  while [ "${WLAN_SSID}" = "" -o "${WLAN_PASSPHRASE}" = "" ]
+  while [ "$WLAN_SSID" = "" -o "$WLAN_PASSPHRASE" = "" ]
   do
     title "Network Setup"
-    wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
+    wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
     printf "\n
   > W-LAN SSID
   > WPA Passphrase (will not echo)
@@ -704,17 +704,17 @@ net_conf_wlan()
   dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak"
 
   title "Network Setup"
-  wprintf "[+] Configuring network interface '${NET_IF}' via W-LAN + DHCP: "
+  wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
   printf "\n\n"
 
-  wpa_passphrase "${WLAN_SSID}" "${WLAN_PASSPHRASE}" > ${wpasup}
-  wpa_supplicant -B -c ${wpasup} -i ${NET_IF}
+  wpa_passphrase "$WLAN_SSID" "$WLAN_PASSPHRASE" > $wpasup
+  wpa_supplicant -B -c $wpasup -i $NET_IF
 
   warn "We need to wait a bit for wpa_supplicant and dhcpcd"
 
   sleep 10
 
-  dhcpcd ${dhcp_opts} -i ${NET_IF}
+  dhcpcd $dhcp_opts -i $NET_IF
 
   sleep 10
 
@@ -741,7 +741,7 @@ check_inet_conn()
 # ask user for luks encrypted partition
 ask_luks()
 {
-  while [ "${LUKS}" = "" ]
+  while [ "$LUKS" = "" ]
   do
     if confirm "Hard Drive Setup" "[?] Full encrypted root [y/n]: "
     then
@@ -778,16 +778,16 @@ ask_hd_dev()
     wprintf "[+] Available hard drives for installation:"
     printf "\n\n"
 
-    for i in ${HD_DEVS}
+    for i in $HD_DEVS
     do
       echo "    > ${i}"
     done
     echo
     wprintf "[?] Please choose a device: "
     read HD_DEV
-    if echo ${HD_DEVS} | grep "\<${HD_DEV}\>" > /dev/null
+    if echo $HD_DEVS | grep "\<$HD_DEV\>" > /dev/null
     then
-      HD_DEV="/dev/${HD_DEV}"
+      HD_DEV="/dev/$HD_DEV"
       clear
       break
     fi
@@ -822,10 +822,10 @@ zero_part()
   if confirm "Hard Drive Setup" "[?] Start with an in-memory zeroed \
 partition table [y/n]: "
   then
-    cfdisk -z "${HD_DEV}"
+    cfdisk -z "$HD_DEV"
     sync
   else
-    cfdisk "${HD_DEV}"
+    cfdisk "$HD_DEV"
     sync
   fi
 
@@ -836,7 +836,7 @@ partition table [y/n]: "
 # get partition label
 get_partition_label()
 {
-  PART_LABEL="$(parted -m ${HD_DEV} print | grep ${HD_DEV} | cut -d ':' -f 6)"
+  PART_LABEL="$(parted -m $HD_DEV print | grep $HD_DEV | cut -d ':' -f 6)"
 
   return $SUCCESS
 }
@@ -848,18 +848,18 @@ ask_partitions()
   partitions=$(ls ${HD_DEV}* | grep -v "${HD_DEV}\>")
 
   while [ \
-    "${BOOT_PART}" = "" -o \
-    "${ROOT_PART}" = "" -o \
-    "${BOOT_FS_TYPE}" = "" -o \
-    "${ROOT_FS_TYPE}" = "" ]
+    "$BOOT_PART" = "" -o \
+    "$ROOT_PART" = "" -o \
+    "$BOOT_FS_TYPE" = "" -o \
+    "$ROOT_FS_TYPE" = "" ]
   do
     title "Hard Drive Setup"
     wprintf "[+] Created partitions:"
     printf "\n\n"
 
-    for i in ${partitions}
+    for i in $partitions
     do
-      echo "    > ${i}"
+      echo "    > $i"
     done
     echo
 
@@ -874,7 +874,7 @@ ask_partitions()
     wprintf "[?] Swap parition (/dev/sdXY - empty for none): "
     read SWAP_PART
 
-    if [ "${SWAP_PART}" = "" ]
+    if [ "$SWAP_PART" = "" ]
     then
       SWAP_PART="none"
     fi
@@ -895,17 +895,17 @@ print_partitions()
     title "Hard Drive Setup"
     wprintf "[+] Current Partition table"
     printf "\n
-  > /boot   : ${BOOT_PART} (${BOOT_FS_TYPE})
-  > /       : ${ROOT_PART} (${ROOT_FS_TYPE})
-  > swap    : ${SWAP_PART} (swap)
+  > /boot   : $BOOT_PART ($BOOT_FS_TYPE)
+  > /       : $ROOT_PART ($ROOT_FS_TYPE)
+  > swap    : $SWAP_PART (swap)
   \n"
     wprintf "[?] Partition table correct [y/n]: "
     read i
-    if [ "${i}" = "y" -o "${i}" = "Y" ]
+    if [ "$i" = "y" -o "$i" = "Y" ]
     then
       clear
       break
-    elif [ "${i}" = "n" -o "${i}" = "N" ]
+    elif [ "$i" = "n" -o "$i" = "N" ]
     then
       echo
       err "Hard Drive Setup aborted."
@@ -939,14 +939,14 @@ No crying afterwards? [y/n]: "
 # create LUKS encrypted partition
 make_luks_partition()
 {
-  part="${1}"
+  part="$1"
 
   title "Hard Drive Setup"
 
   wprintf "[+] Creating LUKS partition"
   printf "\n\n"
 
-  cryptsetup -q -y -v -s 512 luksFormat "${part}" ||
+  cryptsetup -q -y -v -c aes-xts-plain64 -s 256 luksFormat "$part" ||
     err "Could not create filesystem"
 
   return $SUCCESS
@@ -956,14 +956,14 @@ make_luks_partition()
 # open LUKS partition
 open_luks_partition()
 {
-  part="${1}"
-  name="${2}"
+  part="$1"
+  name="$2"
 
   title "Hard Drive Setup"
 
   wprintf "[+] Opening LUKS partition"
   printf "\n\n"
-  cryptsetup open "${part}" "${name}"
+  cryptsetup open "$part" "$name"
 
   return $SUCCESS
 }
@@ -976,7 +976,7 @@ make_swap_partition()
 
   wprintf "[+] Creating SWAP partition"
   printf "\n\n"
-  mkswap "${SWAP_PART}" || err "Could not create filesystem"
+  mkswap "$SWAP_PART" || err "Could not create filesystem"
 
   return $SUCCESS
 }
@@ -985,21 +985,21 @@ make_swap_partition()
 # make and format root partition
 make_root_partition()
 {
-  if [ ${LUKS} = ${TRUE} ]
+  if [ $LUKS = $TRUE ]
   then
-    make_luks_partition "${ROOT_PART}"
+    make_luks_partition "$ROOT_PART"
     sleep_clear 1
-    open_luks_partition "${ROOT_PART}" "${CRYPT_ROOT}"
+    open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
     sleep_clear 1
     title "Hard Drive Setup"
     wprintf "[+] Creating encrypted ROOT partition"
     printf "\n\n"
-    if [ "${ROOT_FS_TYPE}" = "btrfs" ]
+    if [ "$ROOT_FS_TYPE" = "btrfs" ]
     then
-      mkfs.${ROOT_FS_TYPE} -f "/dev/mapper/${CRYPT_ROOT}" ||
+      mkfs.$ROOT_FS_TYPE -f "/dev/mapper/$CRYPT_ROOT" ||
         err "Could not create filesystem"
     else
-      mkfs.${ROOT_FS_TYPE} -F "/dev/mapper/${CRYPT_ROOT}" ||
+      mkfs.$ROOT_FS_TYPE -F "/dev/mapper/$CRYPT_ROOT" ||
         err "Could not create filesystem"
     fi
     sleep_clear 1
@@ -1007,12 +1007,12 @@ make_root_partition()
     title "Hard Drive Setup"
     wprintf "[+] Creating ROOT partition"
     printf "\n\n"
-    if [ "${ROOT_FS_TYPE}" = "btrfs" ]
+    if [ "$ROOT_FS_TYPE" = "btrfs" ]
     then
-      mkfs.${ROOT_FS_TYPE} -f ${ROOT_PART} ||
+      mkfs.$ROOT_FS_TYPE -f $ROOT_PART ||
         err "Could not create filesystem"
     else
-      mkfs.${ROOT_FS_TYPE} -F ${ROOT_PART} ||
+      mkfs.$ROOT_FS_TYPE -F $ROOT_PART ||
         err "Could not create filesystem"
     fi
     sleep_clear 1
@@ -1029,11 +1029,11 @@ make_boot_partition()
 
   wprintf "[+] Creating BOOT partition"
   printf "\n\n"
-  if [ "${PART_LABEL}" = "gpt" ]
+  if [ "$PART_LABEL" = "gpt" ]
   then
-    mkfs.fat -F32 ${BOOT_PART} || err "Could not create filesystem"
+    mkfs.fat -F32 $BOOT_PART || err "Could not create filesystem"
   else
-    mkfs.${BOOT_FS_TYPE} -F ${BOOT_PART} ||
+    mkfs.$BOOT_FS_TYPE -F $BOOT_PART ||
       err "Could not create filesystem"
   fi
 
@@ -1050,7 +1050,7 @@ make_partitions()
   make_root_partition
   sleep_clear 1
 
-  if [ "${SWAP_PART}" != "none" ]
+  if [ "$SWAP_PART" != "none" ]
   then
     make_swap_partition
     sleep_clear 1
@@ -1069,19 +1069,19 @@ mount_filesystems()
   printf "\n\n"
 
   # ROOT
-  if [ ${LUKS} = ${TRUE} ]
+  if [ $LUKS = $TRUE ]
   then
-    mount "/dev/mapper/${CRYPT_ROOT}" ${CHROOT} > /dev/null 2>&1
+    mount "/dev/mapper/$CRYPT_ROOT" $CHROOT > /dev/null 2>&1
   else
-    mount ${ROOT_PART} ${CHROOT} > /dev/null 2>&1
+    mount $ROOT_PART $CHROOT > /dev/null 2>&1
   fi
 
   # BOOT
-  mkdir ${CHROOT}/boot > /dev/null 2>&1
-  mount ${BOOT_PART} "${CHROOT}/boot" > /dev/null 2>&1
+  mkdir "$CHROOT/boot" > /dev/null 2>&1
+  mount $BOOT_PART "$CHROOT/boot" > /dev/null 2>&1
 
   # SWAP
-  swapon "${SWAP_PART}" > /dev/null 2>&1
+  swapon $SWAP_PART > /dev/null 2>&1
 
   return $SUCCESS
 }
@@ -1090,9 +1090,9 @@ mount_filesystems()
 # unmount filesystems
 umount_filesystems()
 {
-  routine="${1}"
+  routine="$1"
 
-  if [ "${routine}" = "harddrive" ]
+  if [ "$routine" = "harddrive" ]
   then
     title "Hard Drive Setup"
   else
@@ -1103,16 +1103,16 @@ umount_filesystems()
   printf "\n\n"
 
   # hardcore style ... TODO: tune this
-  umount -Rf ${CHROOT} > ${VERBOSE} 2>&1
-  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
-  umount -Rf "${CHROOT}/proc" > ${VERBOSE} 2>&1
-  umount -Rf "${CHROOT}/sys" > ${VERBOSE} 2>&1
-  umount -Rf "${CHROOT}/dev" > ${VERBOSE} 2>&1
-  umount -Rf "${BOOT_PART}" > ${VERBOSE} 2>&1
-  umount -Rf "${ROOT_PART}" > ${VERBOSE} 2>&1
-  umount -Rf "/dev/mapper/${CRYPT_ROOT}" > ${VERBOSE} 2>&1
-  cryptsetup luksClose "${CRYPT_ROOT}" > ${VERBOSE} 2>&1
-  swapoff "${SWAP_PART}" > ${VERBOSE} 2>&1
+  umount -Rf $CHROOT > $VERBOSE 2>&1
+  umount -Rf "$BOOT_PART" > $VERBOSE 2>&1
+  umount -Rf "$CHROOT/proc" > $VERBOSE 2>&1
+  umount -Rf "$CHROOT/sys" > $VERBOSE 2>&1
+  umount -Rf "$CHROOT/dev" > $VERBOSE 2>&1
+  umount -Rf "$BOOT_PART" > $VERBOSE 2>&1
+  umount -Rf "$ROOT_PART" > $VERBOSE 2>&1
+  umount -Rf "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1
+  cryptsetup luksClose "$CRYPT_ROOT" > $VERBOSE 2>&1
+  swapoff $SWAP_PART > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1126,8 +1126,8 @@ install_base_packages()
   wprintf "[+] Installing ArchLinux base packages"
   printf "\n\n"
 
-  pacstrap ${CHROOT} base base-devel terminus-font
-  chroot ${CHROOT} pacman -Syy --overwrite '*'
+  pacstrap $CHROOT base base-devel terminus-font
+  chroot $CHROOT pacman -Syy --overwrite '*'
 
   return $SUCCESS
 }
@@ -1141,8 +1141,8 @@ setup_resolvconf()
   wprintf "[+] Setting up /etc/resolv.conf"
   printf "\n\n"
 
-  mkdir -p "${CHROOT}/etc/" > ${VERBOSE} 2>&1
-  cp -L "/etc/resolv.conf" "${CHROOT}/etc/resolv.conf" > ${VERBOSE} 2>&1
+  mkdir -p "$CHROOT/etc/" > $VERBOSE 2>&1
+  cp -L /etc/resolv.conf "$CHROOT/etc/resolv.conf" > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1156,11 +1156,11 @@ setup_fstab()
   wprintf "[+] Setting up /etc/fstab"
   printf "\n\n"
 
-  if [ "${PART_LABEL}" = "gpt" ]
+  if [ "$PART_LABEL" = "gpt" ]
   then
-    genfstab -U ${CHROOT} >> "${CHROOT}/etc/fstab"
+    genfstab -U $CHROOT >> "$CHROOT/etc/fstab"
   else
-    genfstab -L ${CHROOT} >> "${CHROOT}/etc/fstab"
+    genfstab -L $CHROOT >> "$CHROOT/etc/fstab"
   fi
 
   return $SUCCESS
@@ -1172,13 +1172,13 @@ setup_locale()
 {
   title "Base System Setup"
 
-  wprintf "[+] Setting up "${LOCALE}" locale"
+  wprintf "[+] Setting up $LOCALE locale"
   printf "\n\n"
-  sed -i "s/^#en_US.UTF-8/en_US.UTF-8/" "${CHROOT}/etc/locale.gen"
-  sed -i "s/^#${LOCALE}/${LOCALE}/" "${CHROOT}/etc/locale.gen"
-  chroot ${CHROOT} locale-gen
-  echo "LANG=${LOCALE}" > "${CHROOT}/etc/locale.conf"
-  echo "KEYMAP=${KEYMAP}" > "${CHROOT}/etc/vconsole.conf"
+  sed -i "s/^#en_US.UTF-8/en_US.UTF-8/" "$CHROOT/etc/locale.gen"
+  sed -i "s/^#$LOCALE/$LOCALE/" "$CHROOT/etc/locale.gen"
+  chroot $CHROOT locale-gen
+  echo "LANG=$LOCALE" > "$CHROOT/etc/locale.conf"
+  echo "KEYMAP=$KEYMAP" > "$CHROOT/etc/vconsole.conf"
 
   return $SUCCESS
 }
@@ -1191,13 +1191,13 @@ setup_time()
   then
     for t in $(timedatectl list-timezones)
     do
-      echo "    > $(echo ${t})"
+      echo "    > $(echo $t)"
     done
 
     wprintf "\n[?] What is your (Zone/SubZone): "
     read timezone
-    chroot ${CHROOT} ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime \
-      > ${VERBOSE} 2>&1
+    chroot $CHROOT ln -sf "/usr/share/zoneinfo/$timezone" /etc/localtime \
+      > $VERBOSE 2>&1
 
     if [ $? -eq 1 ]
     then
@@ -1225,7 +1225,7 @@ default_time()
   echo
   warn "Setting up default time and timezone: UTC"
   printf "\n\n"
-  chroot ${CHROOT} ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+  chroot $CHROOT ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
   return $SUCCESS
 }
@@ -1239,24 +1239,24 @@ setup_initramfs()
   wprintf "[+] Setting up initramfs"
   printf "\n\n"
 
-  if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
   then
     cp /run/archiso/bootmnt/blackarch/boot/x86_64/vmlinuz \
-      ${CHROOT}/boot/vmlinuz-linux
+      "$CHROOT/boot/vmlinuz-linux"
   fi
 
   # terminus font
   sed -i 's/keyboard fsck/keyboard fsck consolefont/g' \
-    "${CHROOT}/etc/mkinitcpio.conf"
-  echo 'FONT=ter-114n' >> "${CHROOT}/etc/vconsole.conf"
+    "$CHROOT/etc/mkinitcpio.conf"
+  echo 'FONT=ter-114n' >> "$CHROOT/etc/vconsole.conf"
 
-  if [ ${LUKS} = ${TRUE} ]
+  if [ $LUKS = $TRUE ]
   then
     sed -i 's/block filesystems/block keymap encrypt filesystems/g' \
-      "${CHROOT}/etc/mkinitcpio.conf"
+      "$CHROOT/etc/mkinitcpio.conf"
   fi
 
-  chroot ${CHROOT} mkinitcpio -p linux
+  chroot $CHROOT mkinitcpio -p linux
 
   return $SUCCESS
 }
@@ -1272,11 +1272,11 @@ setup_proc_sys_dev()
 
   mkdir -p "${CHROOT}/"{proc,sys,dev} > /dev/null 2>&1
 
-  mount -t proc proc "${CHROOT}/proc"
-  mount --rbind /sys "${CHROOT}/sys"
-  mount --make-rslave "${CHROOT}/sys"
-  mount --rbind /dev "${CHROOT}/dev"
-  mount --make-rslave "${CHROOT}/dev"
+  mount -t proc proc "$CHROOT/proc"
+  mount --rbind /sys "$CHROOT/sys"
+  mount --make-rslave "$CHROOT/sys"
+  mount --rbind /dev "$CHROOT/dev"
+  mount --make-rslave "$CHROOT/dev"
 
   return $SUCCESS
 }
@@ -1290,7 +1290,7 @@ setup_hostname()
   wprintf "[+] Setting up hostname"
   printf "\n\n"
 
-  echo "${HOST_NAME}" > "${CHROOT}/etc/hostname"
+  echo $HOST_NAME > "$CHROOT/etc/hostname"
 
   return $SUCCESS
 }
@@ -1301,59 +1301,59 @@ setup_bootloader()
 {
   title "Base System Setup"
 
-  if [ "${PART_LABEL}" = "gpt" ]
+  if [ "$PART_LABEL" = "gpt" ]
   then
     wprintf "[+] Setting up EFI boot loader"
     printf "\n\n"
 
-    chroot ${CHROOT} bootctl install
-    uuid="$(blkid ${ROOT_PART} | cut -d ' ' -f 2 | cut -d '"' -f 2)"
+    chroot $CHROOT bootctl install
+    uuid="$(blkid $ROOT_PART | cut -d ' ' -f 2 | cut -d '"' -f 2)"
 
-    if [ ${LUKS} = ${TRUE} ]
+    if [ $LUKS = $TRUE ]
     then
-      cat >> "${CHROOT}/boot/loader/entries/arch.conf" << EOF
+      cat >> "$CHROOT/boot/loader/entries/arch.conf" << EOF
 title   BlackArch Linux
 linux   /vmlinuz-linux
 initrd    /initramfs-linux.img
-options   cryptdevice=UUID=${uuid}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT} rw
+options   cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT rw
 EOF
 
     else
-      cat >> "${CHROOT}/boot/loader/entries/arch.conf" << EOF
+      cat >> "$CHROOT/boot/loader/entries/arch.conf" << EOF
 title   BlackArch Linux
 linux   /vmlinuz-linux
 initrd    /initramfs-linux.img
-options   root=UUID=${uuid} rw
+options   root=UUID=$uuid rw
 EOF
     fi
   else
     wprintf "[+] Setting up GRUB boot loader"
     printf "\n\n"
 
-    uuid="$(lsblk -o UUID ${ROOT_PART} | sed -n 2p)"
+    uuid="$(lsblk -o UUID $ROOT_PART | sed -n 2p)"
 
-    if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+    if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
     then
-      chroot ${CHROOT} pacman -S grub --noconfirm --overwrite '*' --needed
+      chroot $CHROOT pacman -S grub --noconfirm --overwrite '*' --needed
     else
-      mkdir -p ${CHROOT}/boot/grub
+      mkdir -p "$CHROOT/boot/grub"
     fi
 
-    cp ${BI_PATH}/data/boot/grub/splash.png ${CHROOT}/boot/grub/splash.png
+    cp "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
 
-    if [ ${LUKS} = ${TRUE} ]
+    if [ $LUKS = $TRUE ]
     then
-      sed -i "s|quiet|cryptdevice=UUID=${uuid}:${CRYPT_ROOT} root=/dev/mapper/${CRYPT_ROOT}|" \
-        "${CHROOT}/etc/default/grub"
+      sed -i "s|quiet|cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT|" \
+        "$CHROOT/etc/default/grub"
     fi
-    sed -i 's/quiet//g' "${CHROOT}/etc/default/grub"
-    sed -i 's/Arch/BlackArch/g' "${CHROOT}/etc/default/grub"
+    sed -i 's/quiet//g' "$CHROOT/etc/default/grub"
+    sed -i 's/Arch/BlackArch/g' "$CHROOT/etc/default/grub"
     echo "GRUB_BACKGROUND=\"/boot/grub/splash.png\"" >> \
-      "${CHROOT}/etc/default/grub"
-    chroot ${CHROOT} grub-install --target=i386-pc "${HD_DEV}"
-    chroot ${CHROOT} grub-mkconfig -o /boot/grub/grub.cfg
-    sed -i 's/Arch Linux/BlackArch Linux/g' "${CHROOT}/boot/grub/grub.cfg"
-    chroot ${CHROOT} grub-mkconfig -o /boot/grub/grub.cfg
+      "$CHROOT/etc/default/grub"
+    chroot $CHROOT grub-install --target=i386-pc "$HD_DEV"
+    chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg
+    sed -i 's/Arch Linux/BlackArch Linux/g' "$CHROOT/boot/grub/grub.cfg"
+    chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg
   fi
 
   return $SUCCESS
@@ -1383,8 +1383,8 @@ setup_testuser()
   warn "Remove this user after you added a normal system user account"
   printf "\n"
 
-  chroot ${CHROOT} groupadd blackarchtest
-  chroot ${CHROOT} useradd -g blackarchtest -d /home/blackarchtest/ \
+  chroot $CHROOT groupadd blackarchtest
+  chroot $CHROOT useradd -g blackarchtest -d /home/blackarchtest/ \
     -s /sbin/nologin -m blackarchtest
 }
 
@@ -1392,43 +1392,43 @@ setup_testuser()
 # setup user account, password and environment
 setup_user()
 {
-  user="${1}"
+  user="$1"
 
   title "Base System Setup"
 
-  wprintf "[+] Setting up ${user} account"
+  wprintf "[+] Setting up $user account"
   printf "\n\n"
 
   # normal user
-  if [ ! -z ${NORMAL_USER} ]
+  if [ ! -z $NORMAL_USER ]
   then
-    chroot ${CHROOT} groupadd ${user}
-    chroot ${CHROOT} useradd -g ${user} -d "/home/${user}" -s "/bin/bash" \
-      -G "${user},wheel,users,video,audio" -m ${user} > ${VERBOSE} 2>&1
-    chroot ${CHROOT} chown -R ${user}:${user} "/home/${user}"
-    wprintf "[+] Added user: ${user}"
+    chroot $CHROOT groupadd $user
+    chroot $CHROOT useradd -g $user -d "/home/$user" -s "/bin/bash" \
+      -G "$user,wheel,users,video,audio" -m $user > $VERBOSE 2>&1
+    chroot $CHROOT chown -R $user:$user "/home/$user"
+    wprintf "[+] Added user: $user"
     printf "\n\n"
   fi
 
   # environment
-  if [ -z ${NORMAL_USER} ]
+  if [ -z $NORMAL_USER ]
   then
-    cp -r ${BI_PATH}/data/root/. "${CHROOT}/root/." > ${VERBOSE} 2>&1
+    cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
-    cp -r ${BI_PATH}/data/user/. "${CHROOT}/home/${user}/." > ${VERBOSE} 2>&1
+    cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
   fi
 
   # password
   res=1337
-  wprintf "[?] Set password for ${user}: "
+  wprintf "[?] Set password for $user: "
   printf "\n\n"
   while [ $res -ne 0 ]
   do
-    if [ "${user}" = "root" ]
+    if [ "$user" = "root" ]
     then
-      chroot ${CHROOT} passwd
+      chroot $CHROOT passwd
     else
-      chroot ${CHROOT} passwd "${user}"
+      chroot $CHROOT passwd $user
     fi
     res=$?
   done
@@ -1472,8 +1472,8 @@ setup_extra_packages()
   xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
   xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
 
-  all="${arch} ${bluetooth} ${browser} ${editor} ${filesystem} ${fonts}"
-  all="${all} ${kernel} ${misc} ${network} ${xorg}"
+  all="$arch $bluetooth $browser $editor $filesystem $fonts"
+  all="$all $kernel $misc $network $xorg"
 
   title "Base System Setup"
 
@@ -1481,20 +1481,20 @@ setup_extra_packages()
   printf "\n"
 
   printf "
-  > ArchLinux   : `echo ${arch} | wc -w` packages
-  > Browser     : `echo ${browser} | wc -w` packages
-  > Bluetooth   : `echo ${bluetooth} | wc -w` packages
-  > Editor      : `echo ${editor} | wc -w` packages
-  > Filesystem  : `echo ${filesystem} | wc -w` packages
-  > Fonts       : `echo ${fonts} | wc -w` packages
-  > Misc        : `echo ${misc} | wc -w` packages
-  > Network     : `echo ${network} | wc -w` packages
-  > Xorg        : `echo ${xorg} | wc -w` packages
+  > ArchLinux   : `echo $arch | wc -w` packages
+  > Browser     : `echo $browser | wc -w` packages
+  > Bluetooth   : `echo $bluetooth | wc -w` packages
+  > Editor      : `echo $editor | wc -w` packages
+  > Filesystem  : `echo $filesystem | wc -w` packages
+  > Fonts       : `echo $fonts | wc -w` packages
+  > Misc        : `echo $misc | wc -w` packages
+  > Network     : `echo $network | wc -w` packages
+  > Xorg        : `echo $xorg | wc -w` packages
   \n"
 
   sleep 2
 
-  chroot ${CHROOT} pacman -S --needed --overwrite '*' --noconfirm $(echo ${all})
+  chroot $CHROOT pacman -S --needed --overwrite '*' --noconfirm $(echo $all)
 
   return $SUCCESS
 }
@@ -1503,13 +1503,13 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
-  if [ "${INSTALL_MODE}" = "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
   then
     dump_live_iso
     sleep_clear 1
   fi
 
-  if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
     setup_resolvconf
     sleep_clear 1
@@ -1542,16 +1542,16 @@ setup_base_system()
   ask_user_account
   sleep_clear 1
 
-  if [ ! -z "${NORMAL_USER}" ]
+  if [ ! -z "$NORMAL_USER" ]
   then
-    setup_user "${NORMAL_USER}"
+    setup_user "$NORMAL_USER"
     sleep_clear 1
   else
     setup_testuser
     sleep_clear 2
   fi
 
-  if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
     setup_extra_packages
     sleep_clear 1
@@ -1573,11 +1573,11 @@ update_etc()
   printf "\n\n"
 
   # /etc/*
-  cp -r ${BI_PATH}/data/etc/. ${CHROOT}/etc/. > ${VERBOSE} 2>&1
+  cp -r "$BI_PATH/data/etc/." "$CHROOT/etc/." > $VERBOSE 2>&1
 
   # iptables
-  chroot ${CHROOT} systemctl enable iptables
-  chroot ${CHROOT} systemctl enable ip6tables
+  chroot $CHROOT systemctl enable iptables > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable ip6tables > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1595,16 +1595,16 @@ ask_mirror()
 
   wprintf "[+] Fetching mirror list"
   printf "\n\n"
-  curl -s -o "${mirror_file}" "${mirror_url}"
+  curl -s -o $mirror_file $mirror_url
 
   while read -r country url mirror_name
   do
-    wprintf " %s. %s - %s" "${count}" "${country}" "${mirror_name}"
+    wprintf " %s. %s - %s" "$count" "$country" "$mirror_name"
     printf "\n"
-    wprintf "   * %s" "${url}"
+    wprintf "   * %s" "$url"
     printf "\n"
     count=`expr $count + 1`
-  done < "${mirror_file}"
+  done < "$mirror_file"
 
   printf "\n"
   wprintf "[?] Select a mirror number (enter for default): "
@@ -1614,17 +1614,17 @@ ask_mirror()
   # bugfix: detected chars added sometimes - clear chars
   _a=`printf "%s" $a | sed 's/[a-z]//Ig' 2> /dev/null`
 
-  if [ -z "${_a}" ]
+  if [ -z "$_a" ]
   then
-    wprintf "[+] Choosing default mirror: %s " "${BA_REPO_URL}"
+    wprintf "[+] Choosing default mirror: %s " $BA_REPO_URL
   else
-    BA_REPO_URL=`sed -n "${_a}p" "${mirror_file}" | cut -d "|" -f 2`
+    BA_REPO_URL=`sed -n "${_a}p" $mirror_file | cut -d "|" -f 2`
     wprintf "[+] Mirror from '%s' selected" \
-      `sed -n "${_a}p" "${mirror_file}" | cut -d "|" -f 3`
+      `sed -n "${_a}p" $mirror_file | cut -d "|" -f 3`
     printf "\n\n"
   fi
 
-  rm -f "${mirror_file}"
+  rm -f $mirror_file
 
   return $SUCCESS
 }
@@ -1640,8 +1640,8 @@ ask_mirror_arch()
     printf "\n"
     warn "This may take time depending on your connection"
     $mirrold
-    pacman -Syy --noconfirm > ${VERBOSE} 2>&1
-    pacman -S --noconfirm pacman-contrib > ${VERBOSE} 2>&1
+    pacman -Syy --noconfirm > $VERBOSE 2>&1
+    pacman -S --noconfirm pacman-contrib > $VERBOSE 2>&1
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist.backup
     rankmirrors -n 3 /etc/pacman.d/mirrorlist.backup \
       > /etc/pacman.d/mirrorlist
@@ -1652,9 +1652,9 @@ ask_mirror_arch()
     echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" \
       > /etc/pacman.d/mirrorlist
 
-    for wore in ${AR_REPO_URL}
+    for wore in $AR_REPO_URL
     do
-      echo "Server = ${wore}" >> /etc/pacman.d/mirrorlist
+      echo "Server = $wore" >> /etc/pacman.d/mirrorlist
     done
   fi
 
@@ -1663,8 +1663,8 @@ ask_mirror_arch()
 # pass correct config
 pass_mirror_conf()
 {
-  cp -f /etc/pacman.d/mirrorlist ${CHROOT}/etc/pacman.d/mirrorlist \
-    > ${VERBOSE} 2>&1
+  cp -f /etc/pacman.d/mirrorlist "$CHROOT/etc/pacman.d/mirrorlist" \
+    > $VERBOSE 2>&1
 }
 
 
@@ -1679,26 +1679,26 @@ run_strap_sh()
   wprintf "[+] Downloading and executing strap.sh"
   printf "\n\n"
 
-  curl -s -o "${strap_sh}" "https://www.blackarch.org/strap.sh"
-  sha1="$(sha1sum ${strap_sh} | awk '{print $1}')"
+  curl -s -o $strap_sh "https://www.blackarch.org/strap.sh"
+  sha1="$(sha1sum $strap_sh | awk '{print $1}')"
 
-  if [ "${sha1}" = "${orig_sha1}" ]
+  if [ "$sha1" = "$orig_sha1" ]
   then
-    mv ${strap_sh} "${CHROOT}${strap_sh}"
+    mv $strap_sh "${CHROOT}${strap_sh}"
     chmod a+x "${CHROOT}${strap_sh}"
-    chroot ${CHROOT} echo ${BA_REPO_URL} | sh ${CHROOT}${strap_sh}
+    chroot $CHROOT echo $BA_REPO_URL | sh ${CHROOT}${strap_sh}
   else
-    err "Wrong SHA1 sum for strap.sh: ${sha1} (orig: ${orig_sha1}). Aborting!"
+    err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"
   fi
 
   # add blackarch linux mirror if we are in chroot
-  if ! grep -q "blackarch" "${CHROOT}/etc/pacman.conf"
+  if ! grep -q "blackarch" "$CHROOT/etc/pacman.conf"
   then
-    printf '[blackarch]\nServer = %s\n' "${BA_REPO_URL}" \
-      >> "${CHROOT}/etc/pacman.conf"
+    printf '[blackarch]\nServer = %s\n' $BA_REPO_URL \
+      >> "$CHROOT/etc/pacman.conf"
   else
-    sed -i "/\[blackarch\]/{ n;s?Server.*?Server = ${BA_REPO_URL}?; }" \
-      "${CHROOT}/etc/pacman.conf"
+    sed -i "/\[blackarch\]/{ n;s?Server.*?Server = $BA_REPO_URL?; }" \
+      "$CHROOT/etc/pacman.conf"
   fi
 
   return $SUCCESS
@@ -1734,16 +1734,16 @@ setup_display_manager()
   sleep 2
 
   # install lxdm packages
-  chroot ${CHROOT} pacman -S lxdm --needed --overwrite '*' --noconfirm
+  chroot $CHROOT pacman -S lxdm --needed --overwrite '*' --noconfirm
 
   # config files
-  cp -r ${BI_PATH}/data/etc/lxdm/. ${CHROOT}/etc/lxdm/.
-  cp -r ${BI_PATH}/data/usr/share/lxdm/. ${CHROOT}/usr/share/lxdm/.
-  cp -r ${BI_PATH}/data/usr/share/xsessions/. ${CHROOT}/usr/share/xsessions/
-  cp -r ${BI_PATH}/data/usr/share/gtk-2.0/. ${CHROOT}/usr/share/gtk-2.0/.
+  cp -r "$BI_PATH/data/etc/lxdm/." "$CHROOT/etc/lxdm/."
+  cp -r "$BI_PATH/data/usr/share/lxdm/." "$CHROOT/usr/share/lxdm/."
+  cp -r "$BI_PATH/data/usr/share/xsessions" "$CHROOT/usr/share/xsessions"
+  cp -r "$BI_PATH/data/usr/share/gtk-2.0/." "$CHROOT/usr/share/gtk-2.0/."
 
   # enable in systemd
-  chroot ${CHROOT} systemctl enable lxdm
+  chroot $CHROOT systemctl enable lxdm > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1773,79 +1773,64 @@ setup_window_managers()
     echo
     case $choice in
       1)
-        chroot ${CHROOT} pacman -S awesome --needed --overwrite '*' --noconfirm
-        cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
-          ${CHROOT}/etc/xdg/awesome/.
-        cp -r ${BI_PATH}/data/usr/share/awesome/. \
-          ${CHROOT}/usr/share/awesome/.
+        chroot $CHROOT pacman -S awesome --needed --overwrite '*' --noconfirm
+        cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
+        cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
         # fix bullshit exit() issue
         sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
+          "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
         break
         ;;
       2)
-        chroot ${CHROOT} pacman -S dwm --needed --overwrite '*' --noconfirm
+        chroot $CHROOT pacman -S dwm --needed --overwrite '*' --noconfirm
         break
         ;;
       3)
-        chroot ${CHROOT} pacman -S fluxbox --needed --overwrite '*' --noconfirm
-        cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
-          ${CHROOT}/usr/share/fluxbox/.
+        chroot $CHROOT pacman -S fluxbox --needed --overwrite '*' --noconfirm
+        cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
         break
         ;;
       4)
-        chroot ${CHROOT} pacman -S i3-wm i3status i3lock dmenu --needed \
+        chroot $CHROOT pacman -S i3-wm i3status i3lock dmenu --needed \
           --overwrite '*' --noconfirm
-        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
-          ${CHROOT}/root/.
+        cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
         break
         ;;
       5)
-        chroot ${CHROOT} pacman -S openbox --needed --overwrite '*' --noconfirm
-        cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
-          ${CHROOT}/etc/xdg/openbox/.
-        cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
-          ${CHROOT}/usr/share/themes/i3lock .
+        chroot $CHROOT pacman -S openbox --needed --overwrite '*' --noconfirm
+        cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
+        cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
+          "$CHROOT/usr/share/themes/i3lock/."
         break
         ;;
       6)
-        chroot ${CHROOT} pacman -S spectrwm --needed --overwrite '*' --noconfirm
-        cp -r ${BI_PATH}/data/etc/spectrwm.conf \
-          ${CHROOT}/etc/spectrwm.conf
+        chroot $CHROOT pacman -S spectrwm --needed --overwrite '*' --noconfirm
+        cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
         break
         ;;
       *)
-        chroot ${CHROOT} pacman -S fluxbox openbox awesome i3-wm i3status \
+        chroot $CHROOT pacman -S fluxbox openbox awesome i3-wm i3status \
           i3lock dwm spectrwm --needed --overwrite '*' --noconfirm
 
         # awesome
-        cp -r ${BI_PATH}/data/etc/xdg/awesome/. \
-          ${CHROOT}/etc/xdg/awesome/.
-        cp -r ${BI_PATH}/data/usr/share/awesome/. \
-          ${CHROOT}/usr/share/awesome/.
+        cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
+        cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
         sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          ${CHROOT}/usr/share/awesome/lib/awful/menu.lua
+          "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
 
         # fluxbox
-        cp -r ${BI_PATH}/data/usr/share/fluxbox/. \
-          ${CHROOT}/usr/share/fluxbox/.
+        cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
 
         # i3
-        cp -r ${BI_PATH}/data/root/{.config,.i3status.conf} \
-          ${CHROOT}/root/.
+        cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
 
         # openbox
-        cp -r ${BI_PATH}/data/etc/xdg/openbox/. \
-          ${CHROOT}/etc/xdg/openbox/.
-        cp -r ${BI_PATH}/data/usr/share/themes/blackarch \
-          ${CHROOT}/usr/share/themes/.
+        cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
+        cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
+          "$CHROOT/usr/share/themes/."
 
         # spectrwm
-        cp -r ${BI_PATH}/data/etc/spectrwm.conf \
-          ${CHROOT}/etc/spectrwm.conf
-
-        # wmii
-        cp -r ${BI_PATH}/data/etc/wmii/. ${CHROOT}/etc/wmii/.
+        cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
 
         break
         ;;
@@ -1853,13 +1838,11 @@ setup_window_managers()
   done
 
   # wallpaper
-  cp -r ${BI_PATH}/data/usr/share/blackarch ${CHROOT}/usr/share/blackarch
+  cp -r "$BI_PATH/data/usr/share/blackarch" "$CHROOT/usr/share/blackarch"
 
   # remove wrong xsession entries
-  chroot ${CHROOT} rm "/usr/share/xsessions/openbox-kde.desktop" \
-    > ${VERBOSE} 2>&1
-  chroot ${CHROOT} rm "/usr/share/xsessions/i3-with-shmlog.desktop" \
-    > ${VERBOSE} 2>&1
+  chroot $CHROOT rm /usr/share/xsessions/openbox-kde.desktop > $VERBOSE 2>&1
+  chroot $CHROOT rm /usr/share/xsessions/i3-with-shmlog.desktop > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1885,16 +1868,16 @@ setup_vbox_utils()
   wprintf "[+] Setting up VirtualBox utils"
   printf "\n\n"
 
-  chroot ${CHROOT} pacman -S virtualbox-guest-utils \
+  chroot $CHROOT pacman -S virtualbox-guest-utils \
     virtualbox-guest-modules-arch --overwrite '*' --needed --noconfirm
 
-  chroot ${CHROOT} systemctl enable vboxservice
-  chroot ${CHROOT} systemctl enable vboxadd
-  chroot ${CHROOT} systemctl enable vboxadd-service
-  chroot ${CHROOT} systemctl enable vboxadd-x11
+  chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable vboxadd > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable vboxadd-service > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable vboxadd-x11 > $VERBOSE 2>&1
 
   printf "vboxguest\nvboxsf\nvboxvideo\n" \
-    > "${CHROOT}/etc/modules-load.d/vbox.conf"
+    > "$CHROOT/etc/modules-load.d/vbox.conf"
 
   return $SUCCESS
 }
@@ -1920,11 +1903,11 @@ setup_vmware_utils()
   wprintf "[+] Setting up VMware utils"
   printf "\n\n"
 
-  chroot ${CHROOT} pacman -S open-vm-tools xf86-video-vmware \
+  chroot $CHROOT pacman -S open-vm-tools xf86-video-vmware \
     xf86-input-vmmouse --overwrite '*' --needed --noconfirm
 
-  chroot ${CHROOT} systemctl enable vmware-vmblock-fuse.service
-  chroot ${CHROOT} systemctl enable vmtoolsd.service
+  chroot $CHROOT systemctl enable vmware-vmblock-fuse.service > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable vmtoolsd.service > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1952,21 +1935,29 @@ setup_blackarch_tools()
   wprintf "[+] Installing BlackArch Linux packages (grab a coffee)"
   printf "\n\n"
 
-  if [ ${INSTALL_MODE} = ${INSTALL_REPO} ]
+  if [ $INSTALL_MODE = $INSTALL_REPO ]
   then
     wprintf "[+] All available BlackArch tools groups:\n\n"
-    printf "blackarch blackarch-anti-forensic blackarch-automation blackarch-backdoor blackarch-binary blackarch-bluetooth
-blackarch-code-audit blackarch-cracker blackarch-crypto blackarch-database blackarch-debugger blackarch-decompiler
-blackarch-defensive blackarch-disassembler blackarch-dos blackarch-drone blackarch-exploitation blackarch-fingerprint
-blackarch-firmware blackarch-forensic blackarch-fuzzer blackarch-hardware blackarch-honeypot blackarch-ids
-blackarch-keylogger blackarch-malware blackarch-misc blackarch-mobile blackarch-networking blackarch-nfc
-blackarch-packer blackarch-proxy blackarch-recon blackarch-reversing blackarch-scanner blackarch-sniffer
-blackarch-social blackarch-spoof blackarch-threat-model blackarch-tunnel blackarch-unpacker blackarch-voip
-blackarch-webapp blackarch-windows blackarch-wireless \n\n"
-    wprintf "[?] BlackArch groups to install [blackarch]: "
-    read GROUPS
-    if [ -z "$GROUPS" ]; then chroot ${CHROOT} pacman -S --needed --overwrite '*' blackarch
-    else chroot ${CHROOT} pacman -S --needed --overwrite '*' $GROUPS; fi
+    printf "blackarch blackarch-anti-forensic blackarch-automation
+blackarch-backdoor blackarch-binary blackarch-bluetooth blackarch-code-audit
+blackarch-cracker blackarch-crypto blackarch-database blackarch-debugger
+blackarch-decompiler blackarch-defensive blackarch-disassembler blackarch-dos
+blackarch-drone blackarch-exploitation blackarch-fingerprint blackarch-firmware
+blackarch-forensic blackarch-fuzzer blackarch-hardware blackarch-honeypot
+blackarch-ids blackarch-keylogger blackarch-malware blackarch-misc
+blackarch-mobile blackarch-networking blackarch-nfc blackarch-packer
+blackarch-proxy blackarch-recon blackarch-reversing blackarch-scanner
+blackarch-sniffer blackarch-social blackarch-spoof blackarch-threat-model
+blackarch-tunnel blackarch-unpacker blackarch-voip blackarch-webapp
+blackarch-windows blackarch-wireless \n\n"
+wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
+    read BA_GROUPS
+    if [ -z "$BA_GROUPS" ]
+    then
+      chroot $CHROOT pacman -S --needed --overwrite '*' blackarch
+    else
+      chroot $CHROOT pacman -S --needed --overwrite '*' $BA_GROUPS
+    fi
   else
     warn "Installing all tools from source via blackman can take hours"
     printf "\n"
@@ -1978,7 +1969,7 @@ blackarch-webapp blackarch-windows blackarch-wireless \n\n"
       foo=`expr $foo - 1`
     done
     printf "\n"
-    chroot ${CHROOT} pacman -S --needed --overwrite '*' blackman
+    chroot $CHROOT pacman -S --needed --overwrite '*' blackman
     blackman -a
   fi
 
@@ -1991,13 +1982,13 @@ update_user_groups()
 {
   title "BlackArch Linux Setup"
 
-  wprintf "[+] Adding user '${NORMAL_USER}' to groups"
+  wprintf "[+] Adding user '$NORMAL_USER' to groups"
   printf "\n\n"
 
   # TODO: more to add here
   if [ $VBOX_SETUP -eq $TRUE ]
   then
-    chroot ${CHROOT} usermod -G ${NORMAL_USER},vboxusers > ${VERBOSE} 2>&1
+    chroot $CHROOT usermod -G "${NORMAL_USER},vboxusers" > $VERBOSE 2>&1
   fi
 
   return $SUCCESS
@@ -2017,27 +2008,27 @@ dump_live_iso()
   wprintf "[+] Fetching total size to transfer, please wait..."
   printf "\n"
 
-  for d in ${live_dirs}
+  for d in $live_dirs
   do
     printf "
-  > ${d} (`du -sh ${d} 2> /dev/null | awk '{print $1}'`)"
+  > $d (`du -sh $d 2> /dev/null | awk '{print $1}'`)"
   done
   printf "\n\n"
 
   wprintf "[+] Installing /, please wait. This will take some time..."
-  cp -ax / ${CHROOT}
+  cp -ax / $CHROOT
   wprintf "done\n"
 
   # clean up files
   wprintf "[+] Cleaning Live Environment files, please wait... "
   sed -i 's/Storage=volatile/#Storage=auto/' ${CHROOT}/etc/systemd/journald.conf
-  rm -rf ${CHROOT}/etc/udev/rules.d/81-dhcpcd.rules
-  rm -rf ${CHROOT}/etc/systemd/system/{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
-  rm -ff ${CHROOT}/etc/systemd/scripts/choose-mirror
-  rm -ff ${CHROOT}/etc/systemd/system/getty@tty1.service.d/autologin.conf
-  rm -ff ${CHROOT}/root/{.automated_script.sh,.zlogin}
-  rm -ff ${CHROOT}/etc/mkinitcpio-archiso.conf
-  rm -rf ${CHROOT}/etc/initcpio
+  rm -rf "$CHROOT/etc/udev/rules.d/81-dhcpcd.rules"
+  rm -rf "$CHROOT/etc/systemd/system/"{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
+  rm -rf "$CHROOT/etc/systemd/scripts/choose-mirror"
+  rm -rf "$CHROOT/etc/systemd/system/getty@tty1.service.d/autologin.conf"
+  rm -rf "$CHROOT/root/"{.automated_script.sh,.zlogin}
+  rm -rf "$CHROOT/etc/mkinitcpio-archiso.conf"
+  rm -rf "$CHROOT/etc/initcpio"
   #rm -rf ${CHROOT}/etc/{group*,passwd*,shadow*,gshadow*}
   wprintf "done\n"
 
@@ -2104,7 +2095,7 @@ setup_blackarch()
     sleep_clear 1
   fi
 
-  if [ -n "${NORMAL_USER}" ]
+  if [ -n "$NORMAL_USER" ]
   then
     update_user_groups
     sleep_clear 1
@@ -2158,18 +2149,18 @@ self_updater()
   title "Self Updater"
   wprintf "[+] Checking for a new version of myself..."
 
-  pacman -Syy > ${VERBOSE} 2>&1
+  pacman -Syy > $VERBOSE 2>&1
   ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
     cut -d '-' -f 1)"
 
-  if [ "${ver}" != "${VERSION}" ]
+  if [ "$ver" != "$VERSION" ]
   then
     printf "\n\n"
     warn "A new version is available! Going to fuck, err, update myself."
     printf "\n"
     pacman -S --overwrite '*' --noconfirm blackarch-installer
     wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
-    chmod +x /usr/share/blackarch-installer/blackarch-install > ${VERBOSE}
+    chmod +x /usr/share/blackarch-installer/blackarch-install > $VERBOSE
     sleep 2
     exit $SUCCESS
   fi
@@ -2203,27 +2194,27 @@ main()
 
   # network
   ask_hostname
-  if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
     get_net_ifs
     ask_net_conf_mode
-    if [ "${NET_CONF_MODE}" != "${NET_CONF_SKIP}" ]
+    if [ "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
     then
       ask_net_if
     fi
-    case "${NET_CONF_MODE}" in
-      "${NET_CONF_AUTO}")
+    case "$NET_CONF_MODE" in
+      "$NET_CONF_AUTO")
         net_conf_auto
         ;;
-      "${NET_CONF_WLAN}")
+      "$NET_CONF_WLAN")
         ask_wlan_data
         net_conf_wlan
         ;;
-      "${NET_CONF_MANUAL}")
+      "$NET_CONF_MANUAL")
         ask_net_addr
         net_conf_manual
         ;;
-      "${NET_CONF_SKIP}")
+      "$NET_CONF_SKIP")
         ;;
       *)
         ;;
@@ -2267,7 +2258,7 @@ main()
   sleep_clear 1
 
   # blackarch Linux
-  if [ "${INSTALL_MODE}" != "${INSTALL_LIVE_ISO}" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
     setup_blackarch
     sleep_clear 1
@@ -2285,7 +2276,7 @@ main()
 
 
 # we start here
-main "${@}"
+main "$@"
 
 
 # EOF

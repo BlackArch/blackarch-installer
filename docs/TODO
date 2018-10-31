@@ -21,11 +21,14 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check for available disk space before starting to install pkgs
 
 
-===> 1.0
+===> 1.0.0
 
   [ ] update: add help text for each section and sub-section
   [ ] update: sort installation routines (order of sections)
   [.] bugfix: test reported bugs, find bugs, fix them
+  [x] update: luks: use aes-xts-plain64 + 256bit for keysize
+  [x] update: remove wmii related code
+  [x] update: code style fixes. remove unnecessary curly-brackets
   [x] new option: blackarch-groups optionally rather than all/single tools
 
 
