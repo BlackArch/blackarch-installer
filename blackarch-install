@@ -1118,6 +1118,25 @@ umount_filesystems()
 }
 
 
+check_space()
+{
+  wprintf "[+] Checking available space..."
+  printf "\n\n"
+
+  avail_space=$(df -m $ROOT_PART | grep "$ROOT_PART" | awk '{print $4}')
+
+  if [ "$avail_space" -le 40960 ]
+  then
+    err "BlackArch Linux require 40 GB of free space to install! Go get a new HDD || SSD, quick!"
+  else
+    printf "Everything is ok, can continue..."
+  fi
+  printf "\n"
+
+  return $SUCCESS
+}
+
+
 # install ArchLinux base and base-devel packages
 install_base_packages()
 {
@@ -1950,8 +1969,10 @@ wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read BA_GROUPS
     if [ -z "$BA_GROUPS" ]
     then
+      check_space
       chroot $CHROOT pacman -S --needed --overwrite '*' blackarch
     else
+      warn "We hope that you have more 40 GB free space..."
       chroot $CHROOT pacman -S --needed --overwrite '*' $BA_GROUPS
     fi
   else
@@ -2013,24 +2034,15 @@ dump_live_iso()
     printf "
   > $d $part_size MB"
   done
-  printf "
+  printf "\n"
+  pritf "
   [ Total size = $total_size MB ]"
   printf "\n\n"
 
-  wprintf "[+] Checking available space..."
-  printf "\n\n"
-
-  avail_space=$(df -m $ROOT_PART | grep '/dev/' | awk '{print $4}')
-
-  if [ "$total_size" -ge "$avail_space" ]
-  then
-    err "Buy more capacious HDD!"
-  else
-    printf "Everything is ok, can continue..."
-  fi
-  printf "\n\n"
+  check_space
 
   wprintf "[+] Installing /, please wait. This will take some time..."
+  printf "\n\n"
   rsync -aWx --info=progress2 / $CHROOT
   wprintf "done\n"
 
