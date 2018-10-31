@@ -2035,7 +2035,7 @@ dump_live_iso()
   > $d $part_size MB"
   done
   printf "\n"
-  pritf "
+  printf "
   [ Total size = $total_size MB ]"
   printf "\n\n"
 
