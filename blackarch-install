@@ -2018,7 +2018,7 @@ dump_live_iso()
   printf "\n\n"
 
   wprintf "[+] Checking available space..."
-  printf "\n"
+  printf "\n\n"
 
   avail_space=$(df -m $ROOT_PART | grep '/dev/' | awk '{print $4}')
 
@@ -2028,10 +2028,10 @@ dump_live_iso()
   else
     printf "Everything is ok, can continue..."
   fi
-  printf "\n"
+  printf "\n\n"
 
   wprintf "[+] Installing /, please wait. This will take some time..."
-  rsync -ax --info=progress2 / $CHROOT
+  rsync -aWx --info=progress2 / $CHROOT
   wprintf "done\n"
 
   # clean up files
