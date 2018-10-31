@@ -346,8 +346,8 @@ ask_output_mode()
   title "Environment > Output Mode"
   wprintf "[+] Available output modes:"
   printf "\n
-1. Quiet (default)
-2. Verbose\n\n"
+  1. Quiet (default)
+  2. Verbose\n\n"
   wprintf "[?] Make a choice: "
   read output_opt
   if [ "$output_opt" = 2 ]
