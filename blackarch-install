@@ -1869,12 +1869,9 @@ setup_vbox_utils()
   printf "\n\n"
 
   chroot $CHROOT pacman -S virtualbox-guest-utils \
-    virtualbox-guest-modules-arch --overwrite '*' --needed --noconfirm
+    virtualbox-guest-dkms --overwrite '*' --needed --noconfirm
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
-  chroot $CHROOT systemctl enable vboxadd > $VERBOSE 2>&1
-  chroot $CHROOT systemctl enable vboxadd-service > $VERBOSE 2>&1
-  chroot $CHROOT systemctl enable vboxadd-x11 > $VERBOSE 2>&1
 
   printf "vboxguest\nvboxsf\nvboxvideo\n" \
     > "$CHROOT/etc/modules-load.d/vbox.conf"
