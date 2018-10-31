@@ -1885,7 +1885,7 @@ setup_vbox_utils()
   printf "\n\n"
 
   chroot $CHROOT pacman -S virtualbox-guest-utils \
-    virtualbox-guest-dkms --overwrite '*' --needed --noconfirm
+    virtualbox-guest-modules-arch --overwrite '*' --needed --noconfirm
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
 
