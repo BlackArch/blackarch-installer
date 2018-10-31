@@ -17,7 +17,6 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: ask for optional partitions
   [ ] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
   [ ] update: check/test uefi installation (especially grub stuff)
-  [ ] update: check for available disk space before starting to install pkgs
 
 
 ===> 1.0.0
@@ -25,6 +24,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section and sub-section
   [ ] update: sort installation routines (order of sections)
   [.] bugfix: test reported bugs, find bugs, fix them
+  [x] update: check for available disk space before starting to install pkgs
   [x] update: add progressbar for offline installation mode
   [x] update: luks: use aes-xts-plain64 + 256bit for keysize
   [x] update: remove wmii related code

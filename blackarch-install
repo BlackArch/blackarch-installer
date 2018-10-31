@@ -1996,6 +1996,8 @@ dump_live_iso()
 {
   live_dirs="/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
 
+  total_size=0 # no cheat
+
   title "BlackArch Linux Setup"
 
   wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
@@ -2006,10 +2008,27 @@ dump_live_iso()
 
   for d in $live_dirs
   do
+    part_size=$(du -sm $d 2> /dev/null | awk '{print $1}')
+    ((total_size+=part_size))
     printf "
-  > $d (`du -sh $d 2> /dev/null | awk '{print $1}'`)"
+  > $d $part_size MB"
   done
+  printf "
+  [ Total size = $total_size MB ]"
   printf "\n\n"
+
+  wprintf "[+] Checking available space..."
+  printf "\n"
+
+  avail_space=$(df -m $ROOT_PART | grep '/dev/' | awk '{print $4}')
+
+  if [ "$total_size" -ge "$avail_space" ]
+  then
+    err "Buy more capacious HDD!"
+  else
+    printf "Everything is ok, can continue..."
+  fi
+  printf "\n"
 
   wprintf "[+] Installing /, please wait. This will take some time..."
   rsync -ax --info=progress2 / $CHROOT
