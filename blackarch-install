@@ -1353,7 +1353,6 @@ EOF
     chroot $CHROOT grub-install --target=i386-pc "$HD_DEV"
     chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg
     sed -i 's/Arch Linux/BlackArch Linux/g' "$CHROOT/boot/grub/grub.cfg"
-    chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg
   fi
 
   return $SUCCESS
