@@ -1441,38 +1441,39 @@ setup_extra_packages()
 {
   arch="arch-install-scripts archlinux-keyring pkgfile"
 
-  bluetooth="bluez bluez-firmware bluez-hid2hci bluez-utils"
+  bluetooth="bluez bluez-firmware bluez-hid2hci bluez-tools bluez-utils"
 
-  browser="firefox chromium elinks"
+  browser="chromium elinks firefox"
 
   editor="vim"
 
-  filesystem="btrfs-progs cryptsetup device-mapper dmraid dosfstools
-  gptfdisk nilfs-utils ntfs-3g partclone parted partimage"
+  filesystem="btrfs-progs cryptsetup device-mapper dmraid dosfstools exfat-utils gptfdisk nilfs-utils
+  ntfs-3g partclone parted partimage"
 
-  fonts="ttf-liberation ttf-dejavu ttf-freefont xorg-font-utils
-  xorg-fonts-alias xorg-fonts-misc xorg-mkfontscale xorg-mkfontdir
-  ttf-indic-otf"
+  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation
+  xorg-font-utils xorg-fonts-alias xorg-fonts-misc xorg-mkfontdir
+  xorg-mkfontscale"
 
   kernel="linux-api-headers linux-headers"
 
-  misc="acpi alsa-utils b43-fwcutter bash-completion bc btrfs-progs cmake
-  ctags expac feh git gpm grml-zsh-config haveged hdparm htop
-  inotify-tools ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
-  mpv mtools p7zip rsync rtorrent scrot smartmontools strace sudo tzdata
-  unace unrar unzip usb_modeswitch zip zsh"
+  misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
+  feh git gpm grml-zsh-config haveged hdparm htop inotify-tools
+  ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
+  mpv mtools p7zip rsync rtorrent scrot smartmontools strace
+  sudo tzdata unace unrar unzip usb_modeswitch zip zsh"
 
-  network="wicd-gtk wicd bridge-utils darkhttpd atftp bind-tools dnsmasq
-  dhclient dnscrypt-proxy dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw lftp
-  nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe vpnc dialog
-  iw wireless_tools wpa_actiond wvdial xl2tpd wpa_supplicant"
+  network="atftp bind-tools bridge-utils darkhttpd dhclient dialog dnscrypt-proxy dnsmasq
+  dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
+  ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
+  socat vpnc wicd wicd-gtk wireless_tools wpa_actiond wpa_supplicant wvdial
+  xl2tpd"
 
-  xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
-  xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
-  xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
+  xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev xf86-video-intel
+  xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb xf86-video-vesa xf86-video-voodoo
+  xorg-server xorg-xinit xterm"
 
-  all="$arch $bluetooth $browser $editor $filesystem $fonts"
-  all="$all $kernel $misc $network $xorg"
+  all="$arch $bluetooth $browser $editor $filesystem"
+  all="$all $fonts $kernel $misc $network $xorg"
 
   title "Base System Setup"
 
