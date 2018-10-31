@@ -1127,9 +1127,7 @@ check_space()
 
   if [ "$avail_space" -le 40960 ]
   then
-    err "BlackArch Linux require 40 GB of free space to install! Go get a new HDD || SSD, quick!"
-  else
-    printf "Everything is ok, can continue..."
+    err "BlackArch Linux requires at least 40 GB of free space to install!"
   fi
   printf "\n"
 
@@ -1972,7 +1970,6 @@ wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
       check_space
       chroot $CHROOT pacman -S --needed --overwrite '*' blackarch
     else
-      warn "We hope that you have more 40 GB free space..."
       chroot $CHROOT pacman -S --needed --overwrite '*' $BA_GROUPS
     fi
   else
