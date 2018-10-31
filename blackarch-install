@@ -1120,7 +1120,7 @@ umount_filesystems()
 
 check_space()
 {
-  wprintf "[+] Checking available space..."
+  wprintf "[+] Checking available hard-disk space..."
   printf "\n\n"
 
   avail_space=$(df -m $ROOT_PART | grep "$ROOT_PART" | awk '{print $4}')
@@ -1984,7 +1984,7 @@ wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     done
     printf "\n"
     chroot $CHROOT pacman -S --needed --overwrite '*' blackman
-    blackman -a
+    chroot $CHROOT blackman -a
   fi
 
   return $SUCCESS
