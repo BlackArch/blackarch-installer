@@ -333,7 +333,7 @@ ask_install_mode()
         err "WTF, Live-ISO mode with Netinstall? Nope, sorry!"
       fi
     fi
-  clear
+    clear
   done
 
   return $SUCCESS
@@ -413,7 +413,7 @@ ask_keymap()
       break
     elif [ "$keymap_opt" = "$LIST_KEYMAP" ]
     then
-      localectl list-keymaps
+      localectl list-x11-keymap-layouts
       echo
     else
       clear
