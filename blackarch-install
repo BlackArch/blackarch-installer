@@ -2012,7 +2012,7 @@ dump_live_iso()
   printf "\n\n"
 
   wprintf "[+] Installing /, please wait. This will take some time..."
-  cp -ax / $CHROOT
+  rsync -ax --info=progress2 / $CHROOT
   wprintf "done\n"
 
   # clean up files
