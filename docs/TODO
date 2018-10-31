@@ -9,7 +9,8 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.x.x
 
-  [ ] new option: add optional verbose / quiet mode
+  [ ] new option: add verbose / quiet mode (ask before start). verbose = output
+      of system calls, quiet = no output, only blackarch-installer messages
   [ ] new option: if possible add 'skip' for each asking sections
   [ ] new option: add resume functionality
   [ ] new option: add restart installer option
@@ -21,9 +22,9 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.0.0
 
-  [ ] bugfix: test reported bugs, find bugs, fix them, test again everything
-  [ ] update: add help text for each section and sub-section
+  [ ] bugfix: fix (reported) bugs + test everything
   [ ] update: sort installation routines (order of sections)
+  [ ] update: add help text for each section and sub-section
   [.] update: add subtitles to titles, e.g.: >> Foo > Bar
   [x] update: check for available disk space before starting to install pkgs
   [x] update: add progressbar for offline installation mode
