@@ -343,7 +343,7 @@ ask_install_mode()
 # ask for output mode
 ask_output_mode()
 {
-  title "Output Mode"
+  title "Environment > Output Mode"
   wprintf "[+] Available output modes:"
   printf "\n
 1. Quiet (default)
@@ -354,8 +354,6 @@ ask_output_mode()
   then
     VERBOSE="/dev/stdout"
   fi
-
-  clear
 
   return $SUCCESS
 }
@@ -2229,16 +2227,17 @@ main()
 
   # output mode
   ask_output_mode
+  sleep_clear 0
 
   # locale
   ask_locale
   set_locale
-  clear
+  sleep_clear 0
 
   # keymap
   ask_keymap
   set_keymap
-  clear
+  sleep_clear 0
 
   # network
   ask_hostname
