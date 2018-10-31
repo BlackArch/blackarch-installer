@@ -1445,22 +1445,21 @@ setup_extra_packages()
 
   browser="chromium elinks firefox"
 
-  editor="vim"
+  editor="hexedit vim"
 
-  filesystem="btrfs-progs cryptsetup device-mapper dmraid dosfstools exfat-utils gptfdisk nilfs-utils
-  ntfs-3g partclone parted partimage"
+  filesystem="btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools gpart gptfdisk
+  mtools nilfs-utils ntfs-3g partclone parted partimage xfsprogs"
 
-  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation
-  xorg-font-utils xorg-fonts-alias xorg-fonts-misc xorg-mkfontdir
-  xorg-mkfontscale"
+  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-font-utils
+  xorg-fonts-alias xorg-fonts-misc xorg-mkfontdir xorg-mkfontscale"
 
   kernel="linux-api-headers linux-headers"
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
   feh git gpm grml-zsh-config haveged hdparm htop inotify-tools
   ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
-  mpv mtools p7zip rsync rtorrent scrot smartmontools strace
-  sudo tzdata unace unrar unzip usb_modeswitch zip zsh"
+  mpv p7zip rsync rtorrent screen scrot smartmontools strace
+  tmux tzdata unace unrar unzip usb_modeswitch zip zsh"
 
   network="atftp bind-tools bridge-utils darkhttpd dhclient dialog dnscrypt-proxy dnsmasq
   dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
