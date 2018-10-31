@@ -21,10 +21,10 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.0.0
 
+  [ ] bugfix: test reported bugs, find bugs, fix them, test again everything
   [ ] update: add help text for each section and sub-section
   [ ] update: sort installation routines (order of sections)
-  [ ] update: add subtitles to titles, e.g.: >> Foo > Bar
-  [.] bugfix: test reported bugs, find bugs, fix them
+  [.] update: add subtitles to titles, e.g.: >> Foo > Bar
   [x] update: check for available disk space before starting to install pkgs
   [x] update: add progressbar for offline installation mode
   [x] update: luks: use aes-xts-plain64 + 256bit for keysize
