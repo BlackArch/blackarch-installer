@@ -347,7 +347,7 @@ ask_locale()
     "$locale_opt" != "$SET_LOCALE" -a \
     "$locale_opt" != "$LIST_LOCALE" ]
   do
-    title "Locale Setup"
+    title "Environment > Locale Setup"
     wprintf "[+] Available locale options:"
     printf "\n
   1. Set a locale
@@ -377,7 +377,7 @@ ask_locale()
 # set locale to use
 set_locale()
 {
-  title "Locale Setup"
+  title "Environment > Locale Setup"
   wprintf "[?] Set locale [en_US.UTF-8]: "
   read LOCALE
 
@@ -400,7 +400,7 @@ ask_keymap()
     "$keymap_opt" != "$SET_KEYMAP" -a \
     "$keymap_opt" != "$LIST_KEYMAP" ]
   do
-    title "Keymap Setup"
+    title "Environment > Keymap Setup"
     wprintf "[+] Available keymap options:"
     printf "\n
   1. Set a keymap
@@ -431,7 +431,7 @@ ask_keymap()
 # set keymap to use
 set_keymap()
 {
-  title "Keymap Setup"
+  title "Environment > Keymap Setup"
   wprintf "[?] Set keymap [us]: "
   read KEYMAP
 
@@ -464,7 +464,7 @@ enable_pacman_multilib()
     path=""
   fi
 
-  title "Pacman Setup"
+  title "Pacman Setup > Multilib"
 
   if [ "$(uname -m)" = "x86_64" ]
   then
@@ -498,7 +498,7 @@ enable_pacman_color()
     path=""
   fi
 
-  title "Pacman Setup"
+  title "Pacman Setup > Color"
 
   wprintf "[+] Enabling color mode"
   printf "\n\n"
@@ -512,7 +512,7 @@ enable_pacman_color()
 # update pacman package database
 update_pkg_database()
 {
-  title "Pacman Setup"
+  title "Pacman Setup > Package Database"
 
   wprintf "[+] Updating pacman database"
   printf "\n\n"
@@ -544,10 +544,9 @@ ask_hostname()
 {
   while [ -z "$HOST_NAME" ]
   do
-    title "Network Setup"
-    wprintf "[?] Set your hostname: "
+    title "Network Setup > Hostname"
+    wprintf "[?] Set your fucking hostname: "
     read HOST_NAME
-    clear
   done
 
   return $SUCCESS
@@ -567,7 +566,7 @@ ask_net_if()
 {
   while true
   do
-    title "Network Setup"
+    title "Network Setup > Network Interface"
     wprintf "[+] Available network interfaces:"
     printf "\n\n"
     for i in $NET_IFS
@@ -598,7 +597,7 @@ ask_net_conf_mode()
     "$NET_CONF_MODE" != "$NET_CONF_MANUAL" -a \
     "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
   do
-    title "Network Setup"
+    title "Network Setup > Network Interface"
     wprintf "[+] Network interface configuration:"
     printf "\n
   1. Auto DHCP (use this for auto connect via dhcp on selected interface)
@@ -621,7 +620,7 @@ ask_net_addr()
     "$HOST_IPV4" = "" -o "$GATEWAY" = "" -o "$SUBNETMASK" = "" \
     -o "$BROADCAST" = "" -o "$NAMESERVER" = "" ]
   do
-    title "Network Setup"
+    title "Network Setup > Network Interface (manual)"
     wprintf "[+] Configuring network interface '$NET_IF' via USER: "
     printf "\n
   > Host ipv4
@@ -652,7 +651,7 @@ net_conf_manual()
 {
   ip addr flush dev $NET_IF
   ip link set $NET_IF up
-  ip addr add $HOST_IPV4/$SUBNETMASK broadcast $BROADCAST dev $NET_IF
+  ip addr add "$HOST_IPV4/$SUBNETMASK" broadcast $BROADCAST dev $NET_IF
   ip route add default via $GATEWAY
   echo "nameserver $NAMESERVER" > /etc/resolv.conf
 
@@ -663,13 +662,13 @@ net_conf_manual()
 # auto (dhcp) network interface configuration
 net_conf_auto()
 {
-  opts="-h noleak -i noleak -v ,noleak -I noleak"
+  opts="-h noleak -i noleak -v ,noleak -I noleak -t 10"
 
-  title "Network Setup"
+  title "Network Setup > Network Interface (auto)"
   wprintf "[+] Configuring network interface '$NET_IF' via DHCP: "
   printf "\n\n"
 
-  dhcpcd $opts -i $NET_IF
+  dhcpcd $opts -i $NET_IF > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -680,7 +679,7 @@ ask_wlan_data()
 {
   while [ "$WLAN_SSID" = "" -o "$WLAN_PASSPHRASE" = "" ]
   do
-    title "Network Setup"
+    title "Network Setup > WiFi"
     wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
     printf "\n
   > W-LAN SSID
@@ -701,20 +700,20 @@ ask_wlan_data()
 net_conf_wlan()
 {
   wpasup="$(mktemp)"
-  dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak"
+  dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak -t 10"
 
-  title "Network Setup"
+  title "Network Setup > WiFi"
   wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
   printf "\n\n"
 
   wpa_passphrase "$WLAN_SSID" "$WLAN_PASSPHRASE" > $wpasup
-  wpa_supplicant -B -c $wpasup -i $NET_IF
+  wpa_supplicant -B -c $wpasup -i $NET_IF > $VERBOSE 2>&1
 
   warn "We need to wait a bit for wpa_supplicant and dhcpcd"
 
   sleep 10
 
-  dhcpcd $dhcp_opts -i $NET_IF
+  dhcpcd $dhcp_opts -i $NET_IF > $VERBOSE 2>&1
 
   sleep 10
 
@@ -725,11 +724,10 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-  title "Network Setup"
+  title "Network Setup > Connection Check"
   wprintf "[+] Checking for Internet connection..."
 
-  if ! wget -q --tries=5 --timeout=10 --spider \
-    http://github.com > /dev/null 2>&1
+  if ! wget -q --tries=5 --timeout=10 --spider http://github.com > $VERBOSE 2>&1
   then
     err "No Internet connection! Check your network (settings)."
   fi
@@ -743,7 +741,7 @@ ask_luks()
 {
   while [ "$LUKS" = "" ]
   do
-    if confirm "Hard Drive Setup" "[?] Full encrypted root [y/n]: "
+    if confirm "Hard Drive Setup > LUKS" "[?] Full encrypted root [y/n]: "
     then
       LUKS=$TRUE
       echo
@@ -802,14 +800,14 @@ ask_hd_dev()
 # ask user to create partitions using cfdisk
 ask_cfdisk()
 {
-  if confirm "Hard Drive Setup" "[?] Create partitions with cfdisk (root and \
-boot, optional swap) [y/n]: "
+  if confirm "Hard Drive Setup > Partitions" "[?] Create partitions with \
+cfdisk (root and boot, optional swap) [y/n]: "
   then
     clear
     zero_part
   else
     echo
-    warn "You chosed not to make partitions. Make sure you have them already configured."
+    warn "No partitions chosed? Make sure you have them already configured."
   fi
 
   return $SUCCESS
@@ -853,7 +851,7 @@ ask_partitions()
     "$BOOT_FS_TYPE" = "" -o \
     "$ROOT_FS_TYPE" = "" ]
   do
-    title "Hard Drive Setup"
+    title "Hard Drive Setup > Partitions"
     wprintf "[+] Created partitions:"
     printf "\n\n"
 
@@ -892,7 +890,7 @@ print_partitions()
 
   while true
   do
-    title "Hard Drive Setup"
+    title "Hard Drive Setup > Partitions"
     wprintf "[+] Current Partition table"
     printf "\n
   > /boot   : $BOOT_PART ($BOOT_FS_TYPE)
@@ -923,8 +921,8 @@ print_partitions()
 # ask user and get confirmation for formatting
 ask_formatting()
 {
-  if confirm "Hard Drive Setup" "[?] Formatting partitions. Are you sure? \
-No crying afterwards? [y/n]: "
+  if confirm "Hard Drive Setup > Partition Formatting" "[?] Formatting \
+partitions. Are you sure? No crying afterwards? [y/n]: "
   then
     return $SUCCESS
   else
@@ -941,7 +939,7 @@ make_luks_partition()
 {
   part="$1"
 
-  title "Hard Drive Setup"
+    title "Hard Drive Setup > Crypto Partition Creation"
 
   wprintf "[+] Creating LUKS partition"
   printf "\n\n"
@@ -959,7 +957,7 @@ open_luks_partition()
   part="$1"
   name="$2"
 
-  title "Hard Drive Setup"
+  title "Hard Drive Setup > Crypto Partition Creation"
 
   wprintf "[+] Opening LUKS partition"
   printf "\n\n"
@@ -972,7 +970,7 @@ open_luks_partition()
 # create swap partition
 make_swap_partition()
 {
-  title "Hard Drive Setup"
+  title "Hard Drive Setup > Partition Creation (swap)"
 
   wprintf "[+] Creating SWAP partition"
   printf "\n\n"
@@ -991,7 +989,7 @@ make_root_partition()
     sleep_clear 1
     open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
     sleep_clear 1
-    title "Hard Drive Setup"
+    title "Hard Drive Setup > Partition Creation (root)"
     wprintf "[+] Creating encrypted ROOT partition"
     printf "\n\n"
     if [ "$ROOT_FS_TYPE" = "btrfs" ]
@@ -1004,7 +1002,7 @@ make_root_partition()
     fi
     sleep_clear 1
   else
-    title "Hard Drive Setup"
+    title "Hard Drive Setup > Partition Creation"
     wprintf "[+] Creating ROOT partition"
     printf "\n\n"
     if [ "$ROOT_FS_TYPE" = "btrfs" ]
@@ -1025,7 +1023,7 @@ make_root_partition()
 # make and format boot partition
 make_boot_partition()
 {
-  title "Hard Drive Setup"
+  title "Hard Drive Setup > Partition Creation (boot)"
 
   wprintf "[+] Creating BOOT partition"
   printf "\n\n"
@@ -1063,7 +1061,7 @@ make_partitions()
 # mount filesystems
 mount_filesystems()
 {
-  title "Hard Drive Setup"
+  title "Hard Drive Setup > Mount"
 
   wprintf "[+] Mounting filesystems"
   printf "\n\n"
@@ -1094,7 +1092,7 @@ umount_filesystems()
 
   if [ "$routine" = "harddrive" ]
   then
-    title "Hard Drive Setup"
+    title "Hard Drive Setup > Unmount"
   else
     title "Game Over"
   fi
@@ -1519,6 +1517,9 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
+  # copy mirror list to chroot env
+  pass_mirror_conf
+
   if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
   then
     dump_live_iso
@@ -1650,7 +1651,7 @@ ask_mirror_arch()
 {
   declare mirrold="cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup"
 
-  if confirm "ArchLinux Mirrorlist Setup" \
+  if confirm "Pacman Setup > ArchLinux Mirrorlist" \
     "[+] Worldwide mirror will be used\n\n[?] Look for the best server [y/n]: "
   then
     printf "\n"
@@ -2196,9 +2197,8 @@ self_updater()
 # controller and program flow
 main()
 {
-  clear
-
   # do some ENV checks
+  sleep_clear 0
   check_uid
   check_env
   check_iso_type
@@ -2218,6 +2218,8 @@ main()
 
   # network
   ask_hostname
+  sleep_clear 0
+
   if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
     get_net_ifs
@@ -2246,14 +2248,15 @@ main()
     sleep_clear 1
     check_inet_conn
     sleep_clear 1
-    self_updater
-
-    # pacman
-    sleep_clear 1
-    ask_mirror_arch
-    sleep_clear 1
-    update_pacman
   fi
+
+  # self updater
+  self_updater
+
+  # pacman
+  ask_mirror_arch
+  sleep_clear 1
+  update_pacman
 
   # hard drive
   get_hd_devs
@@ -2274,8 +2277,6 @@ main()
   sleep_clear 1
 
   # arch linux
-  pass_mirror_conf
-  sleep_clear 1
   setup_base_system
   sleep_clear 1
   setup_time
