@@ -15,12 +15,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: go back to previous section
   [ ] new option: ask for optional partitions
   [ ] update: check/test uefi installation (especially grub stuff)
+  [] update: add help text for each section and sub-section
 
 
 ===> 1.0
 
   [.] bugfix: fix (reported) bugs, test everything, fix more bugs...
-  [.] update: add help text for each section and sub-section
   [x] update: sort installation routines (order of sections) (was fine:))
   [x] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
   [x] update: add subtitles to titles, e.g.: >> Foo > Bar
