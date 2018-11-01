@@ -408,6 +408,8 @@ set_locale()
     sleep 1
     LOCALE="en_US.UTF-8"
   fi
+  localectl set-locale "LANG=$LOCALE"
+  check $? "setting locale"
 
   return $SUCCESS
 }
@@ -459,14 +461,13 @@ set_keymap()
   if [ -z "$KEYMAP" ]
   then
     echo
-    warn "Setting default keymap: US"
+    warn "Setting default keymap: us"
     sleep 1
-    localectl set-keymap --no-convert "us"
-    loadkeys "us"
+    KEYMAP="us"
   fi
-  check $? "setting keymap"
-  localectl set-keymap --no-convert "${KEYMAP}"
+  localectl set-keymap --no-convert "$KEYMAP"
   loadkeys "$KEYMAP" > $VERBOSE 2>&1
+  check $? "setting keymap"
 
   return $SUCCESS
 }
