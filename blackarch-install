@@ -1433,7 +1433,7 @@ setup_testuser()
 # setup user account, password and environment
 setup_user()
 {
-  user="$1"
+  user="$(echo $1 | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]' | cut -c 1-32)"
 
   title "Base System Setup > User"
 
