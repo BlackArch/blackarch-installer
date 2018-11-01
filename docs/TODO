@@ -23,7 +23,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] bugfix: fix (reported) bugs + test everything
   [ ] update: sort installation routines (order of sections)
   [ ] update: add help text for each section and sub-section
-  [.] update: add subtitles to titles, e.g.: >> Foo > Bar
+  [x] update: add subtitles to titles, e.g.: >> Foo > Bar
   [x] new option: add verbose / quiet mode (ask before start). verbose = output
       of system calls, quiet = no output, only blackarch-installer messages
   [x] update: check for available disk space before starting to install pkgs

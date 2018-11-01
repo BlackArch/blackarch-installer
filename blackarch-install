@@ -1174,7 +1174,7 @@ install_base_packages()
 # setup /etc/resolv.conf
 setup_resolvconf()
 {
-  title "Base System Setup > /etc"
+  title "Base System Setup > Etc"
 
   wprintf "[+] Setting up /etc/resolv.conf"
   printf "\n\n"
