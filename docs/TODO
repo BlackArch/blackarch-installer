@@ -19,8 +19,8 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.0
 
-  [ ] update: add help text for each section and sub-section
   [.] bugfix: fix (reported) bugs, test everything, fix more bugs...
+  [.] update: add help text for each section and sub-section
   [x] update: sort installation routines (order of sections) (was fine:))
   [x] new option: ask+print locale to generate/use (atm default: en_US-UTF.8)
   [x] update: add subtitles to titles, e.g.: >> Foo > Bar
