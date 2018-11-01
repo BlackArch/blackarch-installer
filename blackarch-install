@@ -1143,9 +1143,6 @@ umount_filesystems()
 
 check_space()
 {
-  wprintf "[+] Checking available hard-disk space..."
-  printf "\n\n"
-
   avail_space=$(df -m $ROOT_PART | grep "$ROOT_PART" | awk '{print $4}')
 
   if [ "$avail_space" -le 40960 ]
@@ -2010,12 +2007,13 @@ blackarch-tunnel blackarch-unpacker blackarch-voip blackarch-webapp
 blackarch-windows blackarch-wireless \n\n"
 wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read BA_GROUPS
+    printf "\n\n"
+    warn "This can take a while, please wait..."
     if [ -z "$BA_GROUPS" ]
     then
       printf "\n"
       check_space
       printf "\n\n"
-      warn "Installation can take a while, please wait..."
       chroot $CHROOT pacman -S --needed --overwrite '*' blackarch \
         > $VERBOSE 2>&1
     else
