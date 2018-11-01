@@ -1166,7 +1166,7 @@ install_base_packages()
   printf "\n"
 
   pacstrap $CHROOT base base-devel terminus-font > $VERBOSE 2>&1
-  chroot $CHROOT pacman -Syy --overwrite '*' > $VERBOSE 2>&1
+  chroot $CHROOT pacman -Syy --noconfirm --overwrite '*' > $VERBOSE 2>&1
 
   return $SUCCESS
 }
