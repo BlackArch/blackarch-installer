@@ -1733,6 +1733,7 @@ run_strap_sh()
 
   wprintf "[+] Downloading and executing strap.sh"
   printf "\n\n"
+  warn "This can take a while, please wait..."
 
   curl -s -o $strap_sh "https://www.blackarch.org/strap.sh" > $VERBOSE 2>&1
   sha1="$(sha1sum $strap_sh | awk '{print $1}')"
@@ -2007,7 +2008,7 @@ blackarch-tunnel blackarch-unpacker blackarch-voip blackarch-webapp
 blackarch-windows blackarch-wireless \n\n"
 wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read BA_GROUPS
-    printf "\n\n"
+    printf "\n"
     warn "This can take a while, please wait..."
     if [ -z "$BA_GROUPS" ]
     then
