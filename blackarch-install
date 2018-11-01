@@ -1547,9 +1547,6 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
-  # copy mirror list to chroot env
-  pass_mirror_conf
-
   if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
   then
     dump_live_iso
@@ -1558,6 +1555,8 @@ setup_base_system()
 
   if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
+    pass_mirror_conf # copy mirror list to chroot env
+
     setup_resolvconf
     sleep_clear 1
 
