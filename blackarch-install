@@ -159,6 +159,9 @@ WLAN_SSID=""
 # wlan passphrase
 WLAN_PASSPHRASE=""
 
+# check boot mode
+BOOT_MODE=""
+
 # check type of ISO (live? netinst?)
 ISO_TYPE=""
 
@@ -227,6 +230,20 @@ banner()
   done
 
   printf "${REDB}%*s${NC}\n\n\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
+
+  return $SUCCESS
+}
+
+
+# check boot mode
+check_boot_mode()
+{
+  if [ "$(efivar --list 2> /dev/null)" ]
+  then
+     BOOT_MODE="uefi"
+  else
+     BOOT_MODE="bios"
+  fi
 
   return $SUCCESS
 }
@@ -2259,6 +2276,7 @@ main()
   sleep_clear 0
   check_uid
   check_env
+  check_boot_mode
   check_iso_type
 
   # install mode
