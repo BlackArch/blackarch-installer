@@ -364,7 +364,7 @@ ask_output_mode()
   wprintf "[+] Available output modes:"
   printf "\n
   1. Quiet (default)
-  2. Verbose\n\n"
+  2. Verbose (output of system commands: mkfs, pacman, etc.)\n\n"
   wprintf "[?] Make a choice: "
   read output_opt
   if [ "$output_opt" = 2 ]
