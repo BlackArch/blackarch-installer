@@ -1163,6 +1163,7 @@ install_base_packages()
   wprintf "[+] Installing ArchLinux base packages"
   printf "\n\n"
   warn "This can take a while, please wait..."
+  printf "\n"
 
   pacstrap $CHROOT base base-devel terminus-font > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --overwrite '*' > $VERBOSE 2>&1
@@ -1295,6 +1296,7 @@ setup_initramfs()
   fi
 
   warn "This can take a while, please wait..."
+  printf "\n"
   chroot $CHROOT mkinitcpio -p linux > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1532,6 +1534,7 @@ setup_extra_packages()
   \n"
 
   warn "This can take a while, please wait..."
+  printf "\n"
   sleep 2
 
   chroot $CHROOT pacman -S --needed --overwrite '*' --noconfirm $(echo $all) \
@@ -1628,7 +1631,7 @@ update_etc()
 {
   title "BlackArch Linux Setup > Etc files"
 
-  wprintf "[+] Updating /etc files and setting up iptables"
+  wprintf "[+] Updating /etc files"
   printf "\n\n"
 
   # /etc/*
@@ -1987,6 +1990,11 @@ setup_blackarch_tools()
 {
   foo=5
 
+  if [ "$VERBOSE" = "/dev/null" ]
+  then
+    noconfirm='--noconfirm'
+  fi
+
   title "BlackArch Linux Setup > Tools"
 
   wprintf "[+] Installing BlackArch Linux packages (grab a coffee)"
@@ -2016,10 +2024,10 @@ blackarch-windows blackarch-wireless \n\n"
       printf "\n"
       check_space
       printf "\n\n"
-      chroot $CHROOT pacman -S --needed --overwrite '*' blackarch \
+      chroot $CHROOT pacman -S --needed --noconfirm --overwrite '*' blackarch \
         > $VERBOSE 2>&1
     else
-      chroot $CHROOT pacman -S --needed --overwrite '*' $BA_GROUPS \
+      chroot $CHROOT pacman -S --needed --noconfirm --overwrite '*' $BA_GROUPS \
         > $VERBOSE 2>&1
     fi
   else
@@ -2033,7 +2041,8 @@ blackarch-windows blackarch-wireless \n\n"
       foo=`expr $foo - 1`
     done
     printf "\n"
-    chroot $CHROOT pacman -S --needed --overwrite '*' blackman > $VERBOSE 2>&1
+    chroot $CHROOT pacman -S --needed --overwrite '*' $noconfirm blackman \
+      > $VERBOSE 2>&1
     chroot $CHROOT blackman -a > $VERBOSE 2>&1
   fi
 
