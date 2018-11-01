@@ -1394,7 +1394,7 @@ EOF
       "$CHROOT/etc/default/grub"
     chroot $CHROOT grub-install --target=i386-pc $HD_DEV > $VERBOSE 2>&1
     chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg > $VERBOSE 2>&1
-    sed -i 's/Arch Linux/BlackArch Linux/g' "$CHROOT/boot/grub/grub.cfg"
+    #sed -i 's/Arch Linux/BlackArch Linux/g' "$CHROOT/boot/grub/grub.cfg"
   fi
 
   return $SUCCESS
