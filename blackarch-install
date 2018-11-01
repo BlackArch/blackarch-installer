@@ -1167,7 +1167,7 @@ install_base_packages()
   printf "\n"
 
   pacstrap $CHROOT base base-devel terminus-font > $VERBOSE 2>&1
-  chroot $CHROOT pacman -Syy --noconfirm --overwrite '*' > $VERBOSE 2>&1
+  chroot $CHROOT pacman -Syy --noconfirm --overwrite=* > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1376,7 +1376,7 @@ EOF
 
     if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
     then
-      chroot $CHROOT pacman -S grub --noconfirm --overwrite '*' --needed \
+      chroot $CHROOT pacman -S grub --noconfirm --overwrite=* --needed \
         > $VERBOSE 2>&1
     else
       mkdir -p "$CHROOT/boot/grub"
@@ -1537,7 +1537,7 @@ setup_extra_packages()
   printf "\n"
   sleep 2
 
-  chroot $CHROOT pacman -S --needed --overwrite '*' --noconfirm $(echo $all) \
+  chroot $CHROOT pacman -S --needed --overwrite=* --noconfirm $(echo $all) \
     > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1787,7 +1787,7 @@ setup_display_manager()
   printf "\n"
 
   # install lxdm packages
-  chroot $CHROOT pacman -S lxdm --needed --overwrite '*' --noconfirm \
+  chroot $CHROOT pacman -S lxdm --needed --overwrite=* --noconfirm \
     > $VERBOSE 2>&1
 
   # config files
@@ -1827,7 +1827,7 @@ setup_window_managers()
     echo
     case $choice in
       1)
-        chroot $CHROOT pacman -S awesome --needed --overwrite '*' --noconfirm \
+        chroot $CHROOT pacman -S awesome --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
         cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
@@ -1837,24 +1837,24 @@ setup_window_managers()
         break
         ;;
       2)
-        chroot $CHROOT pacman -S dwm --needed --overwrite '*' --noconfirm \
+        chroot $CHROOT pacman -S dwm --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
         break
         ;;
       3)
-        chroot $CHROOT pacman -S fluxbox --needed --overwrite '*' --noconfirm \
+        chroot $CHROOT pacman -S fluxbox --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
         break
         ;;
       4)
         chroot $CHROOT pacman -S i3-wm i3status i3lock dmenu --needed \
-          --overwrite '*' --noconfirm > $VERBOSE 2>&1
+          --overwrite=* --noconfirm > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
         break
         ;;
       5)
-        chroot $CHROOT pacman -S openbox --needed --overwrite '*' --noconfirm \
+        chroot $CHROOT pacman -S openbox --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
         cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
@@ -1862,14 +1862,14 @@ setup_window_managers()
         break
         ;;
       6)
-        chroot $CHROOT pacman -S spectrwm --needed --overwrite '*' --noconfirm \
+        chroot $CHROOT pacman -S spectrwm --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
         break
         ;;
       *)
         chroot $CHROOT pacman -S fluxbox openbox awesome i3-wm i3status \
-          i3lock dwm spectrwm --needed --overwrite '*' --noconfirm \
+          i3lock dwm spectrwm --needed --overwrite=* --noconfirm \
           > $VERBOSE 2>&1
 
         # awesome
@@ -1929,7 +1929,7 @@ setup_vbox_utils()
   printf "\n\n"
 
   chroot $CHROOT pacman -S virtualbox-guest-utils \
-    virtualbox-guest-modules-arch --overwrite '*' --needed --noconfirm \
+    virtualbox-guest-modules-arch --overwrite=* --needed --noconfirm \
     > $VERBOSE 2>&1
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
@@ -1962,7 +1962,7 @@ setup_vmware_utils()
   printf "\n\n"
 
   chroot $CHROOT pacman -S open-vm-tools xf86-video-vmware \
-    xf86-input-vmmouse --overwrite '*' --needed --noconfirm \
+    xf86-input-vmmouse --overwrite=* --needed --noconfirm \
     > $VERBOSE 2>&1
 
   chroot $CHROOT systemctl enable vmware-vmblock-fuse.service > $VERBOSE 2>&1
@@ -2023,10 +2023,10 @@ blackarch-windows blackarch-wireless \n\n"
       printf "\n"
       check_space
       printf "\n\n"
-      chroot $CHROOT pacman -S --needed --noconfirm --overwrite '*' blackarch \
+      chroot $CHROOT pacman -S --needed --noconfirm --overwrite=* blackarch \
         > $VERBOSE 2>&1
     else
-      chroot $CHROOT pacman -S --needed --noconfirm --overwrite '*' $BA_GROUPS \
+      chroot $CHROOT pacman -S --needed --noconfirm --overwrite=* $BA_GROUPS \
         > $VERBOSE 2>&1
     fi
   else
@@ -2040,7 +2040,7 @@ blackarch-windows blackarch-wireless \n\n"
       foo=`expr $foo - 1`
     done
     printf "\n"
-    chroot $CHROOT pacman -S --needed --overwrite '*' $noconfirm blackman \
+    chroot $CHROOT pacman -S --needed --overwrite=* $noconfirm blackman \
       > $VERBOSE 2>&1
     chroot $CHROOT blackman -a > $VERBOSE 2>&1
   fi
@@ -2242,7 +2242,7 @@ self_updater()
   then
     printf "\n\n"
     warn "A new version is available! Going to fuck, err, update myself."
-    pacman -S --overwrite '*' --noconfirm blackarch-installer > $VERBOSE 2>&1
+    pacman -S --overwrite=* --noconfirm blackarch-installer > $VERBOSE 2>&1
     wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
     chmod +x /usr/share/blackarch-installer/blackarch-install
     exit $SUCCESS
