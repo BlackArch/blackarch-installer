@@ -1141,6 +1141,7 @@ umount_filesystems()
 }
 
 
+# check for necessary space
 check_space()
 {
   avail_space=$(df -m $ROOT_PART | grep "$ROOT_PART" | awk '{print $4}')
@@ -1149,7 +1150,6 @@ check_space()
   then
     err "BlackArch Linux requires at least 40 GB of free space to install!"
   fi
-  printf "\n"
 
   return $SUCCESS
 }
@@ -1694,6 +1694,7 @@ ask_mirror_arch()
   then
     printf "\n"
     warn "This may take time depending on your connection"
+    printf "\n"
     $mirrold
     pacman -Syy --noconfirm > $VERBOSE 2>&1
     pacman -S --noconfirm pacman-contrib > $VERBOSE 2>&1
@@ -2006,7 +2007,7 @@ blackarch-proxy blackarch-recon blackarch-reversing blackarch-scanner
 blackarch-sniffer blackarch-social blackarch-spoof blackarch-threat-model
 blackarch-tunnel blackarch-unpacker blackarch-voip blackarch-webapp
 blackarch-windows blackarch-wireless \n\n"
-wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
+    wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read BA_GROUPS
     printf "\n"
     warn "This can take a while, please wait..."
