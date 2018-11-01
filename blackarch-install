@@ -2060,7 +2060,7 @@ update_user_groups()
   # TODO: more to add here
   if [ $VBOX_SETUP -eq $TRUE ]
   then
-    chroot $CHROOT usermod -G "$user,vboxusers" > $VERBOSE 2>&1
+    chroot $CHROOT usermod -aG "vboxsf" "$user" > $VERBOSE 2>&1
   fi
 
   return $SUCCESS
