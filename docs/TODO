@@ -18,7 +18,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check/test uefi installation (especially grub stuff)
 
 
-===> 1.0.0
+===> 1.0
 
   [ ] bugfix: fix (reported) bugs + test everything
   [ ] update: sort installation routines (order of sections)
