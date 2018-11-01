@@ -1698,7 +1698,7 @@ ask_mirror_arch()
     printf "\n"
     $mirrold
     pacman -Syy --noconfirm > $VERBOSE 2>&1
-    pacman -S --needed --noconfirm glibc lib32-glibc python reflector > $VERBOSE 2>&1
+    pacman -S --needed --noconfirm glibc lib32-glibc openssl python reflector > $VERBOSE 2>&1
     reflector --verbose --latest 10 --protocol https --sort rate \
       --save /etc/pacman.d/mirrorlist > $VERBOSE 2>&1
   else
