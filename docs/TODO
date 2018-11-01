@@ -15,7 +15,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] new option: go back to previous section
   [ ] new option: ask for optional partitions
   [ ] update: check/test uefi installation (especially grub stuff)
-  [] update: add help text for each section and sub-section
+  [ ] update: add help text for each section if feasible
 
 
 ===> 1.0
