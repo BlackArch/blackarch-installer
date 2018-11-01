@@ -1481,7 +1481,7 @@ setup_user()
 # install extra (missing) packages
 setup_extra_packages()
 {
-  arch="arch-install-scripts archlinux-keyring pkgfile"
+  arch="arch-install-scripts pkgfile"
 
   bluetooth="bluez bluez-firmware bluez-hid2hci bluez-tools bluez-utils"
 
@@ -1490,18 +1490,17 @@ setup_extra_packages()
   editor="hexedit vim"
 
   filesystem="btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools gpart gptfdisk
-  mtools nilfs-utils ntfs-3g partclone parted partimage xfsprogs"
+  mtools nilfs-utils ntfs-3g partclone parted partimage"
 
-  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-font-utils
-  xorg-fonts-alias xorg-fonts-misc xorg-mkfontdir xorg-mkfontscale"
+  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-fonts-alias xorg-fonts-misc"
 
-  kernel="linux-api-headers linux-headers"
+  kernel="linux-headers"
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
   feh git gpm grml-zsh-config haveged hdparm htop inotify-tools
   ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
   mpv p7zip rsync rtorrent screen scrot smartmontools strace
-  tmux tzdata unace unrar unzip usb_modeswitch zip zsh"
+  tmux unace unrar unzip usb_modeswitch zip zsh"
 
   network="atftp bind-tools bridge-utils darkhttpd dhclient dialog dnscrypt-proxy dnsmasq
   dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
