@@ -1162,7 +1162,12 @@ umount_filesystems()
 # check for necessary space
 check_space()
 {
-  avail_space=$(df -m $ROOT_PART | grep "$ROOT_PART" | awk '{print $4}')
+  if [ $LUKS -eq $TRUE ]
+  then
+    avail_space=$(df -m | grep "/dev/mapper/$CRYPT_ROOT" | awk '{print $4}')
+  else
+    avail_space=$(df -m | grep "$ROOT_PART" | awk '{print $4}')
+  fi
 
   if [ $avail_space -le 40960 ]
   then
