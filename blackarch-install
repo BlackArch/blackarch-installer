@@ -2118,9 +2118,11 @@ dump_live_iso()
 
   check_space
 
-  wprintf "[+] Installing /, please wait. This will take some time..."
+  wprintf "[+] Installing the backdoors to /"
   printf "\n\n"
-  rsync -aWx --info=progress2 / $CHROOT > $VERBOSE 2>&1
+  warn "This can take a while, please wait... "
+  printf "\n\n"
+  rsync -aWx --human-readable --info=progress2 / $CHROOT > $VERBOSE 2>&1
   wprintf "done\n"
 
   # clean up files
