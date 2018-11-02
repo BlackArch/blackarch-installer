@@ -1761,6 +1761,7 @@ run_strap_sh()
   wprintf "[+] Downloading and executing strap.sh"
   printf "\n\n"
   warn "This can take a while, please wait..."
+  printf "\n"
 
   curl -s -o $strap_sh "https://www.blackarch.org/strap.sh" > $VERBOSE 2>&1
   sha1="$(sha1sum $strap_sh | awk '{print $1}')"
