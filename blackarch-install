@@ -2121,9 +2121,9 @@ dump_live_iso()
   wprintf "[+] Installing the backdoors to /"
   printf "\n\n"
   warn "This can take a while, please wait... "
-  printf "\n\n"
+  printf "\n"
   rsync -aWx --human-readable --info=progress2 / $CHROOT > $VERBOSE 2>&1
-  wprintf "done\n"
+  wprintf "[+] Installation done!\n"
 
   # clean up files
   wprintf "[+] Cleaning Live Environment files, please wait... "
