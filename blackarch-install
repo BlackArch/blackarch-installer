@@ -1409,10 +1409,10 @@ EOF
 
     if [ $LUKS = $TRUE ]
     then
-      sed -i "s|quiet|cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT|" \
+      sed -i "s|quiet|cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT quiet|" \
         "$CHROOT/etc/default/grub"
     fi
-    sed -i 's/quiet//g' "$CHROOT/etc/default/grub"
+    #sed -i 's/quiet//g' "$CHROOT/etc/default/grub"
     sed -i 's/Arch/BlackArch/g' "$CHROOT/etc/default/grub"
     echo "GRUB_BACKGROUND=\"/boot/grub/splash.png\"" >> \
       "$CHROOT/etc/default/grub"
