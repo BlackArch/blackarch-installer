@@ -1003,7 +1003,8 @@ open_luks_partition()
 
   wprintf "[+] Opening LUKS partition"
   printf "\n\n"
-  cryptsetup open $part $name > $VERBOSE 2>&1
+  cryptsetup open $part $name > $VERBOSE 2>&1 ||
+    err "Could not create filesystem"
 
   return $SUCCESS
 }
@@ -1213,7 +1214,7 @@ setup_resolvconf()
 # setup fstab
 setup_fstab()
 {
-  title "Base System Setup > /etc"
+  title "Base System Setup > Etc"
 
   wprintf "[+] Setting up /etc/fstab"
   printf "\n\n"
