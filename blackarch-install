@@ -2335,15 +2335,14 @@ main()
     sleep_clear 1
     check_inet_conn
     sleep_clear 1
+    # self updater
+    self_updater
+
+    # pacman
+    ask_mirror_arch
+    sleep_clear 1
+    update_pacman
   fi
-
-  # self updater
-  self_updater
-
-  # pacman
-  ask_mirror_arch
-  sleep_clear 1
-  update_pacman
 
   # hard drive
   get_hd_devs
