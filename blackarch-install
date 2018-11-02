@@ -1514,18 +1514,19 @@ setup_extra_packages()
 
   editor="hexedit vim"
 
-  filesystem="btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools gpart gptfdisk
-  mtools nilfs-utils ntfs-3g partclone parted partimage"
+  filesystem="btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools
+  gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage"
 
-  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-fonts-alias xorg-fonts-misc"
+  fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-fonts-alias
+  xorg-fonts-misc"
 
   kernel="linux-headers"
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
-  feh git gpm grml-zsh-config haveged hdparm htop inotify-tools
-  ipython irssi linux-atm lsof mercurial mesa mlocate moreutils
-  mpv p7zip rsync rtorrent screen scrot smartmontools strace
-  tmux unace unrar unzip usb_modeswitch zip zsh"
+  feh git gpm grml-zsh-config haveged hdparm htop inotify-tools ipython irssi
+  intel-iucode linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
+  rtorrent screen scrot smartmontools strace tmux unace unrar unzip
+  usb_modeswitch zip zsh"
 
   network="atftp bind-tools bridge-utils darkhttpd dhclient dialog dnscrypt-proxy dnsmasq
   dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
@@ -1533,9 +1534,9 @@ setup_extra_packages()
   socat vpnc wicd wicd-gtk wireless_tools wpa_actiond wpa_supplicant wvdial
   xl2tpd"
 
-  xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev xf86-video-intel
-  xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb xf86-video-vesa xf86-video-voodoo
-  xorg-server xorg-xinit xterm"
+  xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
+  xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
+  xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
 
   all="$arch $bluetooth $browser $editor $filesystem"
   all="$all $fonts $kernel $misc $network $xorg"
