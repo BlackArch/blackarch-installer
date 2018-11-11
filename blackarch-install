@@ -1524,7 +1524,7 @@ setup_extra_packages()
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
   feh git gpm grml-zsh-config haveged hdparm htop inotify-tools ipython irssi
-  intel-iucode linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
+  intel-ucode linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
   rtorrent screen scrot smartmontools strace tmux unace unrar unzip
   usb_modeswitch zip zsh"
 
