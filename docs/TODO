@@ -18,6 +18,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.0.2
+
+  [x] remove a package related to zsh
+
+
 ===> 1.0.1
 
   [x] bugfix: github commit id: 2f69fc5d60917ba26e50240bdb341ba0a4cab511
