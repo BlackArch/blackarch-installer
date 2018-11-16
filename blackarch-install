@@ -1755,7 +1755,7 @@ pass_mirror_conf()
 run_strap_sh()
 {
   strap_sh="/tmp/strap.sh"
-  orig_sha1="$(curl -s https://blackarch.org/checksums/strap)"
+  orig_sha1="$(curl -s https://blackarch.org/checksums/strap | awk '{print $1}')"
 
   title "BlackArch Linux Setup > Strap"
 
