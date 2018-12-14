@@ -18,6 +18,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.0.5
+
+  [x] bugfix: remove broken alias
+
+
 ===> 1.0.4
 
   [x] update: use single quotes instead of double quotes to tell the
