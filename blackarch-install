@@ -1253,7 +1253,7 @@ setup_locale()
 # setup timezone
 setup_time()
 {
-  if confirm "Base System Setup > Timezone" "[?] Defalt: UTC. Choose other timezone [y/n]: "
+  if confirm "Base System Setup > Timezone" "[?] Default: UTC. Choose other timezone [y/n]: "
   then
     for t in $(timedatectl list-timezones)
     do
@@ -1486,7 +1486,7 @@ setup_user()
     cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
     cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
-    chroot $CHROOT chown -R $user:$user "/home/$user/.*" > $VERBOSE 2>&1
+    chroot $CHROOT chown -R $user:$user "/home/$user" > $VERBOSE 2>&1
   fi
 
   # password
