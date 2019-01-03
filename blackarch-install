@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v1.0.5"
+VERSION="v1.0.6"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1422,7 +1422,7 @@ EOF
     cp -f "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
 
     chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg > $VERBOSE 2>&1
-    
+
   fi
 
   return $SUCCESS

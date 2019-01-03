@@ -18,6 +18,13 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.0.6
+
+  [x] bugfix: typo fixes.
+  [x] update: raise a warning() rather than error() when < 40GB HD space
+  [x] update: data/ clean-ups
+
+
 ===> 1.0.5
 
   [x] bugfix: remove broken alias
@@ -27,6 +34,7 @@ ChangeLog and TODO list for blackarch-installer
 
   [x] update: use single quotes instead of double quotes to tell the
       overwrite option.
+
 
 ===> 1.0.3
 
