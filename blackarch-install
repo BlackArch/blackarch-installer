@@ -1175,7 +1175,7 @@ check_space()
 
   if [ $avail_space -le 40960 ]
   then
-    err "BlackArch Linux requires at least 40 GB of free space to install!"
+    warn "BlackArch Linux requires at least 40 GB of free space to install!"
   fi
 
   return $SUCCESS
