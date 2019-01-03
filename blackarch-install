@@ -905,7 +905,7 @@ ask_partitions()
 
     wprintf "[?] Boot partition (/dev/sdXY): "
     read BOOT_PART
-    wprintf "[?] Boot FS type (ext2, ext3, ext4, btrfs, fat32): "
+    wprintf "[?] Boot FS type (ext2, ext3, ext4, fat32): "
     read BOOT_FS_TYPE
     wprintf "[?] Root partition (/dev/sdXY): "
     read ROOT_PART
@@ -1123,7 +1123,10 @@ mount_filesystems()
   mount $BOOT_PART "$CHROOT/boot" > $VERBOSE 2>&1
 
   # SWAP
-  swapon $SWAP_PART > $VERBOSE 2>&1
+  if [ "$SWAP_PART" != "none" ]
+  then
+    swapon $SWAP_PART > $VERBOSE 2>&1
+  fi
 
   return $SUCCESS
 }
