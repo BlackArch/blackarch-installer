@@ -1408,20 +1408,21 @@ EOF
       mkdir -p "$CHROOT/boot/grub"
     fi
 
-    cp "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
-
     if [ $LUKS = $TRUE ]
     then
       sed -i "s|quiet|cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT quiet|" \
         "$CHROOT/etc/default/grub"
     fi
-    #sed -i 's/quiet//g' "$CHROOT/etc/default/grub"
     sed -i 's/Arch/BlackArch/g' "$CHROOT/etc/default/grub"
     echo "GRUB_BACKGROUND=\"/boot/grub/splash.png\"" >> \
       "$CHROOT/etc/default/grub"
+
     chroot $CHROOT grub-install --target=i386-pc $HD_DEV > $VERBOSE 2>&1
+
+    cp -f "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
+
     chroot $CHROOT grub-mkconfig -o /boot/grub/grub.cfg > $VERBOSE 2>&1
-    #sed -i 's/Arch Linux/BlackArch Linux/g' "$CHROOT/boot/grub/grub.cfg"
+    
   fi
 
   return $SUCCESS
@@ -1485,6 +1486,7 @@ setup_user()
     cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
     cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
+    chroot $CHROOT chown -R $user:$user "/home/$user/.*" > $VERBOSE 2>&1
   fi
 
   # password
@@ -1531,10 +1533,10 @@ setup_extra_packages()
   rtorrent screen scrot smartmontools strace tmux unace unrar unzip
   usb_modeswitch zip zsh"
 
-  network="atftp bind-tools bridge-utils darkhttpd dhclient dialog dnscrypt-proxy dnsmasq
-  dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
+  network="atftp bind-tools bridge-utils curl darkhttpd dhclient dialog dnscrypt-proxy
+  dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
   ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
-  socat vpnc wicd wicd-gtk wireless_tools wpa_actiond wpa_supplicant wvdial
+  socat vpnc wget wicd wicd-gtk wireless_tools wpa_actiond wpa_supplicant wvdial
   xl2tpd"
 
   xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
