@@ -1,3 +1,5 @@
+### BlackArch Linux settings ###
+
 # umask
 umask 077
 
