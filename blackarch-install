@@ -1229,6 +1229,8 @@ setup_fstab()
     genfstab -L $CHROOT >> "$CHROOT/etc/fstab"
   fi
 
+  sed 's/relatime/noatime/g' -i "$CHROOT/etc/fstab"
+
   return $SUCCESS
 }
 
