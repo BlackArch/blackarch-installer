@@ -2268,6 +2268,7 @@ self_updater()
 {
   title "Self Updater"
   wprintf "[+] Checking for a new version of myself..."
+  printf "\n\n"
 
   pacman -Syy > $VERBOSE 2>&1
   ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
@@ -2346,8 +2347,10 @@ main()
     sleep_clear 1
     check_inet_conn
     sleep_clear 1
+
     # self updater
     self_updater
+    sleep_clear 1
 
     # pacman
     ask_mirror_arch
