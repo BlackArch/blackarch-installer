@@ -1,0 +1,16 @@
+! generic
+*foreground:           #cccccc
+*background:           #000000
+
+! xterm
+xterm*VT100*geometry:       80x24
+xterm*faceName:             xos4 Terminus:size=12:antialias=true
+xterm*faceSize:             12
+xterm*utf8:                 1
+xterm*locale:               true
+xterm*cursorColor:          #5f5faf
+xterm*selectToClipboard:    true
+XTerm*SaveLines:            10000
+XTerm*transparent:          true
+Xcursor.theme:              Adwaita
+Xcursor.size:               14
