@@ -1147,15 +1147,7 @@ umount_filesystems()
   wprintf "[+] Unmounting filesystems"
   printf "\n\n"
 
-  # hardcore style ... TODO: tune this
-  umount -Rf $CHROOT > /dev/null 2>&1
-  umount -Rf "$BOOT_PART" > /dev/null 2>&1
-  umount -Rf "$CHROOT/proc" > /dev/null 2>&1
-  umount -Rf "$CHROOT/sys" > /dev/null 2>&1
-  umount -Rf "$CHROOT/dev" > /dev/null 2>&1
-  umount -Rf "$BOOT_PART" > /dev/null 2>&1
-  umount -Rf "$ROOT_PART" > /dev/null 2>&1
-  umount -Rf "/dev/mapper/$CRYPT_ROOT" > /dev/null 2>&1
+  umount -R $CHROOT > /dev/null 2>&1
   cryptsetup luksClose "$CRYPT_ROOT" > /dev/null 2>&1
   swapoff $SWAP_PART > /dev/null 2>&1
 
