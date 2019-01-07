@@ -1664,7 +1664,7 @@ update_etc()
 
   # /etc/*
   cp -r "$BI_PATH/data/etc/"{arch-release,iptables,issue,motd,\
-os-release,sysctl.d,X11,xdg/autostart,xprofile} "$CHROOT/etc/." > $VERBOSE 2>&1
+os-release,sysctl.d,X11,xprofile} "$CHROOT/etc/." > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1968,6 +1968,8 @@ setup_vbox_utils()
   printf "vboxguest\nvboxsf\nvboxvideo\n" \
     > "$CHROOT/etc/modules-load.d/vbox.conf"
 
+  cp -r "$BI_PATH/data/etc/xdg/autostart/vboxclient.desktop" "$CHROOT/etc/xdg/autostart/." > $VERBOSE 2>&1
+
   return $SUCCESS
 }
 
@@ -2195,7 +2197,6 @@ setup_blackarch()
     sleep_clear 1
   fi
 
-  update_etc
   sleep_clear 1
 
   enable_pacman_multilib "chroot"
