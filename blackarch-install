@@ -1658,7 +1658,8 @@ update_etc()
   printf "\n\n"
 
   # /etc/*
-  cp -r "$BI_PATH/data/etc/." "$CHROOT/etc/." > $VERBOSE 2>&1
+  cp -r "$BI_PATH/data/etc/"{arch-release,iptables,issue,motd,\
+  os-release,sysctl.d,X11,xdg/autostart,xprofile} "$CHROOT/etc/." > $VERBOSE 2>&1
 
   return $SUCCESS
 }
