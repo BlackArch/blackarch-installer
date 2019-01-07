@@ -18,6 +18,14 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.0.8
+
+  [x] bugfix: vbox fix + remove unneded update_etc() call.
+  [x] bugfix: fix umount_filesystems() call.
+  [x] update: cleanup umount()
+  [x] update: sync .Xresources/.Xdefaults with blackarch-config-x11
+
+
 ===> 1.0.7
 
   [x] update: update iptables rules
