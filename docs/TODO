@@ -9,6 +9,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.x.x
 
+  [ ] new option: support dual boot
   [ ] new option: if possible add 'skip' for each asking sections
   [ ] new option: add resume functionality
   [ ] new option: add restart installer option
