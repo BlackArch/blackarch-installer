@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+====> 1.0.11
+
+  [x] bugfix: fix space fuck-ups due to missing 'pacman -Scc' calls.
+
+
 ====> 1.0.10
 
   [x] update: sync root/user data with blackarch-config-x11

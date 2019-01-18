@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v1.0.10"
+VERSION="v1.0.11"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1729,7 +1729,8 @@ ask_mirror_arch()
     printf "\n"
     $mirrold
     pacman -Syy --noconfirm > $VERBOSE 2>&1
-    pacman -S --needed --noconfirm glibc lib32-glibc openssl python reflector > $VERBOSE 2>&1
+    pacman -S --needed --noconfirm reflector > $VERBOSE 2>&1
+    yes | pacman -Scc > $VERBOSE 2>&1
     reflector --verbose --latest 10 --protocol https --sort rate \
       --save /etc/pacman.d/mirrorlist > $VERBOSE 2>&1
   else
@@ -2278,6 +2279,7 @@ self_updater()
     printf "\n\n"
     warn "A new version is available! Going to fuck, err, update myself."
     pacman -S --overwrite='*' --noconfirm blackarch-installer > $VERBOSE 2>&1
+    yes | pacman -Scc > $VERBOSE 2>&1
     wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
     chmod +x /usr/share/blackarch-installer/blackarch-install
     exit $SUCCESS
