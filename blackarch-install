@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v1.0.11"
+VERSION="v1.0.12"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -769,7 +769,7 @@ check_inet_conn()
   title "Network Setup > Connection Check"
   wprintf "[+] Checking for Internet connection..."
 
-  if ! wget -q --tries=5 --timeout=10 --spider http://github.com > $VERBOSE 2>&1
+  if ! curl -s http://www.yahoo.com/ > $VERBOSE 2>&1
   then
     err "No Internet connection! Check your network (settings)."
   fi
