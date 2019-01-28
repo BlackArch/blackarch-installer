@@ -19,7 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
-===> 1.0.112
+===> 1.0.13
+
+  [x] update: remove wmii and wmii related data/configs.
+
+
+===> 1.0.12
 
   [x] update: replace wget with curl / replace github.com with yahoo.com
 
