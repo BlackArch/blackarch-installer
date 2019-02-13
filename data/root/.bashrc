@@ -3,6 +3,9 @@
 # umask
 umask 077
 
+# disable bash history
+unset HISTFILE
+
 # colors
 darkgrey="$(tput bold ; tput setaf 0)"
 white="$(tput bold ; tput setaf 7)"
