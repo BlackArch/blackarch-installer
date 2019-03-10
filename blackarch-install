@@ -986,7 +986,7 @@ make_luks_partition()
   wprintf "[+] Creating LUKS partition"
   printf "\n\n"
 
-  cryptsetup -q -y -v -c aes-xts-plain64 -s 256 luksFormat "$part" \
+  cryptsetup -q -y -v -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$part" \
     > $VERBOSE 2>&1 || err "Could not LUKS format"
 
   return $SUCCESS
