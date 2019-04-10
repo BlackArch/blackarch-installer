@@ -1506,19 +1506,19 @@ setup_user()
   return $SUCCESS
 }
 
-reinitialize_key()
+reinitialize_keyring()
 {
 
-    title "Reinitializing keyring"
+    title "Keyring Reinitialization"
 
     wprintf "[+] Reinitializing keyrings"
     printf "\n"
 
     sleep 2
 
-    chroot $CHROOT pacman -Sy --overwrite='*' --noconfirm archlinux-keyring
-    chroot $CHROOT pacman -Su
-    
+    chroot $CHROOT rm -rf /etc/pacman.d/gnupg
+    chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring blackarch-keyring
+
     return $SUCCESS
 
 }
@@ -1643,7 +1643,7 @@ setup_base_system()
 
   if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   then
-    reinitialize_key
+    reinitialize_keyring
     sleep_clear 1
     setup_extra_packages
     sleep_clear 1
