@@ -1515,7 +1515,6 @@ reinitialize_keyring()
     printf "\n"
     sleep 2
 
-    chroot $CHROOT rm -rf /etc/pacman.d/gnupg
     chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring \
       > $VERBOSE 2>&1
 
