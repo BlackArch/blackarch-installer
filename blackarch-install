@@ -1091,15 +1091,16 @@ make_boot_partition()
 {
   title "Hard Drive Setup > Partition Creation (boot)"
 
+  if [ $DUALBOOT = $TRUE ]
+    return $SUCCESS
+  fi
+
   wprintf "[+] Creating BOOT partition"
   printf "\n\n"
   if [ "$PART_LABEL" = "gpt" ]
   then
-    if [ $DUALBOOT = $FALSE ]
-    then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
       err "Could not create filesystem"
-    fi
   else
     mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
       err "Could not create filesystem"
