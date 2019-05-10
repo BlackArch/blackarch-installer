@@ -244,8 +244,6 @@ check_boot_mode()
   if [ "$(efivar --list 2> /dev/null)" ]
   then
      BOOT_MODE="uefi"
-  else
-     BOOT_MODE="bios"
   fi
 
   return $SUCCESS
@@ -922,10 +920,16 @@ ask_partitions()
     done
     echo
 
-    wprintf "[?] Boot partition (/dev/sdXY): "
-    read BOOT_PART
-    wprintf "[?] Boot FS type (ext2, ext3, ext4, fat32): "
-    read BOOT_FS_TYPE
+    if [ "$BOOT_MODE" = "uefi" ]
+    then
+      wprintf "[?] ESP partition (/dev/sdXY): "
+      read BOOT_PART
+    else
+      wprintf "[?] Boot partition (/dev/sdXY): "
+      read BOOT_PART
+      wprintf "[?] Boot FS type (ext2, ext3, ext4): "
+      read BOOT_FS_TYPE
+    fi
     wprintf "[?] Root partition (/dev/sdXY): "
     read ROOT_PART
     wprintf "[?] Root FS type (ext2, ext3, ext4, btrfs): "
@@ -1091,8 +1095,11 @@ make_boot_partition()
   printf "\n\n"
   if [ "$PART_LABEL" = "gpt" ]
   then
+    if [ $DUALBOOT = $FALSE ]
+    then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
       err "Could not create filesystem"
+    fi
   else
     mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
       err "Could not create filesystem"
