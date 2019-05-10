@@ -97,6 +97,9 @@ BROADCAST=''
 # nameserver address
 NAMESERVER=''
 
+# DualBoot flag
+DUALBOOT=''
+
 # LUKS flag
 LUKS=''
 
@@ -774,6 +777,22 @@ check_inet_conn()
     err "No Internet connection! Check your network (settings)."
   fi
 
+  return $SUCCESS
+}
+
+
+# ask user for dualboot install
+ask_dualboot()
+{
+  while [ "$DUALBOOT" = "" ]
+  do
+    if confirm "Hard Drive Setup > DualBoot" "[?] Install BlackArch Linux with Windows/Other OS [y/n]: "
+    then
+      DUALBOOT=$TRUE
+    else
+      DUALBOOT=$FALSE
+    fi
+  done
   return $SUCCESS
 }
 
@@ -2376,6 +2395,8 @@ main()
   fi
 
   # hard drive
+  ask_dualboot
+  sleep_clear 1
   get_hd_devs
   ask_hd_dev
   umount_filesystems "harddrive"
