@@ -924,6 +924,7 @@ ask_partitions()
     then
       wprintf "[?] ESP partition (/dev/sdXY): "
       read BOOT_PART
+      BOOT_FS_TYPE="fat32"
     else
       wprintf "[?] Boot partition (/dev/sdXY): "
       read BOOT_PART
@@ -1092,6 +1093,7 @@ make_boot_partition()
   title "Hard Drive Setup > Partition Creation (boot)"
 
   if [ $DUALBOOT = $TRUE ]
+  then
     return $SUCCESS
   fi
 
@@ -2403,10 +2405,10 @@ main()
   fi
 
   # hard drive
-  ask_dualboot
-  sleep_clear 1
   get_hd_devs
   ask_hd_dev
+  ask_dualboot
+  sleep_clear 1
   umount_filesystems "harddrive"
   sleep_clear 1
   ask_cfdisk
