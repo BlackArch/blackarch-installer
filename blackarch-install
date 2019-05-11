@@ -920,9 +920,9 @@ ask_partitions()
     done
     echo
 
-    if [ "$BOOT_MODE" = "uefi" ]
+    if [ "$BOOT_MODE" = "uefi" ]  && [ "$PART_LABEL" = "gpt" ]
     then
-      wprintf "[?] ESP partition (/dev/sdXY): "
+      wprintf "[?] EFI System partition (/dev/sdXY): "
       read BOOT_PART
       BOOT_FS_TYPE="fat32"
     else
@@ -1090,16 +1090,16 @@ make_root_partition()
 # make and format boot partition
 make_boot_partition()
 {
-  title "Hard Drive Setup > Partition Creation (boot)"
-
-  if [ $DUALBOOT = $TRUE ]
+  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ] && [ $DUALBOOT = $TRUE ]
   then
     return $SUCCESS
   fi
 
+  title "Hard Drive Setup > Partition Creation (boot)"
+
   wprintf "[+] Creating BOOT partition"
   printf "\n\n"
-  if [ "$PART_LABEL" = "gpt" ]
+  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ]
   then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
       err "Could not create filesystem"
@@ -1397,7 +1397,7 @@ setup_bootloader()
 {
   title "Base System Setup > Boot Loader"
 
-  if [ "$PART_LABEL" = "gpt" ]
+  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ]
   then
     wprintf "[+] Setting up EFI boot loader"
     printf "\n\n"
