@@ -1470,22 +1470,6 @@ ask_user_account()
 }
 
 
-# setup blackarch test user (not active + lxdm issue)
-setup_testuser()
-{
-  title "Base System Setup > Test User"
-
-  wprintf "[+] Setting up test user blackarchtest account"
-  printf "\n\n"
-  warn "Remove this user after you added a normal system user account"
-  printf "\n"
-
-  chroot $CHROOT groupadd blackarchtest > $VERBOSE 2>&1
-  chroot $CHROOT useradd -g blackarchtest -d /home/blackarchtest/ \
-    -s /sbin/nologin -m blackarchtest > $VERBOSE 2>&1
-}
-
-
 # setup user account, password and environment
 setup_user()
 {
@@ -1664,9 +1648,6 @@ setup_base_system()
   then
     setup_user "$NORMAL_USER"
     sleep_clear 1
-  else
-    setup_testuser
-    sleep_clear 2
   fi
 
   if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
