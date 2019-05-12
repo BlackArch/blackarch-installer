@@ -18,10 +18,10 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
-===> 1.x.x
+===> 1.1.0
 
-  [x] update: added dual boot support
-  [x] update: added uefi support
+  [x] new option: added dual boot support
+  [x] new option: added uefi support
   [x] update: remove unneeded iptables chain
 
 
