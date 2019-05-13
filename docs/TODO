@@ -20,6 +20,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.0
 
+  [x] update: improve self_updater()
   [x] new option: added dual boot support
   [x] new option: added uefi support
   [x] update: remove unneeded iptables chain

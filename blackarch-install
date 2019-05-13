@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="v1.1.0"
+VERSION="1.1.0"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -221,7 +221,7 @@ err()
 banner()
 {
   columns="$(tput cols)"
-  str="--==[ blackarch-installer $VERSION ]==--"
+  str="--==[ blackarch-installer v$VERSION ]==--"
 
   printf "${REDB}%*s${NC}\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
 
@@ -2322,10 +2322,11 @@ self_updater()
   printf "\n\n"
 
   pacman -Syy > $VERBOSE 2>&1
-  ver="v$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
-    cut -d '-' -f 1)"
+  repo="$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
+    cut -d '-' -f 1 | tr -d '.')"
+  this="$(echo $VERSION | tr -d '.')0"
 
-  if [ "$ver" != "$VERSION" ]
+  if [ $this -lt $repo ]
   then
     printf "\n\n"
     warn "A new version is available! Going to fuck, err, update myself."
