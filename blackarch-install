@@ -1436,6 +1436,12 @@ EOF
       mkdir -p "$CHROOT/boot/grub"
     fi
 
+    if [ $DUALBOOT = $TRUE ]
+    then
+      chroot $CHROOT pacman -S os-prober --noconfirm --overwrite='*' --needed \
+        > $VERBOSE 2>&1
+    fi
+
     if [ $LUKS = $TRUE ]
     then
       sed -i "s|quiet|cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT quiet|" \
