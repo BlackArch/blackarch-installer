@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="1.1.0"
+VERSION="1.1.1"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1574,6 +1574,8 @@ setup_extra_packages()
   fonts="ttf-dejavu ttf-freefont ttf-indic-otf ttf-liberation xorg-fonts-alias
   xorg-fonts-misc"
 
+  hardware="amd-ucode intel-ucode"
+
   kernel="linux-headers"
 
   misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
@@ -1582,17 +1584,17 @@ setup_extra_packages()
   rtorrent screen scrot smartmontools strace tmux udisks2 unace unrar
   unzip upower usb_modeswitch zip zsh"
 
-  network="atftp bind-tools bridge-utils curl darkhttpd dhclient dialog dnscrypt-proxy
-  dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw lftp nfs-utils
-  ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
+  network="atftp bind-tools bridge-utils curl darkhttpd dhclient dialog
+  dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
+  lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
   socat vpnc wget wicd wicd-gtk wireless_tools wpa_supplicant wvdial xl2tpd"
 
   xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
   xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
   xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
 
-  all="$arch $bluetooth $browser $editor $filesystem"
-  all="$all $fonts $kernel $misc $network $xorg"
+  all="$arch $bluetooth $browser $editor $filesystem $fonts $hardware $kernel"
+  all="$all $misc $network $xorg"
 
   title "Base System Setup > Extra Packages"
 
@@ -1606,6 +1608,8 @@ setup_extra_packages()
   > Editor      : `echo $editor | wc -w` packages
   > Filesystem  : `echo $filesystem | wc -w` packages
   > Fonts       : `echo $fonts | wc -w` packages
+  > Hardware    : `echo $hardware | wc -w` packages
+  > Kernel      : `echo $kernel | wc -w` packages
   > Misc        : `echo $misc | wc -w` packages
   > Network     : `echo $network | wc -w` packages
   > Xorg        : `echo $xorg | wc -w` packages

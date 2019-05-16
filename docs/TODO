@@ -18,6 +18,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.1
+
+  [x] update: add intel and amd ucode packages.
+
+
 ===> 1.1.0
 
   [x] update: improve self_updater()
