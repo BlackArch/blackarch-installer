@@ -18,6 +18,10 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.2
+
+  [x] bugfix: fix error while loading systemd-sysctl.service
+
 ===> 1.1.1
 
   [x] update: add intel and amd ucode packages.
