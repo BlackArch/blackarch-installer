@@ -18,6 +18,10 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.3
+
+  [x] bugfix: use single quotes for multiple params for sysctl -w call.
+
 ===> 1.1.2
 
   [x] bugfix: fix error while loading systemd-sysctl.service
