@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION="1.1.3"
+VERSION="1.1.4"
 
 # path to blackarch-installer
 BI_PATH="/usr/share/blackarch-installer"
@@ -1602,17 +1602,17 @@ setup_extra_packages()
   printf "\n"
 
   printf "
-  > ArchLinux   : `echo $arch | wc -w` packages
-  > Browser     : `echo $browser | wc -w` packages
-  > Bluetooth   : `echo $bluetooth | wc -w` packages
-  > Editor      : `echo $editor | wc -w` packages
-  > Filesystem  : `echo $filesystem | wc -w` packages
-  > Fonts       : `echo $fonts | wc -w` packages
-  > Hardware    : `echo $hardware | wc -w` packages
-  > Kernel      : `echo $kernel | wc -w` packages
-  > Misc        : `echo $misc | wc -w` packages
-  > Network     : `echo $network | wc -w` packages
-  > Xorg        : `echo $xorg | wc -w` packages
+  > ArchLinux   : $(echo $arch | wc -w) packages
+  > Browser     : $(echo $browser | wc -w) packages
+  > Bluetooth   : $(echo $bluetooth | wc -w) packages
+  > Editor      : $(echo $editor | wc -w) packages
+  > Filesystem  : $(echo $filesystem | wc -w) packages
+  > Fonts       : $(echo $fonts | wc -w) packages
+  > Hardware    : $(echo $hardware | wc -w) packages
+  > Kernel      : $(echo $kernel | wc -w) packages
+  > Misc        : $(echo $misc | wc -w) packages
+  > Network     : $(echo $network | wc -w) packages
+  > Xorg        : $(echo $xorg | wc -w) packages
   \n"
 
   warn "This can take a while, please wait..."
@@ -1745,7 +1745,7 @@ ask_mirror()
     printf "\n"
     wprintf "   * %s" "$url"
     printf "\n"
-    count=`expr $count + 1`
+    count=$(expr $count + 1)
   done < "$mirror_file"
 
   printf "\n"
@@ -1754,15 +1754,15 @@ ask_mirror()
   printf "\n"
 
   # bugfix: detected chars added sometimes - clear chars
-  _a=`printf "%s" $a | sed 's/[a-z]//Ig' 2> /dev/null`
+  _a=$(printf "%s" $a | sed 's/[a-z]//Ig' 2> /dev/null)
 
   if [ -z "$_a" ]
   then
     wprintf "[+] Choosing default mirror: %s " $BA_REPO_URL
   else
-    BA_REPO_URL=`sed -n "${_a}p" $mirror_file | cut -d "|" -f 2`
+    BA_REPO_URL=$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 2)
     wprintf "[+] Mirror from '%s' selected" \
-      `sed -n "${_a}p" $mirror_file | cut -d "|" -f 3`
+      $(sed -n "${_a}p" $mirror_file | cut -d "|" -f 3)
     printf "\n\n"
   fi
 
@@ -2126,7 +2126,7 @@ blackarch-windows blackarch-wireless \n\n"
     do
       wprintf "$foo "
       sleep 1
-      foo=`expr $foo - 1`
+      foo=$(expr $foo - 1)
     done
     printf "\n"
     chroot $CHROOT pacman -S --needed --overwrite='*' $noconfirm blackman \
@@ -2295,7 +2295,7 @@ easter_backdoor()
   do
     wprintf "."
     sleep 1
-    foo=`expr $foo + 1`
+    foo=$(expr $foo + 1)
   done
   printf " >> ${BLINK}${WHITE}HACK THE PLANET! D00R THE PLANET!${NC} <<"
   printf "\n\n"
