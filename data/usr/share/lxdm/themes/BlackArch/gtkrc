@@ -17,19 +17,19 @@ style "back"
 style "time"
 {
 	fg[NORMAL]="#484848"
-	font_name="xos4 terminus 12"
+	font_name="Terminus"
 }
 
 style "prompt"
 {
 	fg[NORMAL]="#c40000"
-	font_name="xos4 terminus 12"
+	font_name="Terminus"
 }
 
 # Normally this won't paint an invisible event box, but we did some hacks in greeter.c.
 style "bottom"
 {
-	font_name="xos4 terminus 12"
+	font_name="Terminus"
 	fg[NORMAL] = "#c40000"
     bg[NORMAL] = "#000000"
 }

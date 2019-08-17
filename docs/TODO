@@ -18,10 +18,18 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.5
+
+  [x] bugfix: fix terminus font issue with lxdm (gtk etc.).
+  [x] bugfix: add missing video driver packages.
+  [x] bugfix: fix self_updater: wrong comparison of version numbers.
+
+
 ===> 1.1.4
 
   [x] update: minor comsmetic changes (posix related)
   [x] update: remove old/non-existing package.
+
 
 ===> 1.1.3
 

@@ -10,10 +10,10 @@
 
 
 # blackarch-installer version
-VERSION="1.1.4"
+VERSION='1.1.5'
 
 # path to blackarch-installer
-BI_PATH="/usr/share/blackarch-installer"
+BI_PATH='/usr/share/blackarch-installer'
 
 # true / false
 TRUE=0
@@ -24,7 +24,7 @@ SUCCESS=0
 FAILURE=1
 
 # verbose mode - default: quiet
-VERBOSE="/dev/null"
+VERBOSE='/dev/null'
 
 # colors
 WHITE="$(tput setaf 7)"
@@ -1591,7 +1591,8 @@ setup_extra_packages()
 
   xorg="xf86-video-amdgpu xf86-video-ati xf86-video-dummy xf86-video-fbdev
   xf86-video-intel xf86-video-nouveau xf86-video-openchrome xf86-video-sisusb
-  xf86-video-vesa xf86-video-voodoo xorg-server xorg-xinit xterm"
+  xf86-video-vesa xf86-video-vmware xf86-video-voodoo xorg-server xorg-xinit
+  xterm"
 
   all="$arch $bluetooth $browser $editor $filesystem $fonts $hardware $kernel"
   all="$all $misc $network $xorg"
@@ -1815,7 +1816,7 @@ pass_mirror_conf()
 # run strap.sh
 run_strap_sh()
 {
-  strap_sh="/tmp/strap.sh"
+  strap_sh='/tmp/strap.sh'
   orig_sha1="$(curl -s https://blackarch.org/checksums/strap | awk '{print $1}')"
 
   title "BlackArch Linux Setup > Strap"
@@ -2327,7 +2328,7 @@ self_updater()
 
   pacman -Syy > $VERBOSE 2>&1
   repo="$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
-    cut -d '-' -f 1 | tr -d '.')"
+    cut -d '-' -f 1 | tr -d '.')0"
   this="$(echo $VERSION | tr -d '.')0"
 
   if [ $this -lt $repo ]
