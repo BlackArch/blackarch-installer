@@ -21,6 +21,7 @@ ChangeLog and TODO list for blackarch-installer
 ===> 1.1.6
 
   [x] update: sync menus for all WMs with blackarch-config-<wm> packages.
+      (bugfix: terminus font issues)
 
 
 ===> 1.1.5
