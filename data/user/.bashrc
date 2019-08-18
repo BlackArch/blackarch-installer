@@ -1,37 +1,24 @@
-### BlackArch Linux settings ###
-
-# umask
-umask 077
-
-# disable bash history
-unset HISTFILE
-
 # colors
 darkgrey="$(tput bold ; tput setaf 0)"
 white="$(tput bold ; tput setaf 7)"
-red="$(tput bold; tput setaf 1)"
+blue="$(tput bold; tput setaf 4)"
+cyan="$(tput bold; tput setaf 6)"
 nc="$(tput sgr0)"
 
 # exports
-export PATH="${HOME}/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:"
+export PATH="${HOME}/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:"
 export PATH="${PATH}/usr/local/sbin:/opt/bin:/usr/bin/core_perl:/usr/games/bin:"
-export PS1="\[$darkgrey\][ \[$red\]\H \[$white\]\W\[$red\] \[$darkgrey\]]\\[$red\]\$ \[$nc\]"
+export PS1="\[$blue\][ \[$cyan\]\H \[$darkgrey\]\w\[$darkgrey\] \[$blue\]]\\[$darkgrey\$ \[$nc\]"
 export LD_PRELOAD=""
 export EDITOR="vim"
 
 # alias
-alias c="clear"
-alias cd..="cd .."
-alias curl="curl --user-agent 'noleak'"
-alias l="ls -ahls --color"
 alias ls="ls --color"
-alias python="python2"
-alias r="reset"
-alias shred="shred -zf"
-alias sl="ls --color"
 alias vi="vim"
-alias wget="wget -c --user-agent 'noleak'"
-alias www="python -m SimpleHTTPServer"
+alias shred="shred -zf"
+#alias python="python2"
+alias wget="wget -U 'noleak'"
+alias curl="curl --user-agent 'noleak'"
 
 # source files
 [ -r /usr/share/bash-completion/completions ] &&
