@@ -97,6 +97,7 @@ myawesomemenu = {
 }
 
 termmenu = {
+    { "term (grey)", "urxvt -bg black -fg grey" },
     { "term (red)", "urxvt -bg black -fg red" },
     { "term (green)", "urxvt -bg black -fg green" },
     { "term (yellow)", "urxvt -bg black -fg yellow" },
