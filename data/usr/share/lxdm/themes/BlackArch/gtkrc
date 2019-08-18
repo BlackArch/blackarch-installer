@@ -16,13 +16,13 @@ style "back"
 
 style "time"
 {
-	fg[NORMAL]="#484848"
+	fg[NORMAL]="#0d3264"
 	font_name="Terminus"
 }
 
 style "prompt"
 {
-	fg[NORMAL]="#c40000"
+	fg[NORMAL]="#6298e0"
 	font_name="Terminus"
 }
 
@@ -30,8 +30,8 @@ style "prompt"
 style "bottom"
 {
 	font_name="Terminus"
-	fg[NORMAL] = "#c40000"
-    bg[NORMAL] = "#000000"
+	fg[NORMAL] = "#6298e0"
+  bg[NORMAL] = "#000000"
 }
 
 widget "lxdm" style "back"
