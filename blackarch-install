@@ -141,7 +141,7 @@ CHROOT='/mnt'
 NORMAL_USER=''
 
 # default BlackArch Linux repository URL
-BA_REPO_URL='https://www.blackarch.org/blackarch/$repo/os/$arch'
+BA_REPO_URL='http://ftp.halifax.rwth-aachen.de/blackarch/$repo/os/$arch'
 
 # default ArchLinux repository URL
 AR_REPO_URL='https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
