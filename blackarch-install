@@ -1909,11 +1909,10 @@ setup_window_managers()
   do
     printf "
   1. Awesome
-  2. Dwm
-  3. Fluxbox
-  4. I3-wm
-  5. Openbox
-  6. Spectrwm
+  2. Fluxbox
+  3. I3-wm
+  4. Openbox
+  5. Spectrwm
   7. All of the above
   \n"
     wprintf "[?] Choose an option [7]: "
@@ -1931,23 +1930,18 @@ setup_window_managers()
         break
         ;;
       2)
-        chroot $CHROOT pacman -S dwm --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
-        break
-        ;;
-      3)
         chroot $CHROOT pacman -S fluxbox --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
         break
         ;;
-      4)
+      3)
         chroot $CHROOT pacman -S i3-wm i3status i3lock dmenu --needed \
           --overwrite='*' --noconfirm > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
         break
         ;;
-      5)
+      4)
         chroot $CHROOT pacman -S openbox --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
@@ -1955,7 +1949,7 @@ setup_window_managers()
           "$CHROOT/usr/share/themes/i3lock/."
         break
         ;;
-      6)
+      5)
         chroot $CHROOT pacman -S spectrwm --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
@@ -1963,8 +1957,7 @@ setup_window_managers()
         ;;
       *)
         chroot $CHROOT pacman -S fluxbox openbox awesome i3-wm i3status \
-          i3lock dwm spectrwm --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
+          i3lock spectrwm --needed --overwrite='*' --noconfirm > $VERBOSE 2>&1
 
         # awesome
         cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
