@@ -1913,7 +1913,7 @@ setup_window_managers()
   3. I3-wm
   4. Openbox
   5. Spectrwm
-  7. All of the above
+  6. All of the above
   \n"
     wprintf "[?] Choose an option [7]: "
     read choice
