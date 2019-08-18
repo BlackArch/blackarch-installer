@@ -22,6 +22,7 @@ ChangeLog and TODO list for blackarch-installer
 ===> 1.1.7
 
   [.] update: update wallpapers, logos etc. (new design)
+  [x] update: remove dwm
   [x] update: update default blackarch mirror
   [x] update: adjust colors according to the new design
   [x] update: add new package: rxvt-unicode
