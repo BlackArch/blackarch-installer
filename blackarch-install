@@ -161,16 +161,16 @@ VMWARE_SETUP=$FALSE
 BA_TOOLS_SETUP=$FALSE
 
 # wlan ssid
-WLAN_SSID=""
+WLAN_SSID=''
 
 # wlan passphrase
-WLAN_PASSPHRASE=""
+WLAN_PASSPHRASE=''
 
 # check boot mode
-BOOT_MODE=""
+BOOT_MODE=''
 
 # check type of ISO (live? netinst?)
-ISO_TYPE=""
+ISO_TYPE=''
 
 
 # check exit status
@@ -259,9 +259,9 @@ check_iso_type()
 {
   if [ "$(which dnsspider 2> /dev/null)" ]
   then
-    ISO_TYPE="live"
+    ISO_TYPE='live'
   else
-    ISO_TYPE="net"
+    ISO_TYPE='net'
   fi
 
   return $SUCCESS
@@ -313,9 +313,9 @@ title()
 # check for environment issues
 check_env()
 {
-  if [ -f "/var/lib/pacman/db.lck" ]
+  if [ -f '/var/lib/pacman/db.lck' ]
   then
-    err "pacman locked - Please remove /var/lib/pacman/db.lck"
+    err 'pacman locked - Please remove /var/lib/pacman/db.lck'
   fi
 }
 
@@ -323,9 +323,9 @@ check_env()
 # check user id
 check_uid()
 {
-  if [ "$(id -u)" != "0" ]
+  if [ "$(id -u)" != '0' ]
   then
-    err "You must be root to run the BlackArch installer!"
+    err 'You must be root to run the BlackArch installer!'
   fi
 
   return $SUCCESS
@@ -340,19 +340,19 @@ ask_install_mode()
     "$INSTALL_MODE" != "$INSTALL_BLACKMAN" -a \
     "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   do
-    title "Welcome to the BlackArch Linux installer!"
-    wprintf "[+] Available installation modes:"
+    title 'Welcome to the BlackArch Linux installer!'
+    wprintf '[+] Available installation modes:'
     printf "\n
   1. Install from BlackArch repository (online)
   2. Install from BlackArch Live-ISO (offline)
   3. Install from sources using blackman (online)\n\n"
-    wprintf "[?] Choose an installation mode: "
+    wprintf '[?] Choose an installation mode: '
     read INSTALL_MODE
     if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
     then
       if [ "$ISO_TYPE" = "net" ]
       then
-        err "WTF, Live-ISO mode with Netinstall? Nope, sorry!"
+        err 'WTF, Live-ISO mode with Netinstall? Nope!'
       fi
     fi
     clear
@@ -365,8 +365,8 @@ ask_install_mode()
 # ask for output mode
 ask_output_mode()
 {
-  title "Environment > Output Mode"
-  wprintf "[+] Available output modes:"
+  title 'Environment > Output Mode'
+  wprintf '[+] Available output modes:'
   printf "\n
   1. Quiet (default)
   2. Verbose (output of system commands: mkfs, pacman, etc.)\n\n"
@@ -374,7 +374,7 @@ ask_output_mode()
   read output_opt
   if [ "$output_opt" = 2 ]
   then
-    VERBOSE="/dev/stdout"
+    VERBOSE='/dev/stdout'
   fi
 
   return $SUCCESS
@@ -388,8 +388,8 @@ ask_locale()
     "$locale_opt" != "$SET_LOCALE" -a \
     "$locale_opt" != "$LIST_LOCALE" ]
   do
-    title "Environment > Locale Setup"
-    wprintf "[+] Available locale options:"
+    title 'Environment > Locale Setup'
+    wprintf '[+] Available locale options:'
     printf "\n
   1. Set a locale
   2. List available locales\n\n"
@@ -418,20 +418,20 @@ ask_locale()
 # set locale to use
 set_locale()
 {
-  title "Environment > Locale Setup"
-  wprintf "[?] Set locale [en_US.UTF-8]: "
+  title 'Environment > Locale Setup'
+  wprintf '[?] Set locale [en_US.UTF-8]: '
   read LOCALE
 
   # default locale
   if [ -z "$LOCALE" ]
   then
     echo
-    warn "Setting default locale: en_US.UTF-8"
+    warn 'Setting default locale: en_US.UTF-8'
     sleep 1
-    LOCALE="en_US.UTF-8"
+    LOCALE='en_US.UTF-8'
   fi
   localectl set-locale "LANG=$LOCALE"
-  check $? "setting locale"
+  check $? 'setting locale'
 
   return $SUCCESS
 }
@@ -444,12 +444,12 @@ ask_keymap()
     "$keymap_opt" != "$SET_KEYMAP" -a \
     "$keymap_opt" != "$LIST_KEYMAP" ]
   do
-    title "Environment > Keymap Setup"
-    wprintf "[+] Available keymap options:"
+    title 'Environment > Keymap Setup'
+    wprintf '[+] Available keymap options:'
     printf "\n
   1. Set a keymap
   2. List available keymaps\n\n"
-    wprintf "[?] Make a choice: "
+    wprintf '[?] Make a choice: '
     read keymap_opt
 
     if [ "$keymap_opt" = "$SET_KEYMAP" ]
@@ -475,21 +475,21 @@ ask_keymap()
 # set keymap to use
 set_keymap()
 {
-  title "Environment > Keymap Setup"
-  wprintf "[?] Set keymap [us]: "
+  title 'Environment > Keymap Setup'
+  wprintf '[?] Set keymap [us]: '
   read KEYMAP
 
   # default keymap
   if [ -z "$KEYMAP" ]
   then
     echo
-    warn "Setting default keymap: us"
+    warn 'Setting default keymap: us'
     sleep 1
-    KEYMAP="us"
+    KEYMAP='us'
   fi
   localectl set-keymap --no-convert "$KEYMAP"
   loadkeys "$KEYMAP" > $VERBOSE 2>&1
-  check $? "setting keymap"
+  check $? 'setting keymap'
 
   return $SUCCESS
 }
@@ -500,18 +500,18 @@ enable_pacman_multilib()
 {
   path="$1"
 
-  if [ "$path" = "chroot" ]
+  if [ "$path" = 'chroot' ]
   then
     path="$CHROOT"
   else
     path=""
   fi
 
-  title "Pacman Setup > Multilib"
+  title 'Pacman Setup > Multilib'
 
   if [ "$(uname -m)" = "x86_64" ]
   then
-    wprintf "[+] Enabling multilib support"
+    wprintf '[+] Enabling multilib support'
     printf "\n\n"
     if grep -q "#\[multilib\]" "$path/etc/pacman.conf"
     then
@@ -534,16 +534,16 @@ enable_pacman_color()
 {
   path="$1"
 
-  if [ "$path" = "chroot" ]
+  if [ "$path" = 'chroot' ]
   then
     path="$CHROOT"
   else
     path=""
   fi
 
-  title "Pacman Setup > Color"
+  title 'Pacman Setup > Color'
 
-  wprintf "[+] Enabling color mode"
+  wprintf '[+] Enabling color mode'
   printf "\n\n"
 
   sed -i 's/^#Color/Color/' "$path/etc/pacman.conf"
@@ -555,9 +555,9 @@ enable_pacman_color()
 # update pacman package database
 update_pkg_database()
 {
-  title "Pacman Setup > Package Database"
+  title 'Pacman Setup > Package Database'
 
-  wprintf "[+] Updating pacman database"
+  wprintf '[+] Updating pacman database'
   printf "\n\n"
 
   pacman -Syy --noconfirm > $VERBOSE 2>&1
@@ -587,8 +587,8 @@ ask_hostname()
 {
   while [ -z "$HOST_NAME" ]
   do
-    title "Network Setup > Hostname"
-    wprintf "[?] Set your hostname: "
+    title 'Network Setup > Hostname'
+    wprintf '[?] Set your hostname: '
     read HOST_NAME
   done
 
@@ -609,15 +609,15 @@ ask_net_if()
 {
   while true
   do
-    title "Network Setup > Network Interface"
-    wprintf "[+] Available network interfaces:"
+    title 'Network Setup > Network Interface'
+    wprintf '[+] Available network interfaces:'
     printf "\n\n"
     for i in $NET_IFS
     do
       echo "    > $i"
     done
     echo
-    wprintf "[?] Please choose a network interface: "
+    wprintf '[?] Please choose a network interface: '
     read NET_IF
     if echo $NET_IFS | grep "\<$NET_IF\>" > /dev/null
     then
@@ -1900,9 +1900,9 @@ setup_display_manager()
 # setup window managers
 setup_window_managers()
 {
-  title "BlackArch Linux Setup > Window Managers"
+  title 'BlackArch Linux Setup > Window Managers'
 
-  wprintf "[+] Setting up window managers"
+  wprintf '[+] Setting up window managers'
   printf "\n"
 
   while true
@@ -1915,7 +1915,7 @@ setup_window_managers()
   5. Spectrwm
   6. All of the above
   \n"
-    wprintf "[?] Choose an option [7]: "
+    wprintf '[?] Choose an option [6]: '
     read choice
     echo
     case $choice in
@@ -1998,7 +1998,7 @@ setup_window_managers()
 # ask user for VirtualBox modules+utils setup
 ask_vbox_setup()
 {
-  if confirm "BlackArch Linux Setup > VirtualBox" "[?] Setup VirtualBox modules [y/n]: "
+  if confirm 'BlackArch Linux Setup > VirtualBox' '[?] Setup VirtualBox modules [y/n]: '
   then
     VBOX_SETUP=$TRUE
   fi
@@ -2010,9 +2010,9 @@ ask_vbox_setup()
 # setup virtualbox utils
 setup_vbox_utils()
 {
-  title "BlackArch Linux Setup > VirtualBox"
+  title 'BlackArch Linux Setup > VirtualBox'
 
-  wprintf "[+] Setting up VirtualBox utils"
+  wprintf '[+] Setting up VirtualBox utils'
   printf "\n\n"
 
   chroot $CHROOT pacman -S virtualbox-guest-utils \
@@ -2033,7 +2033,7 @@ setup_vbox_utils()
 # ask user for VirtualBox modules+utils setup
 ask_vmware_setup()
 {
-  if confirm "BlackArch Linux Setup > VMware" "[?] Setup VMware modules [y/n]: "
+  if confirm 'BlackArch Linux Setup > VMware' '[?] Setup VMware modules [y/n]: '
   then
     VMWARE_SETUP=$TRUE
   fi
@@ -2045,9 +2045,9 @@ ask_vmware_setup()
 # setup vmware utils
 setup_vmware_utils()
 {
-  title "BlackArch Linux Setup > VMware"
+  title 'BlackArch Linux Setup > VMware'
 
-  wprintf "[+] Setting up VMware utils"
+  wprintf '[+] Setting up VMware utils'
   printf "\n\n"
 
   chroot $CHROOT pacman -S open-vm-tools xf86-video-vmware \
@@ -2064,7 +2064,7 @@ setup_vmware_utils()
 # ask user for BlackArch tools setup
 ask_ba_tools_setup()
 {
-  if confirm "BlackArch Linux Setup > Tools" "[?] Setup BlackArch Linux tools [y/n]: "
+  if confirm 'BlackArch Linux Setup > Tools' '[?] Setup BlackArch Linux tools [y/n]: '
   then
     BA_TOOLS_SETUP=$TRUE
   fi
@@ -2078,14 +2078,14 @@ setup_blackarch_tools()
 {
   foo=5
 
-  if [ "$VERBOSE" = "/dev/null" ]
+  if [ "$VERBOSE" = '/dev/null' ]
   then
     noconfirm='--noconfirm'
   fi
 
-  title "BlackArch Linux Setup > Tools"
+  title 'BlackArch Linux Setup > Tools'
 
-  wprintf "[+] Installing BlackArch Linux packages (grab a coffee)"
+  wprintf '[+] Installing BlackArch Linux packages (grab a coffee)'
   printf "\n\n"
 
   if [ $INSTALL_MODE = $INSTALL_REPO ]
@@ -2106,7 +2106,7 @@ blackarch-windows blackarch-wireless \n\n"
     wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read BA_GROUPS
     printf "\n"
-    warn "This can take a while, please wait..."
+    warn 'This can take a while, please wait...'
     if [ -z "$BA_GROUPS" ]
     then
       printf "\n"
@@ -2119,9 +2119,9 @@ blackarch-windows blackarch-wireless \n\n"
         > $VERBOSE 2>&1
     fi
   else
-    warn "Installing all tools from source via blackman can take hours"
+    warn 'Installing all tools from source via blackman can take hours'
     printf "\n"
-    wprintf "[+] <Control-c> to abort ... "
+    wprintf '[+] <Control-c> to abort ... '
     while [ $foo -gt 0 ]
     do
       wprintf "$foo "
@@ -2141,7 +2141,7 @@ blackarch-windows blackarch-wireless \n\n"
 # add user to newly created groups
 update_user_groups()
 {
-  title "BlackArch Linux Setup > User"
+  title 'BlackArch Linux Setup > User'
 
   wprintf "[+] Adding user $user to groups"
   printf "\n\n"
@@ -2159,16 +2159,15 @@ update_user_groups()
 # dump data from the live-iso
 dump_live_iso()
 {
-  live_dirs="/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp"
-
+  live_dirs='/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp'
   total_size=0 # no cheat
 
-  title "BlackArch Linux Setup"
+  title 'BlackArch Linux Setup'
 
-  wprintf "[+] Dumping data from Live-ISO. Grab a coffee and pop shells!"
+  wprintf '[+] Dumping data from Live-ISO. Grab a coffee and pop shells!'
   printf "\n\n"
 
-  wprintf "[+] Fetching total size to transfer, please wait..."
+  wprintf '[+] Fetching total size to transfer, please wait...'
   printf "\n"
 
   for d in $live_dirs
@@ -2185,15 +2184,15 @@ dump_live_iso()
 
   check_space
 
-  wprintf "[+] Installing the backdoors to /"
+  wprintf '[+] Installing the backdoors to /'
   printf "\n\n"
-  warn "This can take a while, please wait... "
+  warn 'This can take a while, please wait...'
   printf "\n"
   rsync -aWx --human-readable --info=progress2 / $CHROOT > $VERBOSE 2>&1
   wprintf "[+] Installation done!\n"
 
   # clean up files
-  wprintf "[+] Cleaning Live Environment files, please wait... "
+  wprintf '[+] Cleaning Live Environment files, please wait...'
   sed -i 's/Storage=volatile/#Storage=auto/' ${CHROOT}/etc/systemd/journald.conf
   rm -rf "$CHROOT/etc/udev/rules.d/81-dhcpcd.rules"
   rm -rf "$CHROOT/etc/systemd/system/"{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
@@ -2285,12 +2284,12 @@ easter_backdoor()
 {
   foo=0
 
-  title "Game Over"
+  title 'Game Over'
 
-  wprintf "[+] BlackArch Linux installation successfull!"
+  wprintf '[+] BlackArch Linux installation successfull!'
   printf "\n\n"
 
-  wprintf "Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w "
+  wprintf 'Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w '
   while [ $foo -ne 5 ]
   do
     wprintf "."
@@ -2307,9 +2306,9 @@ easter_backdoor()
 # perform sync
 sync_disk()
 {
-  title "Game Over"
+  title 'Game Over'
 
-  wprintf "[+] Syncing disk"
+  wprintf '[+] Syncing disk'
   printf "\n\n"
 
   sync
@@ -2321,8 +2320,8 @@ sync_disk()
 # check if new version available. perform self-update and exit
 self_updater()
 {
-  title "Self Updater"
-  wprintf "[+] Checking for a new version of myself..."
+  title 'Self Updater'
+  wprintf '[+] Checking for a new version of myself...'
   printf "\n\n"
 
   pacman -Syy > $VERBOSE 2>&1
@@ -2333,7 +2332,7 @@ self_updater()
   if [ $this -lt $repo ]
   then
     printf "\n\n"
-    warn "A new version is available! Going to fuck, err, update myself."
+    warn 'A new version is available! Going to fuck, err, update myself.'
     pacman -S --overwrite='*' --noconfirm blackarch-installer > $VERBOSE 2>&1
     yes | pacman -Scc > $VERBOSE 2>&1
     wprintf "\n[+] Updated successfully. Please restart the installer now!\n"
@@ -2420,7 +2419,7 @@ main()
   ask_hd_dev
   ask_dualboot
   sleep_clear 1
-  umount_filesystems "harddrive"
+  umount_filesystems 'harddrive'
   sleep_clear 1
   ask_cfdisk
   sleep_clear 3
