@@ -640,8 +640,8 @@ ask_net_conf_mode()
     "$NET_CONF_MODE" != "$NET_CONF_MANUAL" -a \
     "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
   do
-    title "Network Setup > Network Interface"
-    wprintf "[+] Network interface configuration:"
+    title 'Network Setup > Network Interface'
+    wprintf '[+] Network interface configuration:'
     printf "\n
   1. Auto DHCP (use this for auto connect via dhcp on selected interface)
   2. WiFi WPA Setup (use if you need to connect to a wlan before)
@@ -663,7 +663,7 @@ ask_net_addr()
     "$HOST_IPV4" = "" -o "$GATEWAY" = "" -o "$SUBNETMASK" = "" \
     -o "$BROADCAST" = "" -o "$NAMESERVER" = "" ]
   do
-    title "Network Setup > Network Configuration (manual)"
+    title 'Network Setup > Network Configuration (manual)'
     wprintf "[+] Configuring network interface '$NET_IF' via USER: "
     printf "\n
   > Host ipv4
@@ -672,15 +672,15 @@ ask_net_addr()
   > Broadcast
   > Nameserver
     \n"
-    wprintf "[?] Host IPv4: "
+    wprintf '[?] Host IPv4: '
     read HOST_IPV4
-    wprintf "[?] Gateway IPv4: "
+    wprintf '[?] Gateway IPv4: '
     read GATEWAY
-    wprintf "[?] Subnetmask: "
+    wprintf '[?] Subnetmask: '
     read SUBNETMASK
-    wprintf "[?] Broadcast: "
+    wprintf '[?] Broadcast: '
     read BROADCAST
-    wprintf "[?] Nameserver: "
+    wprintf '[?] Nameserver: '
     read NAMESERVER
     clear
   done
@@ -692,7 +692,7 @@ ask_net_addr()
 # manual network interface configuration
 net_conf_manual()
 {
-  title "Network Setup > Network Configuration (manual)"
+  title 'Network Setup > Network Configuration (manual)'
   wprintf "[+] Configuring network interface '$NET_IF' manually: "
   printf "\n\n"
 
@@ -709,9 +709,9 @@ net_conf_manual()
 # auto (dhcp) network interface configuration
 net_conf_auto()
 {
-  opts="-h noleak -i noleak -v ,noleak -I noleak -t 10"
+  opts='-h noleak -i noleak -v ,noleak -I noleak -t 10'
 
-  title "Network Setup > Network Configuration (auto)"
+  title 'Network Setup > Network Configuration (auto)'
   wprintf "[+] Configuring network interface '$NET_IF' via DHCP: "
   printf "\n\n"
 
@@ -726,7 +726,7 @@ ask_wlan_data()
 {
   while [ "$WLAN_SSID" = "" -o "$WLAN_PASSPHRASE" = "" ]
   do
-    title "Network Setup > Network Configuration (WiFi)"
+    title 'Network Setup > Network Configuration (WiFi)'
     wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
     printf "\n
   > W-LAN SSID
@@ -747,16 +747,16 @@ ask_wlan_data()
 net_conf_wlan()
 {
   wpasup="$(mktemp)"
-  dhcp_opts="-h noleak -i noleak -v ,noleak -I noleak -t 10"
+  dhcp_opts='-h noleak -i noleak -v ,noleak -I noleak -t 10'
 
-  title "Network Setup > Network Configuration (WiFi)"
+  title 'Network Setup > Network Configuration (WiFi)'
   wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
   printf "\n\n"
 
   wpa_passphrase "$WLAN_SSID" "$WLAN_PASSPHRASE" > $wpasup
   wpa_supplicant -B -c $wpasup -i $NET_IF > $VERBOSE 2>&1
 
-  warn "We need to wait a bit for wpa_supplicant and dhcpcd"
+  warn 'We need to wait a bit for wpa_supplicant and dhcpcd'
 
   sleep 10
 
@@ -771,12 +771,12 @@ net_conf_wlan()
 # check for internet connection
 check_inet_conn()
 {
-  title "Network Setup > Connection Check"
-  wprintf "[+] Checking for Internet connection..."
+  title 'Network Setup > Connection Check'
+  wprintf '[+] Checking for Internet connection...'
 
   if ! curl -s http://www.yahoo.com/ > $VERBOSE 2>&1
   then
-    err "No Internet connection! Check your network (settings)."
+    err 'No Internet connection! Check your network (settings).'
   fi
 
   return $SUCCESS
@@ -786,9 +786,9 @@ check_inet_conn()
 # ask user for dualboot install
 ask_dualboot()
 {
-  while [ "$DUALBOOT" = "" ]
+  while [ "$DUALBOOT" = '' ]
   do
-    if confirm "Hard Drive Setup > DualBoot" "[?] Install BlackArch Linux with Windows/Other OS [y/n]: "
+    if confirm 'Hard Drive Setup > DualBoot' '[?] Install BlackArch Linux with Windows/Other OS [y/n]: '
     then
       DUALBOOT=$TRUE
     else
@@ -802,17 +802,17 @@ ask_dualboot()
 # ask user for luks encrypted partition
 ask_luks()
 {
-  while [ "$LUKS" = "" ]
+  while [ "$LUKS" = '' ]
   do
-    if confirm "Hard Drive Setup > Crypto" "[?] Full encrypted root [y/n]: "
+    if confirm 'Hard Drive Setup > Crypto' '[?] Full encrypted root [y/n]: '
     then
       LUKS=$TRUE
       echo
-      warn "The root partition will be encrypted"
+      warn 'The root partition will be encrypted'
     else
       LUKS=$FALSE
       echo
-      warn "The root partition will NOT be encrypted"
+      warn 'The root partition will NOT be encrypted'
     fi
     sleep_clear 2
   done
@@ -834,9 +834,9 @@ ask_hd_dev()
 {
   while true
   do
-    title "Hard Drive Setup"
+    title 'Hard Drive Setup'
 
-    wprintf "[+] Available hard drives for installation:"
+    wprintf '[+] Available hard drives for installation:'
     printf "\n\n"
 
     for i in $HD_DEVS
@@ -844,7 +844,7 @@ ask_hd_dev()
       echo "    > ${i}"
     done
     echo
-    wprintf "[?] Please choose a device: "
+    wprintf '[?] Please choose a device: '
     read HD_DEV
     if echo $HD_DEVS | grep "\<$HD_DEV\>" > /dev/null
     then
@@ -863,14 +863,14 @@ ask_hd_dev()
 # ask user to create partitions using cfdisk
 ask_cfdisk()
 {
-  if confirm "Hard Drive Setup > Partitions" "[?] Create partitions with \
-cfdisk (root and boot, optional swap) [y/n]: "
+  if confirm 'Hard Drive Setup > Partitions' '[?] Create partitions with \
+cfdisk (root and boot, optional swap) [y/n]: '
   then
     clear
     zero_part
   else
     echo
-    warn "No partitions chosed? Make sure you have them already configured."
+    warn 'No partitions chosed? Make sure you have them already configured.'
   fi
 
   return $SUCCESS
@@ -880,8 +880,8 @@ cfdisk (root and boot, optional swap) [y/n]: "
 # zero out partition if needed/chosen
 zero_part()
 {
-  if confirm "Hard Drive Setup" "[?] Start with an in-memory zeroed \
-partition table [y/n]: "
+  if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed \
+partition table [y/n]: '
   then
     cfdisk -z "$HD_DEV"
     sync
@@ -924,27 +924,27 @@ ask_partitions()
     done
     echo
 
-    if [ "$BOOT_MODE" = "uefi" ]  && [ "$PART_LABEL" = "gpt" ]
+    if [ "$BOOT_MODE" = 'uefi' ]  && [ "$PART_LABEL" = 'gpt' ]
     then
-      wprintf "[?] EFI System partition (/dev/sdXY): "
+      wprintf '[?] EFI System partition (/dev/sdXY): '
       read BOOT_PART
       BOOT_FS_TYPE="fat32"
     else
-      wprintf "[?] Boot partition (/dev/sdXY): "
+      wprintf '[?] Boot partition (/dev/sdXY): '
       read BOOT_PART
-      wprintf "[?] Boot FS type (ext2, ext3, ext4): "
+      wprintf '[?] Boot FS type (ext2, ext3, ext4): '
       read BOOT_FS_TYPE
     fi
-    wprintf "[?] Root partition (/dev/sdXY): "
+    wprintf '[?] Root partition (/dev/sdXY): '
     read ROOT_PART
-    wprintf "[?] Root FS type (ext2, ext3, ext4, btrfs): "
+    wprintf '[?] Root FS type (ext2, ext3, ext4, btrfs): '
     read ROOT_FS_TYPE
-    wprintf "[?] Swap parition (/dev/sdXY - empty for none): "
+    wprintf '[?] Swap parition (/dev/sdXY - empty for none): '
     read SWAP_PART
 
-    if [ "$SWAP_PART" = "" ]
+    if [ "$SWAP_PART" = '' ]
     then
-      SWAP_PART="none"
+      SWAP_PART='none'
     fi
     clear
   done
@@ -960,23 +960,23 @@ print_partitions()
 
   while true
   do
-    title "Hard Drive Setup > Partitions"
-    wprintf "[+] Current Partition table"
+    title 'Hard Drive Setup > Partitions'
+    wprintf '[+] Current Partition table'
     printf "\n
   > /boot   : $BOOT_PART ($BOOT_FS_TYPE)
   > /       : $ROOT_PART ($ROOT_FS_TYPE)
   > swap    : $SWAP_PART (swap)
   \n"
-    wprintf "[?] Partition table correct [y/n]: "
+    wprintf '[?] Partition table correct [y/n]: '
     read i
-    if [ "$i" = "y" -o "$i" = "Y" ]
+    if [ "$i" = 'y' -o "$i" = 'Y' ]
     then
       clear
       break
-    elif [ "$i" = "n" -o "$i" = "N" ]
+    elif [ "$i" = 'n' -o "$i" = 'N' ]
     then
       echo
-      err "Hard Drive Setup aborted."
+      err 'Hard Drive Setup aborted.'
     else
       clear
       continue
@@ -991,13 +991,13 @@ print_partitions()
 # ask user and get confirmation for formatting
 ask_formatting()
 {
-  if confirm "Hard Drive Setup > Partition Formatting" "[?] Formatting \
-partitions. Are you sure? No crying afterwards? [y/n]: "
+  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting \
+partitions. Are you sure? No crying afterwards? [y/n]: '
   then
     return $SUCCESS
   else
     echo
-    err "Seriously? No formatting no fun!"
+    err 'Seriously? No formatting no fun!'
   fi
 
   return $SUCCESS
@@ -1009,13 +1009,13 @@ make_luks_partition()
 {
   part="$1"
 
-  title "Hard Drive Setup > Partition Creation (crypto)"
+  title 'Hard Drive Setup > Partition Creation (crypto)'
 
-  wprintf "[+] Creating LUKS partition"
+  wprintf '[+] Creating LUKS partition'
   printf "\n\n"
 
   cryptsetup -q -y -v -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$part" \
-    > $VERBOSE 2>&1 || err "Could not LUKS format"
+    > $VERBOSE 2>&1 || err 'Could not LUKS format'
 
   return $SUCCESS
 }
@@ -1027,12 +1027,12 @@ open_luks_partition()
   part="$1"
   name="$2"
 
-  title "Hard Drive Setup > Partition Creation (crypto)"
+  title 'Hard Drive Setup > Partition Creation (crypto)'
 
-  wprintf "[+] Opening LUKS partition"
+  wprintf '[+] Opening LUKS partition'
   printf "\n\n"
   cryptsetup open $part $name > $VERBOSE 2>&1 ||
-    err "Could not open LUKS device"
+    err 'Could not open LUKS device'
 
   return $SUCCESS
 }
@@ -1041,11 +1041,11 @@ open_luks_partition()
 # create swap partition
 make_swap_partition()
 {
-  title "Hard Drive Setup > Partition Creation (swap)"
+  title 'Hard Drive Setup > Partition Creation (swap)'
 
-  wprintf "[+] Creating SWAP partition"
+  wprintf '[+] Creating SWAP partition'
   printf "\n\n"
-  mkswap $SWAP_PART > $VERBOSE 2>&1 || err "Could not create filesystem"
+  mkswap $SWAP_PART > $VERBOSE 2>&1 || err 'Could not create filesystem'
 
   return $SUCCESS
 }
@@ -1060,29 +1060,29 @@ make_root_partition()
     sleep_clear 1
     open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
     sleep_clear 1
-    title "Hard Drive Setup > Partition Creation (root crypto)"
-    wprintf "[+] Creating encrypted ROOT partition"
+    title 'Hard Drive Setup > Partition Creation (root crypto)'
+    wprintf '[+] Creating encrypted ROOT partition'
     printf "\n\n"
-    if [ "$ROOT_FS_TYPE" = "btrfs" ]
+    if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        err "Could not create filesystem"
+        err 'Could not create filesystem'
     else
       mkfs.$ROOT_FS_TYPE -F "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        err "Could not create filesystem"
+        err 'Could not create filesystem'
     fi
     sleep_clear 1
   else
-    title "Hard Drive Setup > Partition Creation (root)"
-    wprintf "[+] Creating ROOT partition"
+    title 'Hard Drive Setup > Partition Creation (root)'
+    wprintf '[+] Creating ROOT partition'
     printf "\n\n"
-    if [ "$ROOT_FS_TYPE" = "btrfs" ]
+    if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f $ROOT_PART > $VERBOSE 2>&1 ||
-        err "Could not create filesystem"
+        err 'Could not create filesystem'
     else
       mkfs.$ROOT_FS_TYPE -F $ROOT_PART > $VERBOSE 2>&1 ||
-        err "Could not create filesystem"
+        err 'Could not create filesystem'
     fi
     sleep_clear 1
   fi
@@ -1094,22 +1094,22 @@ make_root_partition()
 # make and format boot partition
 make_boot_partition()
 {
-  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ] && [ $DUALBOOT = $TRUE ]
+  if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ] && [ $DUALBOOT = $TRUE ]
   then
     return $SUCCESS
   fi
 
-  title "Hard Drive Setup > Partition Creation (boot)"
+  title 'Hard Drive Setup > Partition Creation (boot)'
 
-  wprintf "[+] Creating BOOT partition"
+  wprintf '[+] Creating BOOT partition'
   printf "\n\n"
-  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ]
+  if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
   then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
-      err "Could not create filesystem"
+      err 'Could not create filesystem'
   else
     mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
-      err "Could not create filesystem"
+      err 'Could not create filesystem'
   fi
 
   return $SUCCESS
@@ -1138,9 +1138,9 @@ make_partitions()
 # mount filesystems
 mount_filesystems()
 {
-  title "Hard Drive Setup > Mount"
+  title 'Hard Drive Setup > Mount'
 
-  wprintf "[+] Mounting filesystems"
+  wprintf '[+] Mounting filesystems'
   printf "\n\n"
 
   # ROOT
@@ -1170,18 +1170,18 @@ umount_filesystems()
 {
   routine="$1"
 
-  if [ "$routine" = "harddrive" ]
+  if [ "$routine" = 'harddrive' ]
   then
-    title "Hard Drive Setup > Unmount"
+    title 'Hard Drive Setup > Unmount'
 
-    wprintf "[+] Unmounting filesystems"
+    wprintf '[+] Unmounting filesystems'
     printf "\n\n"
 
     umount -Rf "$HD_DEV"{1..128} > /dev/null 2>&1 # gpt max - 128
   else
-    title "Game Over"
+    title 'Game Over'
 
-    wprintf "[+] Unmounting filesystems"
+    wprintf '[+] Unmounting filesystems'
     printf "\n\n"
 
     umount -Rf $CHROOT > /dev/null 2>&1
@@ -1215,11 +1215,11 @@ check_space()
 # install ArchLinux base and base-devel packages
 install_base_packages()
 {
-  title "Base System Setup > ArchLinux Packages"
+  title 'Base System Setup > ArchLinux Packages'
 
-  wprintf "[+] Installing ArchLinux base packages"
+  wprintf '[+] Installing ArchLinux base packages'
   printf "\n\n"
-  warn "This can take a while, please wait..."
+  warn 'This can take a while, please wait...'
   printf "\n"
 
   pacstrap $CHROOT base base-devel terminus-font > $VERBOSE 2>&1
@@ -1232,9 +1232,9 @@ install_base_packages()
 # setup /etc/resolv.conf
 setup_resolvconf()
 {
-  title "Base System Setup > Etc"
+  title 'Base System Setup > Etc'
 
-  wprintf "[+] Setting up /etc/resolv.conf"
+  wprintf '[+] Setting up /etc/resolv.conf'
   printf "\n\n"
 
   mkdir -p "$CHROOT/etc/" > $VERBOSE 2>&1
@@ -1247,9 +1247,9 @@ setup_resolvconf()
 # setup fstab
 setup_fstab()
 {
-  title "Base System Setup > Etc"
+  title 'Base System Setup > Etc'
 
-  wprintf "[+] Setting up /etc/fstab"
+  wprintf '[+] Setting up /etc/fstab'
   printf "\n\n"
 
   if [ "$PART_LABEL" = "gpt" ]
@@ -1268,7 +1268,7 @@ setup_fstab()
 # setup locale and keymap
 setup_locale()
 {
-  title "Base System Setup > Locale"
+  title 'Base System Setup > Locale'
 
   wprintf "[+] Setting up $LOCALE locale"
   printf "\n\n"
@@ -1285,7 +1285,7 @@ setup_locale()
 # setup timezone
 setup_time()
 {
-  if confirm "Base System Setup > Timezone" "[?] Default: UTC. Choose other timezone [y/n]: "
+  if confirm 'Base System Setup > Timezone' '[?] Default: UTC. Choose other timezone [y/n]: '
   then
     for t in $(timedatectl list-timezones)
     do
@@ -1299,7 +1299,7 @@ setup_time()
 
     if [ $? -eq 1 ]
     then
-      warn "Do you live on Mars? Setting default time zone..."
+      warn 'Do you live on Mars? Setting default time zone...'
       sleep 1
       default_time
     else
@@ -1321,7 +1321,7 @@ setup_time()
 default_time()
 {
   echo
-  warn "Setting up default time and timezone: UTC"
+  warn 'Setting up default time and timezone: UTC'
   printf "\n\n"
   chroot $CHROOT ln -sf /usr/share/zoneinfo/UTC /etc/localtime > $VERBOSE 2>&1
 
@@ -1332,9 +1332,9 @@ default_time()
 # setup initramfs
 setup_initramfs()
 {
-  title "Base System Setup > InitramFS"
+  title 'Base System Setup > InitramFS'
 
-  wprintf "[+] Setting up InitramFS"
+  wprintf '[+] Setting up InitramFS'
   printf "\n\n"
 
   if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
@@ -1354,7 +1354,7 @@ setup_initramfs()
       "$CHROOT/etc/mkinitcpio.conf"
   fi
 
-  warn "This can take a while, please wait..."
+  warn 'This can take a while, please wait...'
   printf "\n"
   chroot $CHROOT mkinitcpio -p linux > $VERBOSE 2>&1
 
@@ -1365,9 +1365,9 @@ setup_initramfs()
 # mount /proc, /sys and /dev
 setup_proc_sys_dev()
 {
-  title "Base System Setup > Proc Sys Dev"
+  title 'Base System Setup > Proc Sys Dev'
 
-  wprintf "[+] Setting up /proc, /sys and /dev"
+  wprintf '[+] Setting up /proc, /sys and /dev'
   printf "\n\n"
 
   mkdir -p "${CHROOT}/"{proc,sys,dev} > $VERBOSE 2>&1
@@ -1385,9 +1385,9 @@ setup_proc_sys_dev()
 # setup hostname
 setup_hostname()
 {
-  title "Base System Setup > Hostname"
+  title 'Base System Setup > Hostname'
 
-  wprintf "[+] Setting up hostname"
+  wprintf '[+] Setting up hostname'
   printf "\n\n"
 
   echo $HOST_NAME > "$CHROOT/etc/hostname"
@@ -1399,11 +1399,11 @@ setup_hostname()
 # setup boot loader for UEFI/GPT or BIOS/MBR
 setup_bootloader()
 {
-  title "Base System Setup > Boot Loader"
+  title 'Base System Setup > Boot Loader'
 
-  if [ "$BOOT_MODE" = "uefi" ] && [ "$PART_LABEL" = "gpt" ]
+  if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
   then
-    wprintf "[+] Setting up EFI boot loader"
+    wprintf '[+] Setting up EFI boot loader'
     printf "\n\n"
 
     chroot $CHROOT bootctl install > $VERBOSE 2>&1
@@ -1427,7 +1427,7 @@ options   root=UUID=$uuid rw
 EOF
     fi
   else
-    wprintf "[+] Setting up GRUB boot loader"
+    wprintf '[+] Setting up GRUB boot loader'
     printf "\n\n"
 
     uuid="$(lsblk -o UUID $ROOT_PART | sed -n 2p)"
@@ -1472,9 +1472,9 @@ EOF
 # ask for normal user account to setup
 ask_user_account()
 {
-  if confirm "Base System Setup > User" "[?] Setup a normal user account [y/n]: "
+  if confirm 'Base System Setup > User' '[?] Setup a normal user account [y/n]: '
   then
-    wprintf "[?] User name: "
+    wprintf '[?] User name: '
     read NORMAL_USER
   fi
 
@@ -1485,11 +1485,11 @@ ask_user_account()
 # setup blackarch test user (not active + lxdm issue)
 setup_testuser()
 {
-  title "Base System Setup > Test User"
+  title 'Base System Setup > Test User'
 
-  wprintf "[+] Setting up test user blackarchtest account"
+  wprintf '[+] Setting up test user blackarchtest account'
   printf "\n\n"
-  warn "Remove this user after you added a normal system user account"
+  warn 'Remove this user after you added a normal system user account'
   printf "\n"
 
   chroot $CHROOT groupadd blackarchtest > $VERBOSE 2>&1
@@ -1504,7 +1504,7 @@ setup_user()
   user="$(echo $1 | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' |
     cut -c 1-32)"
 
-  title "Base System Setup > User"
+  title 'Base System Setup > User'
 
   wprintf "[+] Setting up $user account"
   printf "\n\n"
@@ -1549,63 +1549,61 @@ setup_user()
 
 reinitialize_keyring()
 {
+  title 'Base System Setup > Keyring Reinitialization'
 
-    title "Base System Setup > Keyring Reinitialization"
+  wprintf '[+] Reinitializing keyrings'
+  printf "\n"
+  sleep 2
 
-    wprintf "[+] Reinitializing keyrings"
-    printf "\n"
-    sleep 2
+  chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring \
+    > $VERBOSE 2>&1
 
-    chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring \
-      > $VERBOSE 2>&1
-
-    return $SUCCESS
-
+  return $SUCCESS
 }
 
 # install extra (missing) packages
 setup_extra_packages()
 {
-  arch="arch-install-scripts pkgfile"
+  arch='arch-install-scripts pkgfile'
 
-  bluetooth="bluez bluez-hid2hci bluez-tools bluez-utils"
+  bluetooth='bluez bluez-hid2hci bluez-tools bluez-utils'
 
-  browser="chromium elinks firefox"
+  browser='chromium elinks firefox'
 
-  editor="hexedit vim"
+  editor='hexedit vim'
 
-  filesystem="btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools
-  gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage"
+  filesystem='btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools
+  gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage'
 
-  fonts="ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-alias
-  xorg-fonts-misc"
+  fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-alias
+  xorg-fonts-misc'
 
-  hardware="amd-ucode intel-ucode"
+  hardware='amd-ucode intel-ucode'
 
-  kernel="linux-headers"
+  kernel='linux-headers'
 
-  misc="acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
+  misc='acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
   feh git gpm haveged hdparm htop inotify-tools ipython irssi intel-ucode
   linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
   rtorrent screen scrot smartmontools strace tmux udisks2 unace unrar
-  unzip upower usb_modeswitch zip zsh"
+  unzip upower usb_modeswitch zip zsh'
 
-  network="atftp bind-tools bridge-utils curl darkhttpd dhclient dialog
+  network='atftp bind-tools bridge-utils curl darkhttpd dhclient dialog
   dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
   lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
-  socat vpnc wget wicd wicd-gtk wireless_tools wpa_supplicant wvdial xl2tpd"
+  socat vpnc wget wicd wicd-gtk wireless_tools wpa_supplicant wvdial xl2tpd'
 
-  xorg="rxvt-unicode xf86-video-amdgpu xf86-video-ati xf86-video-dummy
+  xorg='rxvt-unicode xf86-video-amdgpu xf86-video-ati xf86-video-dummy
   xf86-video-fbdev xf86-video-intel xf86-video-nouveau xf86-video-openchrome
   xf86-video-sisusb xf86-video-vesa xf86-video-vmware xf86-video-voodoo
-  xorg-server xorg-xinit xterm"
+  xorg-server xorg-xinit xterm'
 
   all="$arch $bluetooth $browser $editor $filesystem $fonts $hardware $kernel"
   all="$all $misc $network $xorg"
 
-  title "Base System Setup > Extra Packages"
+  title 'Base System Setup > Extra Packages'
 
-  wprintf "[+] Installing extra packages"
+  wprintf '[+] Installing extra packages'
   printf "\n"
 
   printf "
@@ -1622,7 +1620,7 @@ setup_extra_packages()
   > Xorg        : $(echo $xorg | wc -w) packages
   \n"
 
-  warn "This can take a while, please wait..."
+  warn 'This can take a while, please wait...'
   printf "\n"
   sleep 2
 
@@ -1704,9 +1702,9 @@ setup_base_system()
 # enable iptables services
 enable_iptables()
 {
-  title "BlackArch Linux Setup > Iptables"
+  title 'BlackArch Linux Setup > Iptables'
 
-  wprintf "[+] Enabling iptables and ip6tables"
+  wprintf '[+] Enabling iptables and ip6tables'
   printf "\n\n"
 
   chroot $CHROOT systemctl enable iptables > $VERBOSE 2>&1
@@ -1719,9 +1717,9 @@ enable_iptables()
 # update /etc files and set up iptables
 update_etc()
 {
-  title "BlackArch Linux Setup > Etc files"
+  title 'BlackArch Linux Setup > Etc files'
 
-  wprintf "[+] Updating /etc files"
+  wprintf '[+] Updating /etc files'
   printf "\n\n"
 
   # /etc/*
@@ -1735,14 +1733,14 @@ os-release,sysctl.d,X11,xprofile} "$CHROOT/etc/." > $VERBOSE 2>&1
 # ask for blackarch linux mirror
 ask_mirror()
 {
-  title "BlackArch Linux Setup > BlackArch Mirror"
+  title 'BlackArch Linux Setup > BlackArch Mirror'
 
   local IFS='|'
   count=1
-  mirror_url="https://raw.githubusercontent.com/BlackArch/blackarch/master/mirror/mirror.lst"
-  mirror_file="/tmp/mirror.lst"
+  mirror_url='https://raw.githubusercontent.com/BlackArch/blackarch/master/mirror/mirror.lst'
+  mirror_file='/tmp/mirror.lst'
 
-  wprintf "[+] Fetching mirror list"
+  wprintf '[+] Fetching mirror list'
   printf "\n\n"
   curl -s -o $mirror_file $mirror_url > $VERBOSE 2>&1
 
@@ -1756,7 +1754,7 @@ ask_mirror()
   done < "$mirror_file"
 
   printf "\n"
-  wprintf "[?] Select a mirror number (enter for default): "
+  wprintf '[?] Select a mirror number (enter for default): '
   read a
   printf "\n"
 
@@ -1781,13 +1779,13 @@ ask_mirror()
 # ask for archlinux server
 ask_mirror_arch()
 {
-  declare mirrold="cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup"
+  declare mirrold='cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup'
 
-  if confirm "Pacman Setup > ArchLinux Mirrorlist" \
+  if confirm 'Pacman Setup > ArchLinux Mirrorlist' \
     "[+] Worldwide mirror will be used\n\n[?] Look for the best server [y/n]: "
   then
     printf "\n"
-    warn "This may take time depending on your connection"
+    warn 'This may take time depending on your connection'
     printf "\n"
     $mirrold
     pacman -Sy --noconfirm > $VERBOSE 2>&1
@@ -1797,7 +1795,7 @@ ask_mirror_arch()
       --save /etc/pacman.d/mirrorlist > $VERBOSE 2>&1
   else
     printf "\n"
-    warn "Using Worldwide mirror server"
+    warn 'Using Worldwide mirror server'
     $mirrold
     echo -e "## Arch Linux repository Worldwide mirrorlist\n\n" \
       > /etc/pacman.d/mirrorlist
@@ -1825,14 +1823,14 @@ run_strap_sh()
   strap_sh='/tmp/strap.sh'
   orig_sha1="$(curl -s https://blackarch.org/checksums/strap | awk '{print $1}')"
 
-  title "BlackArch Linux Setup > Strap"
+  title 'BlackArch Linux Setup > Strap'
 
-  wprintf "[+] Downloading and executing strap.sh"
+  wprintf '[+] Downloading and executing strap.sh'
   printf "\n\n"
-  warn "This can take a while, please wait..."
+  warn 'This can take a while, please wait...'
   printf "\n"
 
-  curl -s -o $strap_sh "https://www.blackarch.org/strap.sh" > $VERBOSE 2>&1
+  curl -s -o $strap_sh 'https://www.blackarch.org/strap.sh' > $VERBOSE 2>&1
   sha1="$(sha1sum $strap_sh | awk '{print $1}')"
 
   if [ "$sha1" = "$orig_sha1" ]
@@ -1845,7 +1843,7 @@ run_strap_sh()
   fi
 
   # add blackarch linux mirror if we are in chroot
-  if ! grep -q "blackarch" "$CHROOT/etc/pacman.conf"
+  if ! grep -q 'blackarch' "$CHROOT/etc/pacman.conf"
   then
     printf '[blackarch]\nServer = %s\n' $BA_REPO_URL \
       >> "$CHROOT/etc/pacman.conf"
@@ -1861,7 +1859,7 @@ run_strap_sh()
 # ask user for X (display + window manager) setup
 ask_x_setup()
 {
-  if confirm "BlackArch Linux Setup > X11" "[?] Setup X11 + window managers [y/n]: "
+  if confirm 'BlackArch Linux Setup > X11' '[?] Setup X11 + window managers [y/n]: '
   then
     X_SETUP=$TRUE
     printf "\n"
@@ -1875,9 +1873,9 @@ ask_x_setup()
 # setup display manager
 setup_display_manager()
 {
-  title "BlackArch Linux Setup > Display Manager"
+  title 'BlackArch Linux Setup > Display Manager'
 
-  wprintf "[+] Setting up LXDM"
+  wprintf '[+] Setting up LXDM'
   printf "\n"
 
   # install lxdm packages
