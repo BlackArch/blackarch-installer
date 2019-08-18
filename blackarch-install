@@ -863,8 +863,7 @@ ask_hd_dev()
 # ask user to create partitions using cfdisk
 ask_cfdisk()
 {
-  if confirm 'Hard Drive Setup > Partitions' '[?] Create partitions with \
-cfdisk (root and boot, optional swap) [y/n]: '
+  if confirm 'Hard Drive Setup > Partitions' '[?] Create partitions with cfdisk (root and boot, optional swap) [y/n]: '
   then
     clear
     zero_part
@@ -880,8 +879,7 @@ cfdisk (root and boot, optional swap) [y/n]: '
 # zero out partition if needed/chosen
 zero_part()
 {
-  if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed \
-partition table [y/n]: '
+  if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed partition table [y/n]: '
   then
     cfdisk -z "$HD_DEV"
     sync
@@ -909,13 +907,13 @@ ask_partitions()
   partitions=$(ls ${HD_DEV}* | grep -v "${HD_DEV}\>")
 
   while [ \
-    "$BOOT_PART" = "" -o \
-    "$ROOT_PART" = "" -o \
-    "$BOOT_FS_TYPE" = "" -o \
-    "$ROOT_FS_TYPE" = "" ]
+    "$BOOT_PART" = '' -o \
+    "$ROOT_PART" = '' -o \
+    "$BOOT_FS_TYPE" = '' -o \
+    "$ROOT_FS_TYPE" = '' ]
   do
-    title "Hard Drive Setup > Partitions"
-    wprintf "[+] Created partitions:"
+    title 'Hard Drive Setup > Partitions'
+    wprintf '[+] Created partitions:'
     printf "\n\n"
 
     for i in $partitions
@@ -991,8 +989,7 @@ print_partitions()
 # ask user and get confirmation for formatting
 ask_formatting()
 {
-  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting \
-partitions. Are you sure? No crying afterwards? [y/n]: '
+  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting partitions. Are you sure? No crying afterwards? [y/n]: '
   then
     return $SUCCESS
   else
@@ -1205,7 +1202,7 @@ check_space()
 
   if [ $avail_space -le 40960 ]
   then
-    warn "BlackArch Linux requires at least 40 GB of free space to install!"
+    warn 'BlackArch Linux requires at least 40 GB of free space to install!'
   fi
 
   return $SUCCESS
