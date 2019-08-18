@@ -29,6 +29,10 @@ VERBOSE='/dev/null'
 # colors
 WHITE="$(tput setaf 7)"
 WHITEB="$(tput bold ; tput setaf 7)"
+BLUE="$(tput setaf 5)"
+BLUEB="$(tput bold ; tput setaf 5)"
+CYAN="$(tput setaf 6)"
+CYANB="$(tput bold ; tput setaf 6)"
 GREEN="$(tput setaf 2)"
 GREENB="$(tput bold ; tput setaf 2)"
 RED="$(tput setaf 1)"
