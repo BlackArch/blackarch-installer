@@ -18,6 +18,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.6
+
+  [x] update: sync menus for all WMs with blackarch-config-<wm> packages.
+
+
 ===> 1.1.5
 
   [x] bugfix: fix terminus font issue with lxdm (gtk etc.).
