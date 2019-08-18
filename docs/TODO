@@ -21,7 +21,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.7
 
-  [.] update: update wallpapers, logos etc. (new design)
+  [x] update: update wallpapers, logos etc. (new design)
   [x] update: use new vim config files and themes.
   [x] update: remove dwm
   [x] update: update default blackarch mirror
