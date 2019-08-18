@@ -1451,6 +1451,8 @@ EOF
     echo "GRUB_BACKGROUND=\"/boot/grub/splash.png\"" >> \
       "$CHROOT/etc/default/grub"
 
+    sed -i 's/#GRUB_COLOR_/GRUB_COLOR_/g' "$CHROOT/etc/default/grub"
+
     chroot $CHROOT grub-install --target=i386-pc $HD_DEV > $VERBOSE 2>&1
 
     cp -f "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
