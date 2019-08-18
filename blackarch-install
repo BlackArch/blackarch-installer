@@ -29,8 +29,8 @@ VERBOSE='/dev/null'
 # colors
 WHITE="$(tput setaf 7)"
 WHITEB="$(tput bold ; tput setaf 7)"
-BLUE="$(tput setaf 5)"
-BLUEB="$(tput bold ; tput setaf 5)"
+BLUE="$(tput setaf 4)"
+BLUEB="$(tput bold ; tput setaf 4)"
 CYAN="$(tput setaf 6)"
 CYANB="$(tput bold ; tput setaf 6)"
 GREEN="$(tput setaf 2)"
@@ -227,16 +227,16 @@ banner()
   columns="$(tput cols)"
   str="--==[ blackarch-installer v$VERSION ]==--"
 
-  printf "${REDB}%*s${NC}\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
+  printf "${BLUEB}%*s${NC}\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
 
   echo "$str" |
   while IFS= read -r line
   do
-    printf "%s%*s\n%s" "$WHITEB" $(( (${#line} + columns) / 2)) \
+    printf "%s%*s\n%s" "$CYANB" $(( (${#line} + columns) / 2)) \
       "$line" "$NC"
   done
 
-  printf "${REDB}%*s${NC}\n\n\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
+  printf "${BLUEB}%*s${NC}\n\n\n" "${COLUMNS:-$(tput cols)}" | tr ' ' '-'
 
   return $SUCCESS
 }
@@ -304,7 +304,7 @@ confirm()
 title()
 {
   banner
-  printf "${GREEN}>> %s${NC}\n\n\n" "${@}"
+  printf "${CYAN}>> %s${NC}\n\n\n" "${@}"
 
   return "${SUCCESS}"
 }
