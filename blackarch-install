@@ -2086,7 +2086,7 @@ setup_blackarch_tools()
   if [ $INSTALL_MODE = $INSTALL_REPO ]
   then
     wprintf "[+] All available BlackArch tools groups:\n\n"
-    printf "> blackarch blackarch-anti-forensic blackarch-automation
+    printf "    > blackarch blackarch-anti-forensic blackarch-automation
     > blackarch-backdoor blackarch-binary blackarch-bluetooth blackarch-code-audit
     > blackarch-cracker blackarch-crypto blackarch-database blackarch-debugger
     > blackarch-decompiler blackarch-defensive blackarch-disassembler
