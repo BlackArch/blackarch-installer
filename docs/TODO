@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.8
+
+  [x] update: fix i3 issues and update color themes
+
+
 ===> 1.1.7
 
   [x] update: update wallpapers, logos etc. (new design)
