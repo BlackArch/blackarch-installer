@@ -1701,10 +1701,9 @@ enable_wicd()
 {
   title 'BlackArch Linux Setup > Wicd'
 
-  wprintf '[+] Enabling d-bus + wicd'
+  wprintf '[+] Enabling wicd'
   printf "\n\n"
 
-  chroot $CHROOT systemctl enable dbus > $VERBOSE 2>&1
   chroot $CHROOT systemctl enable wicd > $VERBOSE 2>&1
 
   return $SUCCESS
