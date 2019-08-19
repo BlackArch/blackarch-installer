@@ -21,6 +21,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.8
 
+  [x] update: enable wicd by default
   [x] update: enable dbus and wicd by default
   [x] update: fix i3 issues and update color themes
 
