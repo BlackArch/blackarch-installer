@@ -1945,7 +1945,7 @@ setup_window_managers()
         break
         ;;
       3)
-        chroot $CHROOT pacman -S i3-wm i3status i3lock dmenu --needed \
+        chroot $CHROOT pacman -S i3 i3status i3lock dmenu --needed \
           --overwrite='*' --noconfirm > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
         break
