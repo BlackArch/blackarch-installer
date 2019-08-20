@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.9
+
+  [x] bugfix: fix missing escape close for PS1.
+
+
 ===> 1.1.8
 
   [x] update: enable wicd by default
