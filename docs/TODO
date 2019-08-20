@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.12
+
+  [x] add network tuning sysctl settings.
+
+
 ===> 1.1.11
 
   [x] add terminus font support for i3.
