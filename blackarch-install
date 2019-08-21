@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.13'
+VERSION='1.1.14'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2154,14 +2154,17 @@ update_user_groups()
 {
   title 'BlackArch Linux Setup > User'
 
-  wprintf "[+] Adding user $user to groups"
+  wprintf "[+] Adding user $user to groups and sudoers"
   printf "\n\n"
 
   # TODO: more to add here
   if [ $VBOX_SETUP -eq $TRUE ]
   then
-    chroot $CHROOT usermod -aG "vboxsf" "$user" > $VERBOSE 2>&1
+    chroot $CHROOT usermod -aG 'vboxsf,audio,video' "$user" > $VERBOSE 2>&1
   fi
+
+  # sudoers
+  echo "$user ALL=(ALL) ALL" $CHROOT/etc/sudoers > $VERBOSE 2>&1
 
   return $SUCCESS
 }

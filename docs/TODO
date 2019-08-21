@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.14
+
+  [x] update: add more default groups to $user
+  [x] update: add user to suders
+
+
 ===> 1.1.13
 
   [x] bugfix: fix sysctl settings.
