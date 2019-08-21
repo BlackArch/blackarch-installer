@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.15
+
+  [x] bugfix: add missing redirector.
+
+
 ===> 1.1.14
 
   [x] update: add more default groups to $user

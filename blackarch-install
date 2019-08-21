@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.14'
+VERSION='1.1.15'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2164,7 +2164,7 @@ update_user_groups()
   fi
 
   # sudoers
-  echo "$user ALL=(ALL) ALL" $CHROOT/etc/sudoers > $VERBOSE 2>&1
+  echo "$user ALL=(ALL) ALL" > $CHROOT/etc/sudoers > $VERBOSE 2>&1
 
   return $SUCCESS
 }
