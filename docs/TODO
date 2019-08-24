@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.19
+
+  [x] simple version bump.
+
+
 ===> 1.1.18
 
   [x] update: add xorg-xbacklight package.

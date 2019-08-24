@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.18'
+VERSION='1.1.19'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2271,10 +2271,10 @@ setup_blackarch()
 
   sleep_clear 1
 
-  enable_pacman_multilib "chroot"
+  enable_pacman_multilib 'chroot'
   sleep_clear 1
 
-  enable_pacman_color "chroot"
+  enable_pacman_color 'chroot'
   sleep_clear 1
 
   ask_ba_tools_setup
