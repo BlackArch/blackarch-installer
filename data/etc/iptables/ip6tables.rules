@@ -2,7 +2,6 @@
 :INPUT DROP [0:0]
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
-:PORT-SCANNING - [0:0]
 -A INPUT -i lo -j ACCEPT
 -A INPUT -m conntrack --ctstate INVALID -j DROP
 -A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
