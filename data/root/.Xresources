@@ -6,6 +6,7 @@
 URxvt.font:                   xft:xos4 Terminus:size=12:antialias=true:hinting=true
 URxvt.url-launcher:           /usr/bin/xdg-open
 URxvt.matcher.button:         1
+urxvt.matcher.pattern.0:      \\b([a-zA-Z]+:\/\/|www\\.)[\\w-]+@?[\\w-]+\\.[\\w-]+[^][)("'`]*
 URxvt.scrollBar:              false
 URxvt.termName:               xterm-256color
 URxvt.saveLines:              10000
