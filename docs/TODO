@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.21
+
+  [x] update: vimrc: add auto load buffer for autoread option
+
+
 ===> 1.1.20
 
   [x] update: add a better url-matcher via perl-regex for urxvt (Xresources)

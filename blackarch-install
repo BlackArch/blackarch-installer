@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.20'
+VERSION='1.1.21'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
