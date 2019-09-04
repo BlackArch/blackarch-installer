@@ -22,6 +22,10 @@ noremap <F1> :mksession! .vim.session <cr>
 noremap <F2> :source .vim.session <cr>
 noremap <F3> :! rm .vim.session <cr>
 
+" for autoread to auto load
+au FocusGained,BufEnter * :silent! !
+au FocusLost,WinLeave * :silent! w
+
 " specific settings
 set t_Co=256
 set nocursorline
