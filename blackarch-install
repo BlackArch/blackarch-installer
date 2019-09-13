@@ -1580,7 +1580,7 @@ setup_extra_packages()
   kernel='linux-headers'
 
   misc='acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
-  feh git gpm haveged hdparm htop inotify-tools ipython irssi intel-ucode
+  feh git gpm haveged hdparm htop inotify-tools ipython irssi
   linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
   rtorrent screen scrot smartmontools strace tmux udisks2 unace unrar
   unzip upower usb_modeswitch zip zsh'
