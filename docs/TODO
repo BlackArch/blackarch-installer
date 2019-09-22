@@ -19,7 +19,7 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
-===> 1.1.22
+===> 1.1.23
 
   [x] update: updated regex URL matcher
   [x] update: remove second intel-ucode package
