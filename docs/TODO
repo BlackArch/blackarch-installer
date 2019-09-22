@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.22
+
+  [x] update: updated regex URL matcher
+  [x] update: remove second intel-ucode package
+
+
 ===> 1.1.21
 
   [x] update: vimrc: add auto load buffer for autoread option
