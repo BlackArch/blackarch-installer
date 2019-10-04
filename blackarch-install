@@ -1896,8 +1896,8 @@ setup_display_manager()
   # config files
   cp -r "$BI_PATH/data/etc/lxdm/." "$CHROOT/etc/lxdm/."
   cp -r "$BI_PATH/data/usr/share/lxdm/." "$CHROOT/usr/share/lxdm/."
-  cp -r "$BI_PATH/data/usr/share/xsessions" "$CHROOT/usr/share/xsessions"
   cp -r "$BI_PATH/data/usr/share/gtk-2.0/." "$CHROOT/usr/share/gtk-2.0/."
+  mkdir -p "$CHROOT/usr/share/xsessions"
 
   # enable in systemd
   chroot $CHROOT systemctl enable lxdm > $VERBOSE 2>&1
@@ -1936,18 +1936,21 @@ setup_window_managers()
         # fix bullshit exit() issue
         sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
           "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
+        cp -r "$BI_PATH/data/usr/share/xsessions/awesome.desktop" "$CHROOT/usr/share/xsessions"
         break
         ;;
       2)
         chroot $CHROOT pacman -S fluxbox --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
+        cp -r "$BI_PATH/data/usr/share/xsessions/fluxbox.desktop" "$CHROOT/usr/share/xsessions"
         break
         ;;
       3)
         chroot $CHROOT pacman -S i3 dmenu --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
+        cp -r "$BI_PATH/data/usr/share/xsessions/i3.desktop" "$CHROOT/usr/share/xsessions"
         break
         ;;
       4)
@@ -1956,12 +1959,14 @@ setup_window_managers()
         cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
         cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
           "$CHROOT/usr/share/themes/i3lock/."
+        cp -r "$BI_PATH/data/usr/share/xsessions/openbox.desktop" "$CHROOT/usr/share/xsessions"
         break
         ;;
       5)
         chroot $CHROOT pacman -S spectrwm --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
+        cp -r "$BI_PATH/data/usr/share/xsessions/spectrwm.desktop" "$CHROOT/usr/share/xsessions"
         break
         ;;
       *)
@@ -1987,6 +1992,9 @@ setup_window_managers()
 
         # spectrwm
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
+
+        # xsessions
+        cp -r "$BI_PATH/data/usr/share/xsessions" "$CHROOT/usr/share/xsessions"
 
         break
         ;;
