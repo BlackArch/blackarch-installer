@@ -18,6 +18,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add help text for each section if feasible
 
+===> 1.x.x
+
+  [x] update: separate lxdm xsessions
+  [x] update: iptables cleanup
+  [x] update: arch-release correct
+
 
 ===> 1.1.23
 
