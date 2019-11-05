@@ -1219,7 +1219,7 @@ install_base_packages()
   warn 'This can take a while, please wait...'
   printf "\n"
 
-  pacstrap $CHROOT base base-devel terminus-font > $VERBOSE 2>&1
+  pacstrap $CHROOT base base-devel mkinitcpio terminus-font > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
