@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.26
+
+  [x] update: mkinitcpio as dep in linux package
+  [x] update: added linux + linux-firmware due to base metapackage changes
+
+
 ===> 1.1.25
 
   [x] update: added mkinitcpio
