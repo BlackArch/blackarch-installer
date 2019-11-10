@@ -1,7 +1,17 @@
-" brought by noptrix@nullsecurity.net
+" Vundle -----------------------------------------------------------------------
+set nocompatible              " be iMproved, required
+filetype off                  " required
 
-" yeah baby
-execute pathogen#infect()
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'scrooloose/nerdtree.git'
+Plugin 'davidhalter/jedi-vim'
+
+call vundle#end()            " required
+" Vundle -----------------------------------------------------------------------
 
 " file type and syntax highliting on
 filetype plugin indent on
@@ -27,6 +37,7 @@ au FocusGained,BufEnter * :silent! !
 au FocusLost,WinLeave * :silent! w
 
 " specific settings
+set fo+=t
 set t_Co=256
 set nocursorline
 set title
