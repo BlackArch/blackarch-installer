@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.28
+
+  [x] update: update urxvt configs directives
+
+
 ===> 1.1.27
 
   [x] update: update urxvt configs + add support for changing font size on the
