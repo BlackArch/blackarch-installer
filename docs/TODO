@@ -21,6 +21,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.28
 
+  [x] update: fix (urxvt stuff) and update menus for WMs
   [x] update: update urxvt configs directives
 
 
