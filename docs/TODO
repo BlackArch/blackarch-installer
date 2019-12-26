@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.29
+
+  [x] update: update WM menus.
+
+
 ===> 1.1.28
 
   [x] update: fix (urxvt stuff) and update menus for WMs
