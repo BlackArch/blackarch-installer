@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.31
+
+  [x] bugfix: fix menu items.
+
+
 ===> 1.1.30
 
   [x] update: update lxdm fonts (use terminus).
