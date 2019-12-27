@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 
-VBoxClient-all &
+# virtualbox
+vbox=$(dmesg |grep -io virtualbox)
+if [ ! -z "$vbox" ]
+then
+  /usr/bin/VBoxClient-all &
+fi
+
+# wallpaper
 feh --bg-scale /usr/share/blackarch/wallpaper.jpg
