@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.34
+
+  update: update color for url highlighting
+
+
 ===> 1.1.33
 
   bugfix: fix wrong xinitrc/xprofile handling.
