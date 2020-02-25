@@ -23,7 +23,8 @@ ChangeLog and TODO list for blackarch-installer
 
   [x] update: move from wicd to systemd-networkd and iwd.
   [x] bugfix: removed wicd from packages and added nano to editors.
-  [x] bugfix: move btrfs-progs to main packages, due to mkinitcpio failure find hook to fsck.btrfs.
+  [x] bugfix: move btrfs-progs to main packages, due to mkinitcpio failure find
+              hook to fsck.btrfs.
   [x] bugfix: copy x11 config files, iff user is asked to install dm and wms.
 
 
