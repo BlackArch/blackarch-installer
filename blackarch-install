@@ -1568,7 +1568,7 @@ setup_extra_packages()
 
   browser='chromium elinks firefox'
 
-  editor='hexedit vim'
+  editor='hexedit nano vim'
 
   filesystem='cifs-utils dmraid dosfstools exfat-utils f2fs-tools
   gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage'
