@@ -1735,7 +1735,7 @@ update_etc()
 
   # /etc/*
   cp -r "$BI_PATH/data/etc/"{arch-release,iptables,issue,motd,\
-os-release,sysctl.d,X11,xprofile} "$CHROOT/etc/." > $VERBOSE 2>&1
+os-release,sysctl.d} "$CHROOT/etc/." > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1894,6 +1894,8 @@ setup_display_manager()
     > $VERBOSE 2>&1
 
   # config files
+  cp -r "$BI_PATH/data/etc/X11" "$CHROOT/etc/."
+  cp -r "$BI_PATH/data/etc/xprofile" "$CHROOT/etc/."
   cp -r "$BI_PATH/data/etc/lxdm/." "$CHROOT/etc/lxdm/."
   cp -r "$BI_PATH/data/usr/share/lxdm/." "$CHROOT/usr/share/lxdm/."
   cp -r "$BI_PATH/data/usr/share/gtk-2.0/." "$CHROOT/usr/share/gtk-2.0/."
