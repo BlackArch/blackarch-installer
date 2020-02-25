@@ -3,3 +3,6 @@ Name=en*
 
 [Network]
 DHCP=ipv4
+
+[DHCP]
+RouteMetric=10
