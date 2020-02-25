@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.34'
+VERSION='1.1.35'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -1219,7 +1219,8 @@ install_base_packages()
   warn 'This can take a while, please wait...'
   printf "\n"
 
-  pacstrap $CHROOT base base-devel linux linux-firmware terminus-font > $VERBOSE 2>&1
+  pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
+    terminus-font > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1569,7 +1570,7 @@ setup_extra_packages()
 
   editor='hexedit vim'
 
-  filesystem='btrfs-progs cifs-utils dmraid dosfstools exfat-utils f2fs-tools
+  filesystem='cifs-utils dmraid dosfstools exfat-utils f2fs-tools
   gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage'
 
   fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-alias
@@ -1587,7 +1588,7 @@ setup_extra_packages()
 
   network='atftp bind-tools bridge-utils curl darkhttpd dhclient dialog
   dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
-  lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
+  iwd lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
   socat vpnc wget wireless_tools wpa_supplicant wvdial xl2tpd'
 
   xorg='rxvt-unicode terminus-font xf86-video-amdgpu xf86-video-ati
@@ -1697,14 +1698,14 @@ setup_base_system()
 
 
 # enable systemd-networkd services
-enable_networkd()
+enable_iwd_networkd()
 {
-  title 'BlackArch Linux Setup > systemd-networkd'
+  title 'BlackArch Linux Setup > Network'
 
-  wprintf '[+] Enabling systemd-networkd'
+  wprintf '[+] Enabling Iwd and Networkd'
   printf "\n\n"
 
-  chroot $CHROOT systemctl enable systemd-networkd > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable iwd systemd-networkd > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1735,7 +1736,7 @@ update_etc()
 
   # /etc/*
   cp -r "$BI_PATH/data/etc/"{arch-release,iptables,issue,motd,\
-os-release,sysctl.d} "$CHROOT/etc/." > $VERBOSE 2>&1
+os-release,sysctl.d,systemd} "$CHROOT/etc/." > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -2238,7 +2239,7 @@ setup_blackarch()
   update_etc
   sleep_clear 1
 
-  enable_networkd
+  enable_iwd_networkd
   sleep_clear 1
 
   enable_iptables
