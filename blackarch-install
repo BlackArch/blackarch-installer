@@ -1588,7 +1588,7 @@ setup_extra_packages()
   network='atftp bind-tools bridge-utils curl darkhttpd dhclient dialog
   dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
   lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill rp-pppoe
-  socat vpnc wget wicd wicd-gtk wireless_tools wpa_supplicant wvdial xl2tpd'
+  socat vpnc wget wireless_tools wpa_supplicant wvdial xl2tpd'
 
   xorg='rxvt-unicode terminus-font xf86-video-amdgpu xf86-video-ati
   xf86-video-dummy xf86-video-fbdev xf86-video-intel xf86-video-nouveau
@@ -1696,15 +1696,15 @@ setup_base_system()
 }
 
 
-# enable wicd services
-enable_wicd()
+# enable systemd-networkd services
+enable_networkd()
 {
-  title 'BlackArch Linux Setup > Wicd'
+  title 'BlackArch Linux Setup > systemd-networkd'
 
-  wprintf '[+] Enabling wicd'
+  wprintf '[+] Enabling systemd-networkd'
   printf "\n\n"
 
-  chroot $CHROOT systemctl enable wicd > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable systemd-networkd > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -2238,7 +2238,7 @@ setup_blackarch()
   update_etc
   sleep_clear 1
 
-  enable_wicd
+  enable_networkd
   sleep_clear 1
 
   enable_iptables
