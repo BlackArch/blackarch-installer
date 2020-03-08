@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.37
+
+  [x] bugfix: 'DisableDownloadTimeout' must be in [options] section
+
+
 ===> 1.1.36
 
   [x] update: add 'DisableDownloadTimeout' option in pacman.conf
