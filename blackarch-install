@@ -552,6 +552,33 @@ enable_pacman_color()
 }
 
 
+# enable misc options in pacman.conf
+enable_pacman_misc()
+{
+  path="$1"
+
+  if [ "$path" = 'chroot' ]
+  then
+    path="$CHROOT"
+  else
+    path=""
+  fi
+
+  title 'Pacman Setup > Misc Options'
+
+  wprintf '[+] Enabling DisableDownloadTimeout'
+  printf "\n\n"
+  echo "" >> "$path/etc/pacman.conf"
+  echo "### MY SETTINGS ###" >> "$path/etc/pacman.conf"
+  echo "" >> "$path/etc/pacman.conf"
+  echo "DisableDownloadTImeout"  >> "$path/etc/pacman.conf"
+
+  # put here more misc options if necessary
+
+  return $SUCCESS
+}
+
+
 # update pacman package database
 update_pkg_database()
 {
@@ -573,6 +600,9 @@ update_pacman()
   sleep_clear 1
 
   enable_pacman_color
+  sleep_clear 1
+
+  enable_pacman_misc
   sleep_clear 1
 
   update_pkg_database
