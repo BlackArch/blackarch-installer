@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.37'
+VERSION='1.1.38'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -568,7 +568,7 @@ enable_pacman_misc()
 
   wprintf '[+] Enabling DisableDownloadTimeout'
   printf "\n\n"
-  sed -i '37a DisableDownloadTImeout' "$path/etc/pacman.conf"
+  sed -i '37a DisableDownloadTimeout' "$path/etc/pacman.conf"
 
   # put here more misc options if necessary
 
