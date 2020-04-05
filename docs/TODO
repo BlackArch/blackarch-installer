@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.39
+
+  [x] update: update default blackarch repo mirror
+
+
 ===> 1.1.38
 
   [x] bugfix: 'DisableDownloadTimeout' fix a typo.
