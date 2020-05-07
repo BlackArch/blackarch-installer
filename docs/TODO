@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.41
+
+  [x] update: update vim config files
+  [x] update: update blackarch-config-<wm> files
+
+
 ===> 1.1.40
 
   [x] update: update default blackarch repo mirror
