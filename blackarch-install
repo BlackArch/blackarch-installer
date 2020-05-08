@@ -1917,7 +1917,7 @@ setup_display_manager()
   title 'BlackArch Linux Setup > Display Manager'
 
   wprintf '[+] Setting up LXDM'
-  printf "\n"
+  printf "\n\n"
 
   # install lxdm packages
   chroot $CHROOT pacman -S lxdm --needed --overwrite='*' --noconfirm \
@@ -1944,7 +1944,7 @@ setup_window_managers()
   title 'BlackArch Linux Setup > Window Managers'
 
   wprintf '[+] Setting up window managers'
-  printf "\n"
+  printf "\n\n"
 
   while true
   do
