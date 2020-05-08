@@ -21,6 +21,8 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.41
 
+  [x] update: minor style fixes.
+  [x] update: enable only needed services for virtualbox
   [x] update: update vim config files
   [x] update: update blackarch-config-<wm> files
 
