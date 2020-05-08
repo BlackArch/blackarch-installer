@@ -110,8 +110,8 @@ browsermenu = {
 }
 
 networkmenu = {
-    { "wicd-curses", "wicd-curses" },
-    { "wicd-gtk", "wicd-gtk" }
+    { "wifi-radar", "wifi-radar" },
+    { "wifi-radar-polkit", "wifi-radar-polkit" }
 }
 
 antiforensicmenu = {

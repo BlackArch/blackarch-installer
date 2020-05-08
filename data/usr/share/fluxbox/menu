@@ -14,8 +14,8 @@
     [end]
 
     [submenu] (network)
-        [exec] (wicd-gtk) {wicd-gtk}
-        [exec] (wicd-curses) {wicd-curses}
+        [exec] (wifi-radar) {wifi-radar}
+        [exec] (wifi-radar-polkit) {wifi-radar-polkit}
     [end]
 
     [submenu] (blackarch)
