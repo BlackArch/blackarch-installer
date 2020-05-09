@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.42'
+VERSION='1.1.43'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2268,8 +2268,8 @@ setup_blackarch()
   enable_iwd_networkd
   sleep_clear 1
 
-  enable_iptables
-  sleep_clear 1
+  #enable_iptables
+  #sleep_clear 1
 
   ask_mirror
   sleep_clear 1
