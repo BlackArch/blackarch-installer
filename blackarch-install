@@ -1738,21 +1738,6 @@ enable_iwd_networkd()
 }
 
 
-# enable iptables services
-enable_iptables()
-{
-  title 'BlackArch Linux Setup > Iptables'
-
-  wprintf '[+] Enabling iptables and ip6tables'
-  printf "\n\n"
-
-  chroot $CHROOT systemctl enable iptables > $VERBOSE 2>&1
-  chroot $CHROOT systemctl enable ip6tables > $VERBOSE 2>&1
-
-  return $SUCCESS
-}
-
-
 # update /etc files and set up iptables
 update_etc()
 {
@@ -1762,7 +1747,7 @@ update_etc()
   printf "\n\n"
 
   # /etc/*
-  cp -r "$BI_PATH/data/etc/"{arch-release,iptables,issue,motd,\
+  cp -r "$BI_PATH/data/etc/"{arch-release,issue,motd,\
 os-release,sysctl.d,systemd} "$CHROOT/etc/." > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -2062,7 +2047,7 @@ setup_vbox_utils()
   wprintf '[+] Setting up VirtualBox utils'
   printf "\n\n"
 
-  chroot $CHROOT pacman -S virtualbox-guest-utils --overwrite='*' --needed \
+  chroot $CHROOT pacman -S virtualbox-guest-utils virtualbox-guest-dkms --overwrite='*' --needed \
     --noconfirm > $VERBOSE 2>&1
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
@@ -2267,9 +2252,6 @@ setup_blackarch()
 
   enable_iwd_networkd
   sleep_clear 1
-
-  #enable_iptables
-  #sleep_clear 1
 
   ask_mirror
   sleep_clear 1
