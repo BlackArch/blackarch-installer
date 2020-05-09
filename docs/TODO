@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.42
+
+  [x] update: just force version bump
+
+
 ===> 1.1.41
 
   [x] update: don't warn when encryption was chosen
