@@ -836,8 +836,6 @@ ask_luks()
     if confirm 'Hard Drive Setup > Crypto' '[?] Full encrypted root [y/n]: '
     then
       LUKS=$TRUE
-      echo
-      warn 'The root partition will be encrypted'
     else
       LUKS=$FALSE
       echo

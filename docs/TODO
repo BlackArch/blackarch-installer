@@ -21,6 +21,7 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.1.41
 
+  [x] update: don't warn when encryption was chosen
   [x] update: minor style fixes.
   [x] update: enable only needed services for virtualbox
   [x] update: update vim config files
