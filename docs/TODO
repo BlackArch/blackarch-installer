@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.45
+
+  [x] update: don't add vbox modules to modules-load.d
+
+
 ===> 1.1.44
 
   [x] update: remove iptables services

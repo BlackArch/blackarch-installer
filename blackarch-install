@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.44'
+VERSION='1.1.45'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2052,8 +2052,8 @@ setup_vbox_utils()
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
 
-  printf "vboxguest\nvboxsf\nvboxvideo\n" \
-    > "$CHROOT/etc/modules-load.d/vbox.conf"
+  #printf "vboxguest\nvboxsf\nvboxvideo\n" \
+  #  > "$CHROOT/etc/modules-load.d/vbox.conf"
 
   cp -r "$BI_PATH/data/etc/xdg/autostart/vboxclient.desktop" "$CHROOT/etc/xdg/autostart/." > $VERBOSE 2>&1
 
