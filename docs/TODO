@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.46
+
+  [x] update: retry luks verification if password does not match
+  [x] update: change default mirror (temporary)
+
+
 ===> 1.1.45
 
   [x] update: don't add vbox modules to modules-load.d
