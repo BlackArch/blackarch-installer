@@ -1962,7 +1962,7 @@ setup_window_managers()
         break
         ;;
       3)
-        chroot $CHROOT pacman -S i3 dmenu --needed --overwrite='*' --noconfirm \
+        chroot $CHROOT pacman -S i3 rofi --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
         cp -r "$BI_PATH/data/usr/share/xsessions/i3.desktop" "$CHROOT/usr/share/xsessions"
