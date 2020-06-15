@@ -19,6 +19,12 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.1.47
+
+  [x] update: add a new tool (rofi) for WMs.
+  [x] update: change back default mirror
+
+
 ===> 1.1.46
 
   [x] update: retry luks verification if password does not match

@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.1.46'
+VERSION='1.1.47'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -141,9 +141,9 @@ CHROOT='/mnt'
 NORMAL_USER=''
 
 # default BlackArch Linux repository URL
-#BA_REPO_URL='https://www.mirrorservice.org/sites/blackarch.org/blackarch/$repo/os/$arch'
+BA_REPO_URL='https://www.mirrorservice.org/sites/blackarch.org/blackarch/$repo/os/$arch'
 #BA_REPO_URL='https://blackarch.unixpeople.org/$repo/os/$arch'
-BA_REPO_URL='http://ftp.halifax.rwth-aachen.de/blackarch/$repo/os/$arch'
+#BA_REPO_URL='http://ftp.halifax.rwth-aachen.de/blackarch/$repo/os/$arch'
 
 # default ArchLinux repository URL
 AR_REPO_URL='https://archlinux.surlyjake.com/archlinux/$repo/os/$arch'
