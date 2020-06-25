@@ -1039,7 +1039,7 @@ make_luks_partition()
   printf "\n\n"
 
   cryptsetup -q -y -v -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$part" \
-    > $VERBOSE 2>&1 || warn 'Could not LUKS format, trying again...'; make_root_partition
+    > $VERBOSE 2>&1 || (warn 'Could not LUKS format, trying again...'; make_root_partition)
 
   return $SUCCESS
 }
