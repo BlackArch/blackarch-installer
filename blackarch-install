@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ################################################################################
 #                                                                              #
 # blackarch-installer - Official Installer for BlackArch Linux                 #
@@ -28,17 +28,17 @@ VERBOSE='/dev/null'
 
 # colors
 WHITE="$(tput setaf 7)"
-WHITEB="$(tput bold ; tput setaf 7)"
-BLUE="$(tput setaf 4)"
+# WHITEB="$(tput bold ; tput setaf 7)"
+# BLUE="$(tput setaf 4)"
 BLUEB="$(tput bold ; tput setaf 4)"
 CYAN="$(tput setaf 6)"
 CYANB="$(tput bold ; tput setaf 6)"
-GREEN="$(tput setaf 2)"
-GREENB="$(tput bold ; tput setaf 2)"
+# GREEN="$(tput setaf 2)"
+# GREENB="$(tput bold ; tput setaf 2)"
 RED="$(tput setaf 1)"
-REDB="$(tput bold; tput setaf 1)"
+# REDB="$(tput bold; tput setaf 1)"
 YELLOW="$(tput setaf 3)"
-YELLOWB="$(tput bold ; tput setaf 3)"
+# YELLOWB="$(tput bold ; tput setaf 3)"
 BLINK="$(tput blink)"
 NC="$(tput sgr0)"
 
@@ -189,7 +189,7 @@ check()
   func="$2"
   info="$3"
 
-  if [ $es -ne 0 ]
+  if [ "$es" -ne 0 ]
   then
     echo
     warn "Something went wrong with $func. $info."
@@ -277,7 +277,7 @@ check_iso_type()
 # sleep and clear
 sleep_clear()
 {
-  sleep $1
+  sleep "$1"
   clear
 
   return $SUCCESS
@@ -341,10 +341,10 @@ check_uid()
 # welcome and ask for installation mode
 ask_install_mode()
 {
-  while [ \
-    "$INSTALL_MODE" != "$INSTALL_REPO" -a \
-    "$INSTALL_MODE" != "$INSTALL_BLACKMAN" -a \
-    "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+  while 
+    [ "$INSTALL_MODE" != "$INSTALL_REPO" ] && \
+    [ "$INSTALL_MODE" != "$INSTALL_BLACKMAN" ] && \
+    [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
   do
     title 'Welcome to the BlackArch Linux installer!'
     wprintf '[+] Available installation modes:'
@@ -390,9 +390,8 @@ ask_output_mode()
 # ask for locale to use
 ask_locale()
 {
-  while [ \
-    "$locale_opt" != "$SET_LOCALE" -a \
-    "$locale_opt" != "$LIST_LOCALE" ]
+  while [ "$locale_opt" != "$SET_LOCALE" ] && \
+    [ "$locale_opt" != "$LIST_LOCALE" ]
   do
     title 'Environment > Locale Setup'
     wprintf '[+] Available locale options:'
@@ -446,9 +445,8 @@ set_locale()
 # ask for keymap to use
 ask_keymap()
 {
-  while [ \
-    "$keymap_opt" != "$SET_KEYMAP" -a \
-    "$keymap_opt" != "$LIST_KEYMAP" ]
+  while [ "$keymap_opt" != "$SET_KEYMAP" ] && \
+    [ "$keymap_opt" != "$LIST_KEYMAP" ]
   do
     title 'Environment > Keymap Setup'
     wprintf '[+] Available keymap options:'
@@ -483,7 +481,7 @@ set_keymap()
 {
   title 'Environment > Keymap Setup'
   wprintf '[?] Set keymap [us]: '
-  read KEYMAP
+  read -r KEYMAP
 
   # default keymap
   if [ -z "$KEYMAP" ]
@@ -631,7 +629,7 @@ ask_hostname()
 # get available network interfaces
 get_net_ifs()
 {
-  NET_IFS="$(ls /sys/class/net)"
+  NET_IFS="$(ip -o link show | awk -F': ' '{print $2}' |grep -v 'lo')"
 
   return $SUCCESS
 }
@@ -652,7 +650,7 @@ ask_net_if()
     echo
     wprintf '[?] Please choose a network interface: '
     read -r NET_IF
-    if echo $NET_IFS | grep "\<$NET_IF\>" > /dev/null
+    if echo "$NET_IFS" | grep "\<$NET_IF\>" > /dev/null
     then
       clear
       break
@@ -667,11 +665,10 @@ ask_net_if()
 # ask for networking configuration mode
 ask_net_conf_mode()
 {
-  while [ \
-    "$NET_CONF_MODE" != "$NET_CONF_AUTO" -a \
-    "$NET_CONF_MODE" != "$NET_CONF_WLAN" -a \
-    "$NET_CONF_MODE" != "$NET_CONF_MANUAL" -a \
-    "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
+  while [ "$NET_CONF_MODE" != "$NET_CONF_AUTO" ] && \
+    [ "$NET_CONF_MODE" != "$NET_CONF_WLAN" ] && \
+    [ "$NET_CONF_MODE" != "$NET_CONF_MANUAL" ] && \
+    [ "$NET_CONF_MODE" != "$NET_CONF_SKIP" ]
   do
     title 'Network Setup > Network Interface'
     wprintf '[+] Network interface configuration:'
@@ -692,12 +689,12 @@ ask_net_conf_mode()
 # ask for network addresses
 ask_net_addr()
 {
-  while [ \
-    "$HOST_IPV4" = "" -o "$GATEWAY" = "" -o "$SUBNETMASK" = "" \
-    -o "$BROADCAST" = "" -o "$NAMESERVER" = "" ]
+  while [ "$HOST_IPV4" = "" ] || \
+    [ "$GATEWAY" = "" ] || [ "$SUBNETMASK" = "" ] || \
+    [ "$BROADCAST" = "" ] || [ "$NAMESERVER" = "" ]
   do
     title 'Network Setup > Network Configuration (manual)'
-    wprintf "[+] Configuring network interface '$NET_IF' via USER: "
+    wprintf "[+] Configuring network interface $NET_IF via USER: "
     printf "\n
   > Host ipv4
   > Gateway ipv4
@@ -729,10 +726,10 @@ net_conf_manual()
   wprintf "[+] Configuring network interface '$NET_IF' manually: "
   printf "\n\n"
 
-  ip addr flush dev $NET_IF
-  ip link set $NET_IF up
-  ip addr add "$HOST_IPV4/$SUBNETMASK" broadcast $BROADCAST dev $NET_IF
-  ip route add default via $GATEWAY
+  ip addr flush dev "$NET_IF"
+  ip link set "$NET_IF" up
+  ip addr add "$HOST_IPV4/$SUBNETMASK" broadcast "$BROADCAST" dev "$NET_IF"
+  ip route add default via "$GATEWAY"
   echo "nameserver $NAMESERVER" > /etc/resolv.conf
 
   return $SUCCESS
@@ -748,7 +745,7 @@ net_conf_auto()
   wprintf "[+] Configuring network interface '$NET_IF' via DHCP: "
   printf "\n\n"
 
-  dhcpcd $opts -i $NET_IF > $VERBOSE 2>&1
+  dhcpcd "$opts" -i "$NET_IF" > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -757,10 +754,10 @@ net_conf_auto()
 # ask for wlan data (ssid, wpa passphrase, etc.)
 ask_wlan_data()
 {
-  while [ "$WLAN_SSID" = "" -o "$WLAN_PASSPHRASE" = "" ]
+  while [ "$WLAN_SSID" = "" ] || [ "$WLAN_PASSPHRASE" = "" ]
   do
     title 'Network Setup > Network Configuration (WiFi)'
-    wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
+    wprintf "[+] Configuring network interface $NET_IF via W-LAN + DHCP: "
     printf "\n
   > W-LAN SSID
   > WPA Passphrase (will not echo)
@@ -783,17 +780,17 @@ net_conf_wlan()
   dhcp_opts='-h noleak -i noleak -v ,noleak -I noleak -t 10'
 
   title 'Network Setup > Network Configuration (WiFi)'
-  wprintf "[+] Configuring network interface '$NET_IF' via W-LAN + DHCP: "
+  wprintf "[+] Configuring network interface $NET_IF via W-LAN + DHCP: "
   printf "\n\n"
 
-  wpa_passphrase "$WLAN_SSID" "$WLAN_PASSPHRASE" > $wpasup
-  wpa_supplicant -B -c $wpasup -i $NET_IF > $VERBOSE 2>&1
+  wpa_passphrase "$WLAN_SSID" "$WLAN_PASSPHRASE" > "$wpasup"
+  wpa_supplicant -B -c "$wpasup" -i "$NET_IF" > $VERBOSE 2>&1
 
   warn 'We need to wait a bit for wpa_supplicant and dhcpcd'
 
   sleep 10
 
-  dhcpcd $dhcp_opts -i $NET_IF > $VERBOSE 2>&1
+  dhcpcd "$dhcp_opts" -i "$NET_IF" > $VERBOSE 2>&1
 
   sleep 10
 
@@ -877,7 +874,7 @@ ask_hd_dev()
     echo
     wprintf '[?] Please choose a device: '
     read -r HD_DEV
-    if echo $HD_DEVS | grep "\<$HD_DEV\>" > /dev/null
+    if echo "$HD_DEVS" | grep "\<$HD_DEV\>" > /dev/null
     then
       HD_DEV="/dev/$HD_DEV"
       clear
@@ -936,11 +933,10 @@ get_partition_label()
 ask_partitions()
 {
 
-  while [ \
-    "$BOOT_PART" = '' -o \
-    "$ROOT_PART" = '' -o \
-    "$BOOT_FS_TYPE" = '' -o \
-    "$ROOT_FS_TYPE" = '' ]
+  while [ "$BOOT_PART" = '' ] || \
+    [ "$ROOT_PART" = '' ] || \
+    [ "$BOOT_FS_TYPE" = '' ] || \
+    [ "$ROOT_FS_TYPE" = '' ]
   do
     title 'Hard Drive Setup > Partitions'
     wprintf '[+] Created partitions:'
@@ -1024,17 +1020,19 @@ print_partitions()
     title 'Hard Drive Setup > Partitions'
     wprintf '[+] Current Partition table'
     printf "\n
-  > /boot   : $BOOT_PART ($BOOT_FS_TYPE)
-  > /       : $ROOT_PART ($ROOT_FS_TYPE)
-  > swap    : $SWAP_PART (swap)
-  \n"
+  > /boot   : %s (%s)
+  > /       : %s (%s)
+  > swap    : %s (swap)
+  \n" "$BOOT_PART" "$BOOT_FS_TYPE" \
+      "$ROOT_PART" "$ROOT_FS_TYPE" \
+      "$SWAP_PART"
     wprintf '[?] Partition table correct [y/n]: '
-    read i
-    if [ "$i" = 'y' -o "$i" = 'Y' ]
+    read -r i
+    if [ "$i" = 'y' ] || [ "$i" = 'Y' ]
     then
       clear
       break
-    elif [ "$i" = 'n' -o "$i" = 'N' ]
+    elif [ "$i" = 'n' ] || [ "$i" = 'N' ]
     then
       echo
       err 'Hard Drive Setup aborted.'
@@ -1090,7 +1088,7 @@ open_luks_partition()
 
   wprintf '[+] Opening LUKS partition'
   printf "\n\n"
-  cryptsetup open $part $name > $VERBOSE 2>&1 ||
+  cryptsetup open "$part" "$name" > $VERBOSE 2>&1 ||
     err 'Could not open LUKS device, please try again and make sure that your password is correct.'
 
   return $SUCCESS
@@ -1136,10 +1134,10 @@ make_root_partition()
     printf "\n\n"
     if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
-      mkfs.$ROOT_FS_TYPE -f $ROOT_PART > $VERBOSE 2>&1 ||
+      mkfs.$ROOT_FS_TYPE -f "$ROOT_PART" > $VERBOSE 2>&1 ||
         { err 'Could not create filesystem'; exit $FAILURE; }
     else
-      mkfs.$ROOT_FS_TYPE -F $ROOT_PART > $VERBOSE 2>&1 ||
+      mkfs.$ROOT_FS_TYPE -F "$ROOT_PART" > $VERBOSE 2>&1 ||
         { err 'Could not create filesystem'; exit $FAILURE; }
     fi
     sleep_clear 1
@@ -1163,10 +1161,10 @@ make_boot_partition()
   printf "\n\n"
   if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
   then
-    mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
+    mkfs.fat -F32 "$BOOT_PART" > $VERBOSE 2>&1 ||
       { err 'Could not create filesystem'; exit $FAILURE; }
   else
-    mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
+    mkfs.$BOOT_FS_TYPE -F "$BOOT_PART" > $VERBOSE 2>&1 ||
       { err 'Could not create filesystem'; exit $FAILURE; }
   fi
 
@@ -1206,12 +1204,12 @@ mount_filesystems()
   then
     mount "/dev/mapper/$CRYPT_ROOT" $CHROOT > $VERBOSE 2>&1
   else
-    mount $ROOT_PART $CHROOT > $VERBOSE 2>&1
+    mount "$ROOT_PART" $CHROOT > $VERBOSE 2>&1
   fi
 
   # BOOT
   mkdir "$CHROOT/boot" > $VERBOSE 2>&1
-  mount $BOOT_PART "$CHROOT/boot" > $VERBOSE 2>&1
+  mount "$BOOT_PART" "$CHROOT/boot" > $VERBOSE 2>&1
 
   # SWAP
   if [ "$SWAP_PART" != "none" ]
@@ -1235,6 +1233,7 @@ umount_filesystems()
     wprintf '[+] Unmounting filesystems'
     printf "\n\n"
 
+    umount -Rf /mnt > /dev/null 2>&1; \
     umount -Rf "$HD_DEV"{1..128} > /dev/null 2>&1 # gpt max - 128
   else
     title 'Game Over'
@@ -1261,7 +1260,7 @@ check_space()
     avail_space=$(df -m | grep "$ROOT_PART" | awk '{print $4}')
   fi
 
-  if [ $avail_space -le 40960 ]
+  if [ "$avail_space" -le 40960 ]
   then
     warn 'BlackArch Linux requires at least 40 GB of free space to install!'
   fi
@@ -1348,7 +1347,7 @@ setup_time()
   then
     for t in $(timedatectl list-timezones)
     do
-      echo "    > $(echo $t)"
+      echo "    > echo $t"
     done
 
     wprintf "\n[?] What is your (Zone/SubZone): "
@@ -1449,7 +1448,7 @@ setup_hostname()
   wprintf '[+] Setting up hostname'
   printf "\n\n"
 
-  echo $HOST_NAME > "$CHROOT/etc/hostname"
+  echo "$HOST_NAME" > "$CHROOT/etc/hostname"
 
   return $SUCCESS
 }
@@ -1466,7 +1465,7 @@ setup_bootloader()
     printf "\n\n"
 
     chroot $CHROOT bootctl install > $VERBOSE 2>&1
-    uuid="$(blkid $ROOT_PART | cut -d ' ' -f 2 | cut -d '"' -f 2)"
+    uuid="$(blkid "$ROOT_PART" | cut -d ' ' -f 2 | cut -d '"' -f 2)"
 
     if [ $LUKS = $TRUE ]
     then
@@ -1489,7 +1488,7 @@ EOF
     wprintf '[+] Setting up GRUB boot loader'
     printf "\n\n"
 
-    uuid="$(lsblk -o UUID $ROOT_PART | sed -n 2p)"
+    uuid="$(lsblk -o UUID "$ROOT_PART" | sed -n 2p)"
 
     if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
     then
@@ -1516,7 +1515,7 @@ EOF
 
     sed -i 's/#GRUB_COLOR_/GRUB_COLOR_/g' "$CHROOT/etc/default/grub"
 
-    chroot $CHROOT grub-install --target=i386-pc $HD_DEV > $VERBOSE 2>&1
+    chroot $CHROOT grub-install --target=i386-pc "$HD_DEV" > $VERBOSE 2>&1
 
     cp -f "$BI_PATH/data/boot/grub/splash.png" "$CHROOT/boot/grub/splash.png"
 
@@ -1571,10 +1570,10 @@ setup_user()
   # normal user
   if [ -n "$NORMAL_USER" ]
   then
-    chroot $CHROOT groupadd $user > $VERBOSE 2>&1
-    chroot $CHROOT useradd -g $user -d "/home/$user" -s "/bin/bash" \
-      -G "$user,wheel,users,video,audio" -m $user > $VERBOSE 2>&1
-    chroot $CHROOT chown -R $user:$user "/home/$user" > $VERBOSE 2>&1
+    chroot $CHROOT groupadd "$user" > $VERBOSE 2>&1
+    chroot $CHROOT useradd -g "$user" -d "/home/$user" -s "/bin/bash" \
+      -G "$user,wheel,users,video,audio" -m "$user" > $VERBOSE 2>&1
+    chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
     wprintf "[+] Added user: $user"
     printf "\n\n"
   # environment
@@ -1583,7 +1582,7 @@ setup_user()
     cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
     cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
-    chroot $CHROOT chown -R $user:$user "/home/$user" > $VERBOSE 2>&1
+    chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
   fi
 
   # password
@@ -1596,7 +1595,7 @@ setup_user()
     then
       chroot $CHROOT passwd
     else
-      chroot $CHROOT passwd $user
+      chroot $CHROOT passwd "$user"
     fi
     res=$?
   done
@@ -1664,24 +1663,24 @@ setup_extra_packages()
   printf "\n"
 
   printf "
-  > ArchLinux   : $(echo $arch | wc -w) packages
-  > Browser     : $(echo $browser | wc -w) packages
-  > Bluetooth   : $(echo $bluetooth | wc -w) packages
-  > Editor      : $(echo $editor | wc -w) packages
-  > Filesystem  : $(echo $filesystem | wc -w) packages
-  > Fonts       : $(echo $fonts | wc -w) packages
-  > Hardware    : $(echo $hardware | wc -w) packages
-  > Kernel      : $(echo $kernel | wc -w) packages
-  > Misc        : $(echo $misc | wc -w) packages
-  > Network     : $(echo $network | wc -w) packages
-  > Xorg        : $(echo $xorg | wc -w) packages
+  > ArchLinux   : $(echo "$arch" | wc -w) packages
+  > Browser     : $(echo "$browser" | wc -w) packages
+  > Bluetooth   : $(echo "$bluetooth" | wc -w) packages
+  > Editor      : $(echo "$editor" | wc -w) packages
+  > Filesystem  : $(echo "$filesystem" | wc -w) packages
+  > Fonts       : $(echo "$fonts" | wc -w) packages
+  > Hardware    : $(echo "$hardware" | wc -w) packages
+  > Kernel      : $(echo "$kernel" | wc -w) packages
+  > Misc        : $(echo "$misc" | wc -w) packages
+  > Network     : $(echo "$network" | wc -w) packages
+  > Xorg        : $(echo "$xorg" | wc -w) packages
   \n"
 
   warn 'This can take a while, please wait...'
   printf "\n"
   sleep 2
 
-  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $(echo $all) \
+  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm echo "$all" \
     > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1732,7 +1731,7 @@ setup_base_system()
   ask_user_account
   sleep_clear 1
 
-  if [ ! -z "$NORMAL_USER" ]
+  if [ -n "$NORMAL_USER" ]
   then
     setup_user "$NORMAL_USER"
     sleep_clear 1
@@ -1806,7 +1805,7 @@ ask_mirror()
     printf "\n"
     wprintf "   * %s" "$url"
     printf "\n"
-    count=$(expr $count + 1)
+    count=$($count + 1)
   done < "$mirror_file"
 
   printf "\n"
@@ -1815,7 +1814,7 @@ ask_mirror()
   printf "\n"
 
   # bugfix: detected chars added sometimes - clear chars
-  _a=$(printf "%s" $a | sed 's/[a-z]//Ig' 2> /dev/null)
+  _a=$(printf "%s" "$a" | sed 's/[a-z]//Ig' 2> /dev/null)
 
   if [ -z "$_a" ]
   then
@@ -1893,7 +1892,7 @@ run_strap_sh()
   then
     mv $strap_sh "${CHROOT}${strap_sh}"
     chmod a+x "${CHROOT}${strap_sh}"
-    chroot $CHROOT echo $BA_REPO_URL | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
+    chroot $CHROOT echo "$BA_REPO_URL" | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
   else
     { err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE; }
   fi
@@ -1901,7 +1900,7 @@ run_strap_sh()
   # add blackarch linux mirror if we are in chroot
   if ! grep -q 'blackarch' "$CHROOT/etc/pacman.conf"
   then
-    printf '[blackarch]\nServer = %s\n' $BA_REPO_URL \
+    printf '[blackarch]\nServer = %s\n' "$BA_REPO_URL" \
       >> "$CHROOT/etc/pacman.conf"
   else
     sed -i "/\[blackarch\]/{ n;s?Server.*?Server = $BA_REPO_URL?; }" \
@@ -1972,7 +1971,7 @@ setup_window_managers()
   6. All of the above
   \n"
     wprintf '[?] Choose an option [6]: '
-    read choice
+    read -r choice
     echo
     case $choice in
       1)
@@ -2151,7 +2150,7 @@ setup_blackarch_tools()
   wprintf '[+] Installing BlackArch Linux packages (grab a coffee)'
   printf "\n\n"
 
-  if [ $INSTALL_MODE = $INSTALL_REPO ]
+  if [ "$INSTALL_MODE" = $INSTALL_REPO ]
   then
     wprintf "[+] All available BlackArch tools groups:\n\n"
     printf "    > blackarch blackarch-anti-forensic blackarch-automation
@@ -2167,7 +2166,7 @@ setup_blackarch_tools()
     > blackarch-threat-model blackarch-tunnel blackarch-unpacker blackarch-voip
     > blackarch-webapp blackarch-windows blackarch-wireless \n\n"
     wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
-    read BA_GROUPS
+    read -r BA_GROUPS
     printf "\n"
     warn 'This can take a while, please wait...'
     if [ -z "$BA_GROUPS" ]
@@ -2178,7 +2177,7 @@ setup_blackarch_tools()
       chroot $CHROOT pacman -S --needed --noconfirm --overwrite='*' blackarch \
         > $VERBOSE 2>&1
     else
-      chroot $CHROOT pacman -S --needed --noconfirm --overwrite='*' $BA_GROUPS \
+      chroot $CHROOT pacman -S --needed --noconfirm --overwrite='*' "$BA_GROUPS" \
         > $VERBOSE 2>&1
     fi
     chroot $CHROOT pacman -S --needed --noconfirm terminus-font-ttf \
@@ -2191,7 +2190,7 @@ setup_blackarch_tools()
     do
       wprintf "$foo "
       sleep 1
-      foo=$(expr $foo - 1)
+      foo=$($foo - 1)
     done
     printf "\n"
     chroot $CHROOT pacman -S --needed --overwrite='*' $noconfirm blackman \
@@ -2240,15 +2239,14 @@ dump_live_iso()
 
   for d in $live_dirs
   do
-    part_size=$(du -sm $d 2> /dev/null | awk '{print $1}')
+    part_size=$(du -sm "$d" 2> /dev/null | awk '{print $1}')
     ((total_size+=part_size))
     printf "
   > $d $part_size MB"
   done
-  printf "\n"
-  printf "
-  [ Total size = $total_size MB ]"
-  printf "\n\n"
+  printf "\n
+  [ Total size = $total_size MB ]
+  \n\n"
 
   check_space
 
@@ -2362,7 +2360,7 @@ easter_backdoor()
   do
     wprintf "."
     sleep 1
-    foo=$(expr $foo + 1)
+    foo=$($foo + 1)
   done
   printf " >> ${BLINK}${WHITE}HACK THE PLANET! D00R THE PLANET!${NC} <<"
   printf "\n\n"
@@ -2397,7 +2395,7 @@ self_updater()
     cut -d '-' -f 1 | tr -d '.')0"
   this="$(echo $VERSION | tr -d '.')0"
 
-  if [ $this -lt $repo ]
+  if [ "$this" -lt "$repo" ]
   then
     printf "\n\n"
     warn 'A new version is available! Going to fuck, err, update myself.'
