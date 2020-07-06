@@ -12,7 +12,8 @@ pacman -S blackarch-installer
 ### Using the git version
 
 ```bash
-# NOTE: For development testing, use: git clone -b develop https://github.com/BlackArch/blackarch-installer.git
+# NOTE: For development testing, use:
+# git clone -b develop https://github.com/BlackArch/blackarch-installer.git
 1) git clone https://github.com/BlackArch/blackarch-installer.git
 2) cp -R blackarch-installer/ /usr/share/blackarch-installer
 3) ln -sf /usr/share/blackarch-installer/blackarch-install /usr/bin/blackarch-install
