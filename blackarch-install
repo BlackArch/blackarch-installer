@@ -462,7 +462,7 @@ ask_keymap()
       break
     elif [ "$keymap_opt" = "$LIST_KEYMAP" ]
     then
-      localectl list-x11-keymap-layouts
+      localectl list-keymaps
       echo
     else
       clear
