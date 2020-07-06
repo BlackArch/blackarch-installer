@@ -5,13 +5,14 @@ It is recommend to use it with Arch or BlackArch Linux ISOs though.
 
 ## Installation
 
-On Arch Linux, run:
+### Using the repo package:
 ```sh
 pacman -S blackarch-installer
 ```
-On any other distribution follow these steps:
+### Using the git version
 
 ```bash
+# NOTE: For development testing, use: git clone -b develop https://github.com/BlackArch/blackarch-installer.git
 1) git clone https://github.com/BlackArch/blackarch-installer.git
 2) cp -R blackarch-installer/ /usr/share/blackarch-installer
 3) ln -sf /usr/share/blackarch-installer/blackarch-install /usr/bin/blackarch-install
