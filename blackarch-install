@@ -1104,7 +1104,7 @@ make_swap_partition()
 
   wprintf '[+] Creating SWAP partition'
   printf "\n\n"
-  mkswap $SWAP_PART > $VERBOSE 2>&1 || (err 'Could not create filesystem'; exit $FAILURE)
+  mkswap $SWAP_PART > $VERBOSE 2>&1 || { err 'Could not create filesystem'; exit $FAILURE; }
 
 }
 
@@ -1124,10 +1124,10 @@ make_root_partition()
     if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        (err 'Could not create filesystem'; exit $FAILURE)
+        { err 'Could not create filesystem'; exit $FAILURE; }
     else
       mkfs.$ROOT_FS_TYPE -F "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        (err 'Could not create filesystem'; exit $FAILURE)
+        { err 'Could not create filesystem'; exit $FAILURE; }
     fi
     sleep_clear 1
   else
@@ -1137,10 +1137,10 @@ make_root_partition()
     if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f $ROOT_PART > $VERBOSE 2>&1 ||
-        (err 'Could not create filesystem'; exit $FAILURE)
+        { err 'Could not create filesystem'; exit $FAILURE; }
     else
       mkfs.$ROOT_FS_TYPE -F $ROOT_PART > $VERBOSE 2>&1 ||
-        (err 'Could not create filesystem'; exit $FAILURE)
+        { err 'Could not create filesystem'; exit $FAILURE; }
     fi
     sleep_clear 1
   fi
@@ -1164,10 +1164,10 @@ make_boot_partition()
   if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
   then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
-      (err 'Could not create filesystem'; exit $FAILURE)
+      { err 'Could not create filesystem'; exit $FAILURE; }
   else
     mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
-      (err 'Could not create filesystem'; exit $FAILURE)
+      { err 'Could not create filesystem'; exit $FAILURE; }
   fi
 
   return $SUCCESS
@@ -1895,7 +1895,7 @@ run_strap_sh()
     chmod a+x "${CHROOT}${strap_sh}"
     chroot $CHROOT echo $BA_REPO_URL | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
   else
-    (err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE)
+    { err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE; }
   fi
 
   # add blackarch linux mirror if we are in chroot
