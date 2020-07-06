@@ -174,14 +174,6 @@ BOOT_MODE=''
 # check type of ISO (live? netinst?)
 ISO_TYPE=''
 
-# Error handling
-err_hand() {
-    until "$@"; do
-        "$@"
-    done
-}
-
-
 # check exit status
 check()
 {
@@ -359,6 +351,7 @@ ask_install_mode()
       if [ "$ISO_TYPE" = "net" ]
       then
         err 'WTF, Live-ISO mode with Netinstall? Nope!'
+        ask_install_mode
       fi
     fi
     clear
@@ -1057,6 +1050,7 @@ ask_formatting()
   else
     echo
     err 'Seriously? No formatting no fun! Please format to continue or CTRL + c to cancel...'
+    ask_formatting
   fi
 
 }
@@ -1073,7 +1067,7 @@ make_luks_partition()
   printf "\n\n"
 
   cryptsetup -q -y -v -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$part" \
-    > $VERBOSE 2>&1 || err 'Could not LUKS format, trying again.'
+    > $VERBOSE 2>&1 || { err 'Could not LUKS format, trying again.'; make_luks_partition "$@"; }
 
 }
 
@@ -1089,7 +1083,7 @@ open_luks_partition()
   wprintf '[+] Opening LUKS partition'
   printf "\n\n"
   cryptsetup open "$part" "$name" > $VERBOSE 2>&1 ||
-    err 'Could not open LUKS device, please try again and make sure that your password is correct.'
+    { err 'Could not open LUKS device, please try again and make sure that your password is correct.'; open_luks_partition "$@"; }
 
 }
 
@@ -1111,9 +1105,9 @@ make_root_partition()
 {
   if [ $LUKS = $TRUE ]
   then
-    err_hand make_luks_partition "$ROOT_PART"
+    make_luks_partition "$ROOT_PART"
     sleep_clear 1
-    err_hand open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
+    open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
     sleep_clear 1
     title 'Hard Drive Setup > Partition Creation (root crypto)'
     wprintf '[+] Creating encrypted ROOT partition'
@@ -1796,7 +1790,7 @@ ask_mirror()
 
   wprintf '[+] Fetching mirror list'
   printf "\n\n"
-  curl -s -o $mirror_file $mirror_url > $VERBOSE 2>&1
+  curl -s -o $mirror_file $mirror_url > $VERBOSE
 
   while read -r country url mirror_name
   do
@@ -2420,7 +2414,7 @@ main()
   check_iso_type
 
   # install mode
-  err_hand ask_install_mode
+  ask_install_mode
 
   # output mode
   ask_output_mode
@@ -2492,7 +2486,7 @@ main()
   get_partition_label
   ask_partitions
   print_partitions
-  err_hand ask_formatting
+  ask_formatting
   clear
   make_partitions
   clear
