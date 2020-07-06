@@ -1091,7 +1091,6 @@ open_luks_partition()
   cryptsetup open "$part" "$name" > $VERBOSE 2>&1 ||
     err 'Could not open LUKS device, please try again and make sure that your password is correct.'
 
-  return $SUCCESS
 }
 
 
