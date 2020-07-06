@@ -113,7 +113,7 @@ HD_DEVS=''
 # chosen hard drive device
 HD_DEV=''
 
-# partition label: gpt or msdos
+# partition label: gpt or dos
 PART_LABEL=''
 
 # boot partition
@@ -174,6 +174,13 @@ BOOT_MODE=''
 # check type of ISO (live? netinst?)
 ISO_TYPE=''
 
+# Error handling
+err_hand() {
+    until "$@"; do
+        "$@"
+    done
+}
+
 
 # check exit status
 check()
@@ -212,16 +219,20 @@ warn()
 }
 
 
-# print error and exit
+# print error and return failure
 err()
 {
   printf "%s[-] ERROR: %s%s\n" "$RED" "$@" "$NC"
 
-  exit $FAILURE
-
-  return $SUCCESS
+  return $FAILURE
 }
 
+# print error
+err2()
+{
+  printf "%s[-] ERROR: %s%s\n" "$RED" "$@" "$NC"
+
+}
 
 # leet banner (very important)
 banner()
@@ -290,7 +301,7 @@ confirm()
   do
     title "$header"
     wprintf "$ask"
-    read input
+    read -r input
     case $input in
       y|Y|yes|YES|Yes) return $TRUE ;;
       n|N|no|NO|No) return $FALSE ;;
@@ -349,7 +360,7 @@ ask_install_mode()
   2. Install from BlackArch Live-ISO (offline)
   3. Install from sources using blackman (online)\n\n"
     wprintf '[?] Choose an installation mode: '
-    read INSTALL_MODE
+    read -r INSTALL_MODE
     if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
     then
       if [ "$ISO_TYPE" = "net" ]
@@ -373,7 +384,7 @@ ask_output_mode()
   1. Quiet (default)
   2. Verbose (output of system commands: mkfs, pacman, etc.)\n\n"
   wprintf "[?] Make a choice: "
-  read output_opt
+  read -r output_opt
   if [ "$output_opt" = 2 ]
   then
     VERBOSE='/dev/stdout'
@@ -396,7 +407,7 @@ ask_locale()
   1. Set a locale
   2. List available locales\n\n"
     wprintf "[?] Make a choice: "
-    read locale_opt
+    read -r locale_opt
     if [ "$locale_opt" = "$SET_LOCALE" ]
     then
       break
@@ -422,7 +433,7 @@ set_locale()
 {
   title 'Environment > Locale Setup'
   wprintf '[?] Set locale [en_US.UTF-8]: '
-  read LOCALE
+  read -r LOCALE
 
   # default locale
   if [ -z "$LOCALE" ]
@@ -452,7 +463,7 @@ ask_keymap()
   1. Set a keymap
   2. List available keymaps\n\n"
     wprintf '[?] Make a choice: '
-    read keymap_opt
+    read -r keymap_opt
 
     if [ "$keymap_opt" = "$SET_KEYMAP" ]
     then
@@ -618,7 +629,7 @@ ask_hostname()
   do
     title 'Network Setup > Hostname'
     wprintf '[?] Set your hostname: '
-    read HOST_NAME
+    read -r HOST_NAME
   done
 
   return $SUCCESS
@@ -647,7 +658,7 @@ ask_net_if()
     done
     echo
     wprintf '[?] Please choose a network interface: '
-    read NET_IF
+    read -r NET_IF
     if echo $NET_IFS | grep "\<$NET_IF\>" > /dev/null
     then
       clear
@@ -677,7 +688,7 @@ ask_net_conf_mode()
   3. Manual (use this if you are 1337)
   4. Skip (use this if you are already connected)\n\n"
     wprintf "[?] Please choose a mode: "
-    read NET_CONF_MODE
+    read -r NET_CONF_MODE
     clear
   done
 
@@ -702,15 +713,15 @@ ask_net_addr()
   > Nameserver
     \n"
     wprintf '[?] Host IPv4: '
-    read HOST_IPV4
+    read -r HOST_IPV4
     wprintf '[?] Gateway IPv4: '
-    read GATEWAY
+    read -r GATEWAY
     wprintf '[?] Subnetmask: '
-    read SUBNETMASK
+    read -r SUBNETMASK
     wprintf '[?] Broadcast: '
-    read BROADCAST
+    read -r BROADCAST
     wprintf '[?] Nameserver: '
-    read NAMESERVER
+    read -r NAMESERVER
     clear
   done
 
@@ -762,9 +773,9 @@ ask_wlan_data()
   > WPA Passphrase (will not echo)
     \n"
     wprintf "[?] W-LAN SSID: "
-    read WLAN_SSID
+    read -r WLAN_SSID
     wprintf "[?] WPA Passphrase: "
-    read -s WLAN_PASSPHRASE
+    read -rs WLAN_PASSPHRASE
     clear
   done
 
@@ -806,9 +817,9 @@ check_inet_conn()
   if ! curl -s http://www.yahoo.com/ > $VERBOSE 2>&1
   then
     err 'No Internet connection! Check your network (settings).'
+    exit $FAILURE
   fi
 
-  return $SUCCESS
 }
 
 
@@ -872,7 +883,7 @@ ask_hd_dev()
     done
     echo
     wprintf '[?] Please choose a device: '
-    read HD_DEV
+    read -r HD_DEV
     if echo $HD_DEVS | grep "\<$HD_DEV\>" > /dev/null
     then
       HD_DEV="/dev/$HD_DEV"
@@ -922,7 +933,7 @@ zero_part()
 # get partition label
 get_partition_label()
 {
-  PART_LABEL="$(parted -m $HD_DEV print | grep $HD_DEV | cut -d ':' -f 6)"
+  PART_LABEL="$(fdisk -l "$HD_DEV" |grep "Disklabel" | awk '{print $3;}')"
 
   return $SUCCESS
 }
@@ -931,7 +942,6 @@ get_partition_label()
 # get partitions
 ask_partitions()
 {
-  partitions=$(ls ${HD_DEV}* | grep -v "${HD_DEV}\>")
 
   while [ \
     "$BOOT_PART" = '' -o \
@@ -943,29 +953,62 @@ ask_partitions()
     wprintf '[+] Created partitions:'
     printf "\n\n"
 
-    for i in $partitions
-    do
-      echo "    > $i"
-    done
+    fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:digit:]]"
+    PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:digit:]]" |awk '{print $1;}')
+    
     echo
 
     if [ "$BOOT_MODE" = 'uefi' ]  && [ "$PART_LABEL" = 'gpt' ]
     then
-      wprintf '[?] EFI System partition (/dev/sdXY): '
-      read BOOT_PART
+      while [ -z "$BOOT_PART" ]; do
+        wprintf "[?] EFI System partition (${HD_DEV}X): "
+        read -r BOOT_PART
+        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
+          wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
+          wprintf "[?] EFI System partition (${HD_DEV}X): "
+          read -r BOOT_PART
+        done
+      done
       BOOT_FS_TYPE="fat32"
     else
-      wprintf '[?] Boot partition (/dev/sdXY): '
-      read BOOT_PART
-      wprintf '[?] Boot FS type (ext2, ext3, ext4): '
-      read BOOT_FS_TYPE
+      while [ -z "$BOOT_PART" ]; do
+        wprintf "[?] Boot partition (${HD_DEV}X): "
+        read -r BOOT_PART
+        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
+          wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
+          wprintf "[?] Boot partition (${HD_DEV}X): "
+          read -r BOOT_PART
+        done
+      done
+      wprintf '[?] Choose a filesystem to use in your boot partition (ext2, ext3, ext4)? (default: ext4): '
+      read -r BOOT_FS_TYPE
+      if [ -z "$BOOT_FS_TYPE" ]; then
+        BOOT_FS_TYPE="ext4"
+      fi
     fi
-    wprintf '[?] Root partition (/dev/sdXY): '
-    read ROOT_PART
-    wprintf '[?] Root FS type (ext2, ext3, ext4, btrfs): '
-    read ROOT_FS_TYPE
-    wprintf '[?] Swap parition (/dev/sdXY - empty for none): '
-    read SWAP_PART
+    while [ -z "$ROOT_PART" ]; do
+      wprintf "[?] Root partition (${HD_DEV}X): "
+      read -r ROOT_PART
+      until [[ "$PARTITIONS" =~ $ROOT_PART ]]; do
+          wprintf "[?] Your partition $ROOT_PART is not in the partitions list.\n"
+          wprintf "[?] Root partition (${HD_DEV}X): "
+          read -r ROOT_PART
+      done
+    done
+    wprintf '[?] Choose a filesystem to use in your root partition (ext2, ext3, ext4, btrfs)? (default: ext4): '
+    read -r ROOT_FS_TYPE
+    if [ -z "$ROOT_FS_TYPE" ]; then
+      ROOT_FS_TYPE="ext4"
+    fi
+    wprintf "[?] Swap partition (${HD_DEV}X - empty for none): "
+    read -r SWAP_PART
+    if [ -n "$SWAP_PART" ]; then
+        until [[ "$PARTITIONS" =~ $SWAP_PART ]]; do
+          wprintf "[?] Your partition $SWAP_PART is not in the partitions list.\n"
+          wprintf "[?] Swap partition (${HD_DEV}X): "
+          read -r SWAP_PART
+        done
+    fi
 
     if [ "$SWAP_PART" = '' ]
     then
@@ -1002,6 +1045,7 @@ print_partitions()
     then
       echo
       err 'Hard Drive Setup aborted.'
+      exit $FAILURE
     else
       clear
       continue
@@ -1021,10 +1065,9 @@ ask_formatting()
     return $SUCCESS
   else
     echo
-    err 'Seriously? No formatting no fun!'
+    err 'Seriously? No formatting no fun! Please format to continue or CTRL + c to cancel...'
   fi
 
-  return $SUCCESS
 }
 
 
@@ -1039,9 +1082,8 @@ make_luks_partition()
   printf "\n\n"
 
   cryptsetup -q -y -v -c aes-xts-plain64 -s 512 -h sha512 luksFormat "$part" \
-    > $VERBOSE 2>&1 || (warn 'Could not LUKS format, trying again...'; make_root_partition)
+    > $VERBOSE 2>&1 || err 'Could not open LUKS device, please try again and make sure that your password is correct.'
 
-  return $SUCCESS
 }
 
 
@@ -1069,9 +1111,8 @@ make_swap_partition()
 
   wprintf '[+] Creating SWAP partition'
   printf "\n\n"
-  mkswap $SWAP_PART > $VERBOSE 2>&1 || err 'Could not create filesystem'
+  mkswap $SWAP_PART > $VERBOSE 2>&1 || (err2 'Could not create filesystem'; exit $FAILURE)
 
-  return $SUCCESS
 }
 
 
@@ -1080,9 +1121,9 @@ make_root_partition()
 {
   if [ $LUKS = $TRUE ]
   then
-    make_luks_partition "$ROOT_PART"
+    err_hand make_luks_partition "$ROOT_PART"
     sleep_clear 1
-    open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
+    err_hand open_luks_partition "$ROOT_PART" "$CRYPT_ROOT"
     sleep_clear 1
     title 'Hard Drive Setup > Partition Creation (root crypto)'
     wprintf '[+] Creating encrypted ROOT partition'
@@ -1090,10 +1131,10 @@ make_root_partition()
     if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        err 'Could not create filesystem'
+        (err2 'Could not create filesystem'; exit $FAILURE)
     else
       mkfs.$ROOT_FS_TYPE -F "/dev/mapper/$CRYPT_ROOT" > $VERBOSE 2>&1 ||
-        err 'Could not create filesystem'
+        (err2 'Could not create filesystem'; exit $FAILURE)
     fi
     sleep_clear 1
   else
@@ -1103,10 +1144,10 @@ make_root_partition()
     if [ "$ROOT_FS_TYPE" = 'btrfs' ]
     then
       mkfs.$ROOT_FS_TYPE -f $ROOT_PART > $VERBOSE 2>&1 ||
-        err 'Could not create filesystem'
+        (err2 'Could not create filesystem'; exit $FAILURE)
     else
       mkfs.$ROOT_FS_TYPE -F $ROOT_PART > $VERBOSE 2>&1 ||
-        err 'Could not create filesystem'
+        (err2 'Could not create filesystem'; exit $FAILURE)
     fi
     sleep_clear 1
   fi
@@ -1130,10 +1171,10 @@ make_boot_partition()
   if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
   then
     mkfs.fat -F32 $BOOT_PART > $VERBOSE 2>&1 ||
-      err 'Could not create filesystem'
+      (err2 'Could not create filesystem'; exit $FAILURE)
   else
     mkfs.$BOOT_FS_TYPE -F $BOOT_PART > $VERBOSE 2>&1 ||
-      err 'Could not create filesystem'
+      (err2 'Could not create filesystem'; exit $FAILURE)
   fi
 
   return $SUCCESS
@@ -1318,7 +1359,7 @@ setup_time()
     done
 
     wprintf "\n[?] What is your (Zone/SubZone): "
-    read timezone
+    read -r timezone
     chroot $CHROOT ln -sf "/usr/share/zoneinfo/$timezone" /etc/localtime \
       > $VERBOSE 2>&1
 
@@ -1500,7 +1541,7 @@ ask_user_account()
   if confirm 'Base System Setup > User' '[?] Setup a normal user account [y/n]: '
   then
     wprintf '[?] User name: '
-    read NORMAL_USER
+    read -r NORMAL_USER
   fi
 
   return $SUCCESS
@@ -1526,7 +1567,7 @@ setup_testuser()
 # setup user account, password and environment
 setup_user()
 {
-  user="$(echo $1 | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' |
+  user="$(echo "$1" | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' |
     cut -c 1-32)"
 
   title 'Base System Setup > User'
@@ -1535,7 +1576,7 @@ setup_user()
   printf "\n\n"
 
   # normal user
-  if [ ! -z $NORMAL_USER ]
+  if [ -n "$NORMAL_USER" ]
   then
     chroot $CHROOT groupadd $user > $VERBOSE 2>&1
     chroot $CHROOT useradd -g $user -d "/home/$user" -s "/bin/bash" \
@@ -1543,10 +1584,8 @@ setup_user()
     chroot $CHROOT chown -R $user:$user "/home/$user" > $VERBOSE 2>&1
     wprintf "[+] Added user: $user"
     printf "\n\n"
-  fi
-
   # environment
-  if [ -z $NORMAL_USER ]
+  elif [ -z "$NORMAL_USER" ]
   then
     cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
@@ -1779,7 +1818,7 @@ ask_mirror()
 
   printf "\n"
   wprintf '[?] Select a mirror number (enter for default): '
-  read a
+  read -r a
   printf "\n"
 
   # bugfix: detected chars added sometimes - clear chars
@@ -1791,7 +1830,7 @@ ask_mirror()
   else
     BA_REPO_URL=$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 2)
     wprintf "[+] Mirror from '%s' selected" \
-      $(sed -n "${_a}p" $mirror_file | cut -d "|" -f 3)
+      "$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 3)"
     printf "\n\n"
   fi
 
@@ -1803,7 +1842,7 @@ ask_mirror()
 # ask for archlinux server
 ask_mirror_arch()
 {
-  declare mirrold='cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup'
+  local mirrold='cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup'
 
   if confirm 'Pacman Setup > ArchLinux Mirrorlist' \
     "[+] Worldwide mirror will be used\n\n[?] Look for the best server [y/n]: "
@@ -1863,7 +1902,7 @@ run_strap_sh()
     chmod a+x "${CHROOT}${strap_sh}"
     chroot $CHROOT echo $BA_REPO_URL | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
   else
-    err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"
+    (err2 "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE)
   fi
 
   # add blackarch linux mirror if we are in chroot
@@ -2391,7 +2430,7 @@ main()
   check_iso_type
 
   # install mode
-  ask_install_mode
+  err_hand ask_install_mode
 
   # output mode
   ask_output_mode
@@ -2463,7 +2502,7 @@ main()
   get_partition_label
   ask_partitions
   print_partitions
-  ask_formatting
+  err_hand ask_formatting
   clear
   make_partitions
   clear
