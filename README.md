@@ -18,7 +18,6 @@ pacman -S blackarch-installer
 2) cp -R blackarch-installer/ /usr/share/blackarch-installer
 3) ln -sf /usr/share/blackarch-installer/blackarch-install /usr/bin/blackarch-install
 4) chmod +x /usr/bin/blackarch-install
-5) blackarch-install
 ```
 
 ## Usage
