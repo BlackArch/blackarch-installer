@@ -804,7 +804,7 @@ check_inet_conn()
   title 'Network Setup > Connection Check'
   wprintf '[+] Checking for Internet connection...'
 
-  if ! curl -s http://www.yahoo.com/ > $VERBOSE 2>&1
+  if ! curl -s http://www.yahoo.com/ > $VERBOSE
   then
     err 'No Internet connection! Check your network (settings).'
     exit $FAILURE
