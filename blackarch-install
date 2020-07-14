@@ -113,6 +113,9 @@ HD_DEVS=''
 # chosen hard drive device
 HD_DEV=''
 
+# Partitions
+PARTITIONS=''
+
 # partition label: gpt or dos
 PART_LABEL=''
 
@@ -908,7 +911,9 @@ ask_cfdisk()
 # zero out partition if needed/chosen
 zero_part()
 {
+  local zeroed_part=0;
   if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed partition table [y/n]: '
+  zeroed_part=1;
   then
     cfdisk -z "$HD_DEV"
     sync
@@ -916,7 +921,11 @@ zero_part()
     cfdisk "$HD_DEV"
     sync
   fi
-
+  PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
+  if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
+    err 'You have not created partitions on your disk, please make sure to write your partitions to the disk before quiting cfdisk.'
+    zero_part
+  fi
   return $SUCCESS
 }
 
@@ -944,7 +953,6 @@ ask_partitions()
     printf "\n\n"
 
     fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]"
-    PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
     
     echo
 
