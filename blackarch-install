@@ -943,8 +943,8 @@ ask_partitions()
     wprintf '[+] Created partitions:'
     printf "\n\n"
 
-    fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:digit:]]"
-    PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:digit:]]" |awk '{print $1;}')
+    fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]"
+    PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
     
     echo
 
