@@ -923,7 +923,7 @@ zero_part()
   fi
   PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
   if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
-    err 'You have not created partitions on your disk, please make sure to write your partitions to the disk before quiting cfdisk.'
+    err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
     zero_part
   fi
   return $SUCCESS
