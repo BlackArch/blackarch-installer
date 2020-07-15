@@ -1423,7 +1423,7 @@ setup_initramfs()
 
   warn 'This can take a while, please wait...'
   printf "\n"
-  chroot $CHROOT mkinitcpio -p linux > $VERBOSE 2>&1
+  chroot $CHROOT mkinitcpio -P > $VERBOSE 2>&1
 
   return $SUCCESS
 }
