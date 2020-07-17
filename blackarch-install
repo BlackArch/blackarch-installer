@@ -927,7 +927,7 @@ zero_part()
     zero_part
   fi
   if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
-    err 'You are booting in UEFI mode but not EFI partition was created, make sure you choose EFI System type for one of your partitions.'
+    err 'You are booting in UEFI mode but not EFI partition was created, make sure you select the "EFI System" type for your EFI partition.'
     zero_part
   fi
   return $SUCCESS
