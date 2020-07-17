@@ -18,6 +18,19 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add help text for each section if feasible
 
+===> 1.2.0
+
+  [x] Introduce error handling. This makes the installer able to recover from user errors (like typos).
+  [x] Check for EFI partition if boot mode is UEFI.
+  [x] Improve disk partitions detection using fdisk instead of ls.
+  [x] Improve partition table detection.
+  [x] Introduce defaults for partition filesystems.
+  [x] Show the correct device when suggesting partitions names.
+  [x] Force read to raw input.
+  [x] Verify that partitions are in the partitions list.
+  [x] Exit from the installer explicity.
+  [x] Trap CTRL + c.
+  [x] Add empty partitions list detection.
 
 ===> 1.1.49
 
