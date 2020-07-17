@@ -926,7 +926,7 @@ zero_part()
     err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
     zero_part
   fi
-  if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i EFI ; then
+  if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
     err 'You are booting in UEFI mode but not EFI partition was created, make sure you choose EFI System type for one of your partitions.'
     zero_part
   fi
