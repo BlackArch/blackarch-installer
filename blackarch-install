@@ -1293,7 +1293,7 @@ install_base_packages()
   printf "\n"
 
   pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
-    terminus-font > $VERBOSE 2>&1
+    terminus-font terminus-font-ttf > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1662,7 +1662,7 @@ setup_extra_packages()
   iwd lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill
   rp-pppoe socat vpnc wget wireless_tools wpa_supplicant wvdial xl2tpd'
 
-  xorg='rxvt-unicode terminus-font xf86-video-amdgpu xf86-video-ati
+  xorg='rxvt-unicode xf86-video-amdgpu xf86-video-ati
   xf86-video-dummy xf86-video-fbdev xf86-video-intel xf86-video-nouveau
   xf86-video-openchrome xf86-video-sisusb xf86-video-vesa xf86-video-vmware
   xf86-video-voodoo xorg-server xorg-xbacklight xorg-xinit xterm'
@@ -2193,8 +2193,6 @@ setup_blackarch_tools()
       chroot $CHROOT pacman -S --needed --noconfirm --overwrite='*' "$BA_GROUPS" \
         > $VERBOSE 2>&1
     fi
-    chroot $CHROOT pacman -S --needed --noconfirm terminus-font-ttf \
-      > $VERBOSE 2>&1
   else
     warn 'Installing all tools from source via blackman can take hours'
     printf "\n"
