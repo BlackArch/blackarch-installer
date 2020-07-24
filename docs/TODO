@@ -18,14 +18,24 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add help text for each section if feasible
 
+
+===> 1.2.11
+
+  [x] fix a typo which lead to wrong install
+  [x] remove a non-existing package from 'extra package' list
+  [x] docs/TODO style fixes
+
+
 ===> 1.2.10
 
   [x] Simply bump version to .XX (.10) in order to trigger self_updater() (i
-  will fix this soon) and use .11, .12, .13 in upcoming versions.
+      will fix this soon) and use .11, .12, .13 in upcoming versions.
+
 
 ===> 1.2.1
 
   [x] Fix issue with Window Manager/Session Manager fonts. Ref: https://github.com/BlackArch/blackarch/issues/2433
+
 
 ===> 1.2.0
 
@@ -40,6 +50,7 @@ ChangeLog and TODO list for blackarch-installer
   [x] Exit from the installer explicity.
   [x] Trap CTRL + c.
   [x] Add empty partitions list detection.
+
 
 ===> 1.1.49
 

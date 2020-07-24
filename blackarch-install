@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.10'
+VERSION='1.2.11'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -1644,8 +1644,7 @@ setup_extra_packages()
   filesystem='cifs-utils dmraid dosfstools exfat-utils f2fs-tools
   gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage'
 
-  fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-alias
-  xorg-fonts-misc'
+  fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-misc'
 
   hardware='amd-ucode intel-ucode'
 
@@ -1693,7 +1692,7 @@ setup_extra_packages()
   printf "\n"
   sleep 2
 
-  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm echo "$all" \
+  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $all \
     > $VERBOSE 2>&1
 
   return $SUCCESS
