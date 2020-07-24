@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.1'
+VERSION='1.2.10'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -344,7 +344,7 @@ check_uid()
 # welcome and ask for installation mode
 ask_install_mode()
 {
-  while 
+  while
     [ "$INSTALL_MODE" != "$INSTALL_REPO" ] && \
     [ "$INSTALL_MODE" != "$INSTALL_BLACKMAN" ] && \
     [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
@@ -957,7 +957,7 @@ ask_partitions()
     printf "\n\n"
 
     fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]"
-    
+
     echo
 
     if [ "$BOOT_MODE" = 'uefi' ]  && [ "$PART_LABEL" = 'gpt' ]
