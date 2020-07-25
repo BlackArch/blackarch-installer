@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.11'
+VERSION='1.2.12'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -2090,7 +2090,7 @@ setup_vbox_utils()
   wprintf '[+] Setting up VirtualBox utils'
   printf "\n\n"
 
-  chroot $CHROOT pacman -S virtualbox-guest-utils virtualbox-guest-dkms --overwrite='*' --needed \
+  chroot $CHROOT pacman -S virtualbox-guest-utils --overwrite='*' --needed \
     --noconfirm > $VERBOSE 2>&1
 
   chroot $CHROOT systemctl enable vboxservice > $VERBOSE 2>&1
@@ -2098,7 +2098,8 @@ setup_vbox_utils()
   #printf "vboxguest\nvboxsf\nvboxvideo\n" \
   #  > "$CHROOT/etc/modules-load.d/vbox.conf"
 
-  cp -r "$BI_PATH/data/etc/xdg/autostart/vboxclient.desktop" "$CHROOT/etc/xdg/autostart/." > $VERBOSE 2>&1
+  cp -r "$BI_PATH/data/etc/xdg/autostart/vboxclient.desktop" \
+    "$CHROOT/etc/xdg/autostart/." > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -2200,7 +2201,7 @@ setup_blackarch_tools()
     do
       wprintf "$foo "
       sleep 1
-      foo=$($foo - 1)
+      foo=$((foo - 1))
     done
     printf "\n"
     chroot $CHROOT pacman -S --needed --overwrite='*' $noconfirm blackman \
@@ -2358,7 +2359,7 @@ setup_blackarch()
 # for fun and lulz
 easter_backdoor()
 {
-  foo=0
+  bar=0
 
   title 'Game Over'
 
@@ -2366,11 +2367,11 @@ easter_backdoor()
   printf "\n\n"
 
   wprintf 'Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w '
-  while [ $foo -ne 5 ]
+  while [ $bar -ne 5 ]
   do
     wprintf "."
     sleep 1
-    foo=$($foo + 1)
+    bar=$((bar + 1))
   done
   printf " >> ${BLINK}${WHITE}HACK THE PLANET! D00R THE PLANET!${NC} <<"
   printf "\n\n"

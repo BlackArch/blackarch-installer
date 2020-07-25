@@ -19,6 +19,13 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.12
+
+  [x] remove dkms-guest package for vbox as we use AL's 'linux' kernel
+  [x] add '--checkhostversion' option for vboxclient
+  [x] fix wrong counter lines
+
+
 ===> 1.2.11
 
   [x] fix a typo which lead to wrong install

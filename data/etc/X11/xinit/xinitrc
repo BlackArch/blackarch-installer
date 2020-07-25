@@ -44,7 +44,10 @@ fi
 vbox=$(dmesg |grep -io virtualbox)
 if [ ! -z "$vbox" ]
 then
-  /usr/bin/VBoxClient-all
+  /usr/bin/VBoxClient --checkhostversion
+  /usr/bin/VBoxClient --seamless
+  /usr/bin/VBoxClient --clipboard
+  /usr/bin/VboxClient --vmsvga
 fi
 
 # wallpaper
