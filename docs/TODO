@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.13
+
+  [x] stick with default luks encryption settings
+
+
 ===> 1.2.12
 
   [x] remove dkms-guest package for vbox as we use AL's 'linux' kernel
