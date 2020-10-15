@@ -1213,14 +1213,16 @@ mount_filesystems()
   printf "\n\n"
 
   # ROOT
-  if [ $LUKS = $TRUE ]
-  then
+  if [ $LUKS = $TRUE ]; then
     if ! mount "/dev/mapper/$CRYPT_ROOT" $CHROOT; then
       err "Error mounting root filesystem, leaving."
       exit $FAILURE
     fi
   else
-    mount "$ROOT_PART" $CHROOT > $VERBOSE 2>&1
+    if ! mount "$ROOT_PART" $CHROOT; then
+      err "Error mounting root filesystem, leaving."
+      exit $FAILURE
+    fi
   fi
 
   # BOOT
