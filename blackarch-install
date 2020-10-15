@@ -1215,14 +1215,20 @@ mount_filesystems()
   # ROOT
   if [ $LUKS = $TRUE ]
   then
-    mount "/dev/mapper/$CRYPT_ROOT" $CHROOT > $VERBOSE 2>&1
+    if ! mount "/dev/mapper/$CRYPT_ROOT" $CHROOT; then
+      err "Error mounting root filesystem, leaving."
+      exit $FAILURE
+    fi
   else
     mount "$ROOT_PART" $CHROOT > $VERBOSE 2>&1
   fi
 
   # BOOT
   mkdir "$CHROOT/boot" > $VERBOSE 2>&1
-  mount "$BOOT_PART" "$CHROOT/boot" > $VERBOSE 2>&1
+  if ! mount "$BOOT_PART" "$CHROOT/boot"; then
+    err "Error mounting boot partition, leaving."
+    exit $FAILURE
+  fi
 
   # SWAP
   if [ "$SWAP_PART" != "none" ]
@@ -1606,9 +1612,9 @@ setup_user()
   do
     if [ "$user" = "root" ]
     then
-      chroot $CHROOT /usr/bin/passwd
+      chroot $CHROOT passwd
     else
-      chroot $CHROOT /usr/bin/passwd "$user"
+      chroot $CHROOT passwd "$user"
     fi
     res=$?
   done
