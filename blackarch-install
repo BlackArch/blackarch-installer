@@ -1606,9 +1606,9 @@ setup_user()
   do
     if [ "$user" = "root" ]
     then
-      chroot $CHROOT passwd
+      chroot $CHROOT /usr/bin/passwd
     else
-      chroot $CHROOT passwd "$user"
+      chroot $CHROOT /usr/bin/passwd "$user"
     fi
     res=$?
   done
