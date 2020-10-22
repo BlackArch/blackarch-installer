@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.14'
+VERSION='1.2.15'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -891,6 +891,15 @@ ask_hd_dev()
   return $SUCCESS
 }
 
+# get available partitions on hard drive
+get_partitions()
+{
+  PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type | \
+    grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
+
+  return $SUCCESS
+}
+
 
 # ask user to create partitions using cfdisk
 ask_cfdisk()
@@ -902,6 +911,7 @@ ask_cfdisk()
   else
     echo
     warn 'No partitions chosed? Make sure you have them already configured.'
+    get_partitions
   fi
 
   return $SUCCESS
@@ -921,7 +931,7 @@ zero_part()
     cfdisk "$HD_DEV"
     sync
   fi
-  PARTITIONS=$(fdisk -l "${HD_DEV}" -o device,size,type |grep "${HD_DEV}[[:alnum:]]" |awk '{print $1;}')
+  get_partitions
   if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
     err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
     zero_part
