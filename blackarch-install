@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.15'
+VERSION='1.2.16'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -177,6 +177,7 @@ BOOT_MODE=''
 # check type of ISO (live? netinst?)
 ISO_TYPE=''
 
+
 # Exit on CTRL + c
 ctrl_c() {
   err "Keyboard Interrupt detected, leaving..."
@@ -184,6 +185,7 @@ ctrl_c() {
 }
 
 trap ctrl_c 2
+
 
 # check exit status
 check()
@@ -956,7 +958,6 @@ get_partition_label()
 # get partitions
 ask_partitions()
 {
-
   while [ "$BOOT_PART" = '' ] || \
     [ "$ROOT_PART" = '' ] || \
     [ "$BOOT_FS_TYPE" = '' ] || \
@@ -1378,7 +1379,7 @@ setup_time()
   then
     for t in $(timedatectl list-timezones)
     do
-      echo "    > echo $t"
+      echo "    > $t"
     done
 
     wprintf "\n[?] What is your (Zone/SubZone): "
