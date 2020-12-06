@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.18
+
+  [x] Loop if offline install on netinstall is selected
+
+
 ===> 1.2.16
 
   [x] output style fixes
