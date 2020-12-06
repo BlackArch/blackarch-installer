@@ -365,6 +365,7 @@ ask_install_mode()
       then
         err 'WTF, Live-ISO mode with Netinstall? Nope!'
         ask_install_mode
+        INSTALL_MODE=''
       fi
     fi
     clear
