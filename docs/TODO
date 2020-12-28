@@ -19,6 +19,13 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.19
+
+  [x] add default mkinitcpio.* stuff
+  [x] copy correct vmlinux image (fix 'grub' bug)
+  [x] use correct format for counter
+
+
 ===> 1.2.18
 
   [x] Loop if offline install on netinstall is selected

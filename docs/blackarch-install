@@ -1428,9 +1428,6 @@ setup_initramfs()
   wprintf '[+] Setting up InitramFS'
   printf "\n\n"
 
-  cp -f "$BI_PATH/data/etc/mkinitcpio.conf" "$CHROOT/etc/mkinitcpio.conf"
-  cp -fr "$BI_PATH/data/etc/mkinitcpio.d" "$CHROOT/etc/"
-
   if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
   then
     cp /run/archiso/bootmnt/blackarch/boot/x86_64/vmlinuz-linux \
