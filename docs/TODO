@@ -19,6 +19,11 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.20
+
+  [x] s/live/full/gi
+
+
 ===> 1.2.19
 
   [x] add default mkinitcpio.* stuff

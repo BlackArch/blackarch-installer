@@ -47,7 +47,7 @@ INSTALL_MODE=''
 
 # install modes
 INSTALL_REPO='1'
-INSTALL_LIVE_ISO='2'
+INSTALL_FULL_ISO='2'
 INSTALL_BLACKMAN='3'
 
 # chosen locale
@@ -174,7 +174,7 @@ WLAN_PASSPHRASE=''
 # check boot mode
 BOOT_MODE=''
 
-# check type of ISO (live? netinst?)
+# check type of ISO (Full? netinst?)
 ISO_TYPE=''
 
 
@@ -270,7 +270,7 @@ check_iso_type()
 {
   if [ "$(which dnsspider 2> /dev/null)" ]
   then
-    ISO_TYPE='live'
+    ISO_TYPE='full'
   else
     ISO_TYPE='net'
   fi
@@ -349,21 +349,21 @@ ask_install_mode()
   while
     [ "$INSTALL_MODE" != "$INSTALL_REPO" ] && \
     [ "$INSTALL_MODE" != "$INSTALL_BLACKMAN" ] && \
-    [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+    [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   do
     title 'Welcome to the BlackArch Linux installer!'
     wprintf '[+] Available installation modes:'
     printf "\n
   1. Install from BlackArch repository (online)
-  2. Install from BlackArch Live-ISO (offline)
+  2. Install from BlackArch Full-ISO (offline)
   3. Install from sources using blackman (online)\n\n"
     wprintf '[?] Choose an installation mode: '
     read -r INSTALL_MODE
-    if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
+    if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
     then
       if [ "$ISO_TYPE" = "net" ]
       then
-        err 'WTF, Live-ISO mode with Netinstall? Nope!'
+        err 'WTF, Full-ISO mode with Netinstall? Nope!'
         ask_install_mode
         INSTALL_MODE=''
       fi
@@ -1431,7 +1431,7 @@ setup_initramfs()
   cp -f "$BI_PATH/data/etc/mkinitcpio.conf" "$CHROOT/etc/mkinitcpio.conf"
   cp -fr "$BI_PATH/data/etc/mkinitcpio.d" "$CHROOT/etc/"
 
-  if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
   then
     cp /run/archiso/bootmnt/blackarch/boot/x86_64/vmlinuz-linux \
       "$CHROOT/boot/vmlinuz-linux"
@@ -1526,7 +1526,7 @@ EOF
 
     uuid="$(lsblk -o UUID "$ROOT_PART" | sed -n 2p)"
 
-    if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+    if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
     then
       chroot $CHROOT pacman -S grub --noconfirm --overwrite='*' --needed \
         > $VERBOSE 2>&1
@@ -1725,13 +1725,13 @@ setup_extra_packages()
 # perform system base setup/configurations
 setup_base_system()
 {
-  if [ "$INSTALL_MODE" = "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
   then
-    dump_live_iso
+    dump_full_iso
     sleep_clear 1
   fi
 
-  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     pass_mirror_conf # copy mirror list to chroot env
 
@@ -1775,7 +1775,7 @@ setup_base_system()
     sleep_clear 2
   fi
 
-  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     reinitialize_keyring
     sleep_clear 1
@@ -2257,21 +2257,21 @@ update_user_groups()
 }
 
 
-# dump data from the live-iso
-dump_live_iso()
+# dump data from the full-iso
+dump_full_iso()
 {
-  live_dirs='/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp'
+  full_dirs='/bin /sbin /etc /home /lib /lib64 /opt /root /srv /usr /var /tmp'
   total_size=0 # no cheat
 
   title 'BlackArch Linux Setup'
 
-  wprintf '[+] Dumping data from Live-ISO. Grab a coffee and pop shells!'
+  wprintf '[+] Dumping data from Full-ISO. Grab a coffee and pop shells!'
   printf "\n\n"
 
   wprintf '[+] Fetching total size to transfer, please wait...'
   printf "\n"
 
-  for d in $live_dirs
+  for d in $full_dirs
   do
     part_size=$(du -sm "$d" 2> /dev/null | awk '{print $1}')
     ((total_size+=part_size))
@@ -2292,7 +2292,7 @@ dump_live_iso()
   wprintf "[+] Installation done!\n"
 
   # clean up files
-  wprintf '[+] Cleaning Live Environment files, please wait...'
+  wprintf '[+] Cleaning Full Environment files, please wait...'
   sed -i 's/Storage=volatile/#Storage=auto/' ${CHROOT}/etc/systemd/journald.conf
   rm -rf "$CHROOT/etc/udev/rules.d/81-dhcpcd.rules"
   rm -rf "$CHROOT/etc/systemd/system/"{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
@@ -2475,7 +2475,7 @@ main()
   ask_hostname
   sleep_clear 0
 
-  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     get_net_ifs
     ask_net_conf_mode
@@ -2541,7 +2541,7 @@ main()
   sleep_clear 1
 
   # blackarch Linux
-  if [ "$INSTALL_MODE" != "$INSTALL_LIVE_ISO" ]
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     setup_blackarch
     sleep_clear 1
