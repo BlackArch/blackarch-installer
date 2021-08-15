@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.21-dev'
+VERSION='1.2.21'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -1881,7 +1881,7 @@ ask_mirror_arch()
     pacman -Sy --noconfirm > $VERBOSE 2>&1
     pacman -S --needed --noconfirm reflector > $VERBOSE 2>&1
     yes | pacman -Scc > $VERBOSE 2>&1
-    reflector --verbose --latest 10 --protocol https --sort rate \
+    reflector --verbose --latest 5 --protocol https --sort rate \
       --save /etc/pacman.d/mirrorlist > $VERBOSE 2>&1
   else
     printf "\n"
