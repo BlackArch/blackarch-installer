@@ -1,16 +1,16 @@
-from typing import Any
+from typing import Any, Dict, List, NamedTuple, Optional
+
 from tornado.util import ObjectDict
-from collections import namedtuple
 
 class SSLError(Exception): ...
 
-class _NormalizedHeaderCache(dict):
+class _NormalizedHeaderCache(Dict[Any, Any]):
     size: Any
     queue: Any
     def __init__(self, size) -> None: ...
     def __missing__(self, key): ...
 
-class HTTPHeaders(dict):
+class HTTPHeaders(Dict[Any, Any]):
     def __init__(self, *args, **kwargs) -> None: ...
     def add(self, name, value): ...
     def get_list(self, name): ...
@@ -29,21 +29,24 @@ class HTTPHeaders(dict):
     def __deepcopy__(self, memo_dict): ...
 
 class HTTPServerRequest:
-    method: Any
-    uri: Any
-    version: Any
-    headers: Any
-    body: Any
+    path: str
+    query: str
+    method: Optional[str]
+    uri: Optional[str]
+    version: str
+    headers: HTTPHeaders
+    body: bytes
     remote_ip: Any
     protocol: Any
-    host: Any
-    files: Any
-    connection: Any
-    arguments: Any
-    query_arguments: Any
-    body_arguments: Any
-    def __init__(self, method=..., uri=..., version=..., headers=..., body=..., host=..., files=..., connection=...,
-                 start_line=...) -> None: ...
+    host: str
+    files: Dict[str, List[HTTPFile]]
+    connection: Optional[HTTPConnection]
+    arguments: Dict[str, List[bytes]]
+    query_arguments: Dict[str, List[bytes]]
+    body_arguments: Dict[str, List[bytes]]
+    def __init__(
+        self, method=..., uri=..., version=..., headers=..., body=..., host=..., files=..., connection=..., start_line=...
+    ) -> None: ...
     def supports_http_1_1(self): ...
     @property
     def cookies(self): ...
@@ -79,11 +82,17 @@ def parse_body_arguments(content_type, body, arguments, files, headers=...): ...
 def parse_multipart_form_data(boundary, data, arguments, files): ...
 def format_timestamp(ts): ...
 
-RequestStartLine = namedtuple('RequestStartLine', ['method', 'path', 'version'])
+class RequestStartLine(NamedTuple):
+    method: str
+    path: str
+    version: str
 
 def parse_request_start_line(line): ...
 
-ResponseStartLine = namedtuple('ResponseStartLine', ['version', 'code', 'reason'])
+class ResponseStartLine(NamedTuple):
+    version: str
+    code: str
+    reason: str
 
 def parse_response_start_line(line): ...
 def doctests(): ...

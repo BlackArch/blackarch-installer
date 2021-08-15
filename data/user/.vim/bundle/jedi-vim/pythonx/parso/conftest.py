@@ -2,8 +2,8 @@ import re
 import tempfile
 import shutil
 import logging
-import sys
 import os
+from pathlib import Path
 
 import pytest
 
@@ -13,8 +13,7 @@ from parso.utils import parse_version_string
 
 collect_ignore = ["setup.py"]
 
-VERSIONS_2 = '2.6', '2.7'
-VERSIONS_3 = '3.3', '3.4', '3.5', '3.6', '3.7', '3.8'
+_SUPPORTED_VERSIONS = '3.6', '3.7', '3.8', '3.9', '3.10'
 
 
 @pytest.fixture(scope='session')
@@ -30,7 +29,7 @@ def clean_parso_cache():
     """
     old = cache._default_cache_path
     tmp = tempfile.mkdtemp(prefix='parso-test-')
-    cache._default_cache_path = tmp
+    cache._default_cache_path = Path(tmp)
     yield
     cache._default_cache_path = old
     shutil.rmtree(tmp)
@@ -52,16 +51,13 @@ def pytest_generate_tests(metafunc):
             ids=[c.name for c in cases]
         )
     elif 'each_version' in metafunc.fixturenames:
-        metafunc.parametrize('each_version', VERSIONS_2 + VERSIONS_3)
-    elif 'each_py2_version' in metafunc.fixturenames:
-        metafunc.parametrize('each_py2_version', VERSIONS_2)
-    elif 'each_py3_version' in metafunc.fixturenames:
-        metafunc.parametrize('each_py3_version', VERSIONS_3)
-    elif 'version_ge_py36' in metafunc.fixturenames:
-        metafunc.parametrize('version_ge_py36', ['3.6', '3.7'])
+        metafunc.parametrize('each_version', _SUPPORTED_VERSIONS)
+    elif 'version_ge_py38' in metafunc.fixturenames:
+        ge38 = set(_SUPPORTED_VERSIONS) - {'3.6', '3.7'}
+        metafunc.parametrize('version_ge_py38', sorted(ge38))
 
 
-class NormalizerIssueCase(object):
+class NormalizerIssueCase:
     """
     Static Analysis cases lie in the static_analysis folder.
     The tests also start with `#!`, like the goto_definition tests.
@@ -85,15 +81,15 @@ def pytest_configure(config):
         root = logging.getLogger()
         root.setLevel(logging.DEBUG)
 
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
+        #ch = logging.StreamHandler(sys.stdout)
+        #ch.setLevel(logging.DEBUG)
         #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         #ch.setFormatter(formatter)
 
-        root.addHandler(ch)
+        #root.addHandler(ch)
 
 
-class Checker():
+class Checker:
     def __init__(self, version, is_passing):
         self.version = version
         self._is_passing = is_passing
@@ -135,29 +131,17 @@ def works_not_in_py(each_version):
 
 
 @pytest.fixture
-def works_in_py2(each_version):
-    return Checker(each_version, each_version.startswith('2'))
-
-
-@pytest.fixture
-def works_ge_py27(each_version):
-    version_info = parse_version_string(each_version)
-    return Checker(each_version, version_info >= (2, 7))
-
-
-@pytest.fixture
-def works_ge_py3(each_version):
-    version_info = parse_version_string(each_version)
-    return Checker(each_version, version_info >= (3, 0))
-
-
-@pytest.fixture
-def works_ge_py35(each_version):
-    version_info = parse_version_string(each_version)
-    return Checker(each_version, version_info >= (3, 5))
+def works_in_py(each_version):
+    return Checker(each_version, True)
 
 
 @pytest.fixture
 def works_ge_py38(each_version):
     version_info = parse_version_string(each_version)
     return Checker(each_version, version_info >= (3, 8))
+
+
+@pytest.fixture
+def works_ge_py39(each_version):
+    version_info = parse_version_string(each_version)
+    return Checker(each_version, version_info >= (3, 9))

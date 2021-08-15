@@ -1,22 +1,26 @@
-from typing import Iterable, Callable, IO, AnyStr, Generic, Any, Text, Union, Iterator, Optional
-
-import os
 import sys
+from _typeshed import AnyPath
+from typing import IO, Any, AnyStr, Callable, Generic, Iterable, Iterator, Optional, Union
 
-if sys.version_info >= (3, 6):
-    _Path = Union[Text, bytes, os.PathLike[Any]]
+if sys.version_info >= (3, 8):
+    def input(
+        files: Union[AnyPath, Iterable[AnyPath], None] = ...,
+        inplace: bool = ...,
+        backup: str = ...,
+        *,
+        mode: str = ...,
+        openhook: Callable[[AnyPath, str], IO[AnyStr]] = ...,
+    ) -> FileInput[AnyStr]: ...
+
 else:
-    _Path = Union[Text, bytes]
-
-
-def input(
-    files: Union[_Path, Iterable[_Path], None] = ...,
-    inplace: bool = ...,
-    backup: str = ...,
-    bufsize: int = ...,
-    mode: str = ...,
-    openhook: Callable[[_Path, str], IO[AnyStr]] = ...) -> FileInput[AnyStr]: ...
-
+    def input(
+        files: Union[AnyPath, Iterable[AnyPath], None] = ...,
+        inplace: bool = ...,
+        backup: str = ...,
+        bufsize: int = ...,
+        mode: str = ...,
+        openhook: Callable[[AnyPath, str], IO[AnyStr]] = ...,
+    ) -> FileInput[AnyStr]: ...
 
 def close() -> None: ...
 def nextfile() -> None: ...
@@ -28,16 +32,26 @@ def isfirstline() -> bool: ...
 def isstdin() -> bool: ...
 
 class FileInput(Iterable[AnyStr], Generic[AnyStr]):
-    def __init__(
-        self,
-        files: Union[None, _Path, Iterable[_Path]] = ...,
-        inplace: bool = ...,
-        backup: str = ...,
-        bufsize: int = ...,
-        mode: str = ...,
-        openhook: Callable[[_Path, str], IO[AnyStr]] = ...
-    ) -> None: ...
-
+    if sys.version_info >= (3, 8):
+        def __init__(
+            self,
+            files: Union[None, AnyPath, Iterable[AnyPath]] = ...,
+            inplace: bool = ...,
+            backup: str = ...,
+            *,
+            mode: str = ...,
+            openhook: Callable[[AnyPath, str], IO[AnyStr]] = ...,
+        ) -> None: ...
+    else:
+        def __init__(
+            self,
+            files: Union[None, AnyPath, Iterable[AnyPath]] = ...,
+            inplace: bool = ...,
+            backup: str = ...,
+            bufsize: int = ...,
+            mode: str = ...,
+            openhook: Callable[[AnyPath, str], IO[AnyStr]] = ...,
+        ) -> None: ...
     def __del__(self) -> None: ...
     def close(self) -> None: ...
     if sys.version_info >= (3, 2):
@@ -55,8 +69,10 @@ class FileInput(Iterable[AnyStr], Generic[AnyStr]):
     def isfirstline(self) -> bool: ...
     def isstdin(self) -> bool: ...
 
-def hook_compressed(filename: _Path, mode: str) -> IO[Any]: ...
+def hook_compressed(filename: AnyPath, mode: str) -> IO[Any]: ...
+
 if sys.version_info >= (3, 6):
-    def hook_encoded(encoding: str, errors: Optional[str] = ...) -> Callable[[_Path, str], IO[Any]]: ...
+    def hook_encoded(encoding: str, errors: Optional[str] = ...) -> Callable[[AnyPath, str], IO[Any]]: ...
+
 else:
-    def hook_encoded(encoding: str) -> Callable[[_Path, str], IO[Any]]: ...
+    def hook_encoded(encoding: str) -> Callable[[AnyPath, str], IO[Any]]: ...

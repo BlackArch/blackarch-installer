@@ -24,10 +24,10 @@ git checkout $BRANCH
 git submodule update --init
 
 # Test first.
-tox
+pytest
 
 # Create tag
-tag=v$(python -c "import $PROJECT_NAME; print($PROJECT_NAME.__version__)")
+tag=v$(python3 -c "import $PROJECT_NAME; print($PROJECT_NAME.__version__)")
 
 master_ref=$(git show-ref -s heads/$BRANCH)
 tag_ref=$(git show-ref -s $tag || true)
@@ -44,7 +44,7 @@ fi
 # Package and upload to PyPI
 #rm -rf dist/ - Not needed anymore, because the folder is never reused.
 echo `pwd`
-python setup.py sdist bdist_wheel
+python3 setup.py sdist bdist_wheel
 # Maybe do a pip install twine before.
 twine upload dist/*
 

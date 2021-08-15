@@ -1,28 +1,33 @@
 import os
 
-from jedi._compatibility import FileNotFoundError, force_unicode
-from jedi.evaluate.names import AbstractArbitraryName
 from jedi.api import classes
-from jedi.evaluate.helpers import get_str_or_none
-from jedi.parser_utils import get_string_quote
+from jedi.api.strings import StringName, get_quote_ending
+from jedi.api.helpers import match
+from jedi.inference.helpers import get_str_or_none
 
 
-def file_name_completions(evaluator, module_context, start_leaf, string,
-                          like_name, call_signatures_callback, code_lines, position):
+class PathName(StringName):
+    api_type = 'path'
+
+
+def complete_file_name(inference_state, module_context, start_leaf, quote, string,
+                       like_name, signatures_callback, code_lines, position, fuzzy):
     # First we want to find out what can actually be changed as a name.
-    like_name_length = len(os.path.basename(string) + like_name)
+    like_name_length = len(os.path.basename(string))
 
     addition = _get_string_additions(module_context, start_leaf)
+    if string.startswith('~'):
+        string = os.path.expanduser(string)
     if addition is None:
         return
     string = addition + string
 
     # Here we use basename again, because if strings are added like
     # `'foo' + 'bar`, it should complete to `foobar/`.
-    must_start_with = os.path.basename(string) + like_name
+    must_start_with = os.path.basename(string)
     string = os.path.dirname(string)
 
-    sigs = call_signatures_callback()
+    sigs = signatures_callback(*position)
     is_in_os_path_join = sigs and all(s.full_name == 'os.path.join' for s in sigs)
     if is_in_os_path_join:
         to_be_added = _add_os_path_join(module_context, start_leaf, sigs[0].bracket_start)
@@ -30,33 +35,27 @@ def file_name_completions(evaluator, module_context, start_leaf, string,
             is_in_os_path_join = False
         else:
             string = to_be_added + string
-    base_path = os.path.join(evaluator.project._path, string)
+    base_path = os.path.join(inference_state.project.path, string)
     try:
-        listed = os.listdir(base_path)
-    except FileNotFoundError:
+        listed = sorted(os.scandir(base_path), key=lambda e: e.name)
+        # OSError: [Errno 36] File name too long: '...'
+    except (FileNotFoundError, OSError):
         return
-    for name in listed:
-        if name.startswith(must_start_with):
-            path_for_name = os.path.join(base_path, name)
-            if is_in_os_path_join or not os.path.isdir(path_for_name):
-                if start_leaf.type == 'string':
-                    quote = get_string_quote(start_leaf)
-                else:
-                    assert start_leaf.type == 'error_leaf'
-                    quote = start_leaf.value
-                potential_other_quote = \
-                    code_lines[position[0] - 1][position[1]:position[1] + len(quote)]
-                # Add a quote if it's not already there.
-                if quote != potential_other_quote:
-                    name += quote
+    quote_ending = get_quote_ending(quote, code_lines, position)
+    for entry in listed:
+        name = entry.name
+        if match(name, must_start_with, fuzzy=fuzzy):
+            if is_in_os_path_join or not entry.is_dir():
+                name += quote_ending
             else:
                 name += os.path.sep
 
             yield classes.Completion(
-                evaluator,
-                FileName(evaluator, name[len(must_start_with) - like_name_length:]),
+                inference_state,
+                PathName(inference_state, name[len(must_start_with) - like_name_length:]),
                 stack=None,
-                like_name_length=like_name_length
+                like_name_length=like_name_length,
+                is_fuzzy=fuzzy,
             )
 
 
@@ -85,23 +84,18 @@ def _add_strings(context, nodes, add_slash=False):
     string = ''
     first = True
     for child_node in nodes:
-        contexts = context.eval_node(child_node)
-        if len(contexts) != 1:
+        values = context.infer_node(child_node)
+        if len(values) != 1:
             return None
-        c, = contexts
+        c, = values
         s = get_str_or_none(c)
         if s is None:
             return None
         if not first and add_slash:
             string += os.path.sep
-        string += force_unicode(s)
+        string += s
         first = False
     return string
-
-
-class FileName(AbstractArbitraryName):
-    api_type = u'path'
-    is_context_name = False
 
 
 def _add_os_path_join(module_context, start_leaf, bracket_start):
@@ -116,10 +110,10 @@ def _add_os_path_join(module_context, start_leaf, bracket_start):
 
     if start_leaf.type == 'error_leaf':
         # Unfinished string literal, like `join('`
-        context_node = start_leaf.parent
-        index = context_node.children.index(start_leaf)
+        value_node = start_leaf.parent
+        index = value_node.children.index(start_leaf)
         if index > 0:
-            error_node = context_node.children[index - 1]
+            error_node = value_node.children[index - 1]
             if error_node.type == 'error_node' and len(error_node.children) >= 2:
                 index = -2
                 if error_node.children[-1].type == 'arglist':

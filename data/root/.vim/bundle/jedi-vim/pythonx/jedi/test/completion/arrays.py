@@ -45,6 +45,9 @@ b[int():]
 #? list()
 b[:]
 
+#? 3
+b[:]
+
 #? int()
 b[:, 1]
 #? int()
@@ -212,6 +215,20 @@ f
 g
 
 # -----------------
+# setitem
+# -----------------
+
+class F:
+    setitem_x = [1,2]
+    setitem_x[0] = 3
+
+#? ['setitem_x']
+F().setitem_x
+#? list()
+F().setitem_x
+
+
+# -----------------
 # dicts
 # -----------------
 dic2 = {'asdf': 3, 'b': 'str'}
@@ -261,6 +278,9 @@ def y(a):
 #?
 y(**d)
 
+#? str()
+d['a']
+
 # problem with more complicated casts
 dic = {str(key): ''}
 #? str()
@@ -278,10 +298,29 @@ d = dict(a=3, b='')
 x, = d.values()
 #? int() str()
 x
-#? int() str()
+#? int()
 d['a']
 #? int() str() None
 d.get('a')
+
+some_dct = dict({'a': 1, 'b': ''}, a=1.0)
+#? float()
+some_dct['a']
+#? str()
+some_dct['b']
+#? int() float() str()
+some_dct['c']
+
+class Foo:
+    pass
+
+objects = {object(): 1, Foo: '', Foo(): 3.0}
+#? int() float() str()
+objects[Foo]
+#? int() float() str()
+objects[Foo()]
+#? int() float() str()
+objects['']
 
 # -----------------
 # with variable as index
@@ -445,7 +484,6 @@ def test_func():
 #? int()
 tuple({1})[0]
 
-# python >= 3.4
 # -----------------
 # PEP 3132 Extended Iterable Unpacking (star unpacking)
 # -----------------

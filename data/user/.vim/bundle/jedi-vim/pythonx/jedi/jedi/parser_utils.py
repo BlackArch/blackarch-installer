@@ -1,13 +1,12 @@
 import re
 import textwrap
+from ast import literal_eval
 from inspect import cleandoc
 from weakref import WeakKeyDictionary
 
 from parso.python import tree
 from parso.cache import parser_cache
 from parso import split_lines
-
-from jedi._compatibility import literal_eval, force_unicode
 
 _EXECUTE_NODES = {'funcdef', 'classdef', 'import_from', 'import_name', 'test',
                   'or_test', 'and_test', 'not_test', 'comparison', 'expr',
@@ -30,7 +29,7 @@ def get_executable_nodes(node, last_added=False):
         if last_added is False and node.parent.type != 'param' and next_leaf != '=':
             result.append(node)
     elif typ == 'expr_stmt':
-        # I think evaluating the statement (and possibly returned arrays),
+        # I think inferring the statement (and possibly returned arrays),
         # should be enough for static analysis.
         result.append(node)
         for child in node.children:
@@ -91,21 +90,6 @@ def get_flow_branch_keyword(flow_node, node):
         first_leaf = child.get_first_leaf()
         if first_leaf in _FLOW_KEYWORDS:
             keyword = first_leaf
-    return 0
-
-
-def get_statement_of_position(node, pos):
-    for c in node.children:
-        if c.start_pos <= pos <= c.end_pos:
-            if c.type not in ('decorated', 'simple_stmt', 'suite',
-                              'async_stmt', 'async_funcdef') \
-                    and not isinstance(c, (tree.Flow, tree.ClassOrFunc)):
-                return c
-            else:
-                try:
-                    return get_statement_of_position(c, pos)
-                except AttributeError:
-                    pass  # Must be a non-scope
     return None
 
 
@@ -117,10 +101,19 @@ def clean_scope_docstring(scope_node):
         # leaves anymore that might be part of the docstring. A
         # docstring can also look like this: ``'foo' 'bar'
         # Returns a literal cleaned version of the ``Token``.
-        cleaned = cleandoc(safe_literal_eval(node.value))
-        # Since we want the docstr output to be always unicode, just
-        # force it.
-        return force_unicode(cleaned)
+        return cleandoc(safe_literal_eval(node.value))
+    return ''
+
+
+def find_statement_documentation(tree_node):
+    if tree_node.type == 'expr_stmt':
+        tree_node = tree_node.parent  # simple_stmt
+        maybe_string = tree_node.get_next_sibling()
+        if maybe_string is not None:
+            if maybe_string.type == 'simple_stmt':
+                maybe_string = maybe_string.children[0]
+                if maybe_string.type == 'string':
+                    return cleandoc(safe_literal_eval(maybe_string.value))
     return ''
 
 
@@ -131,21 +124,13 @@ def safe_literal_eval(value):
         # manually, but that's right now not implemented.
         return ''
 
-    try:
-        return literal_eval(value)
-    except SyntaxError:
-        # It's possible to create syntax errors with literals like rb'' in
-        # Python 2. This should not be possible and in that case just return an
-        # empty string.
-        # Before Python 3.3 there was a more strict definition in which order
-        # you could define literals.
-        return ''
+    return literal_eval(value)
 
 
-def get_call_signature(funcdef, width=72, call_string=None,
-                       omit_first_param=False, omit_return_annotation=False):
+def get_signature(funcdef, width=72, call_string=None,
+                  omit_first_param=False, omit_return_annotation=False):
     """
-    Generate call signature of this function.
+    Generate a string signature of a function.
 
     :param width: Fold lines if a line is longer than this value.
     :type width: int
@@ -254,7 +239,7 @@ def get_parent_scope(node, include_flows=False):
         return None  # It's a module already.
 
     while True:
-        if is_scope(scope) or include_flows and isinstance(scope, tree.Flow):
+        if is_scope(scope):
             if scope.type in ('classdef', 'funcdef', 'lambdef'):
                 index = scope.children.index(':')
                 if scope.children[index].start_pos >= node.start_pos:
@@ -266,8 +251,15 @@ def get_parent_scope(node, include_flows=False):
                         scope = scope.parent
                         continue
             return scope
+        elif include_flows and isinstance(scope, tree.Flow):
+            # The cursor might be on `if foo`, so the parent scope will not be
+            # the if, but the parent of the if.
+            if not (scope.type == 'if_stmt'
+                    and any(n.start_pos <= node.start_pos < n.end_pos
+                            for n in scope.get_test_nodes())):
+                return scope
+
         scope = scope.parent
-    return scope
 
 
 get_cached_parent_scope = _get_parent_scope_cache(get_parent_scope)
@@ -289,9 +281,47 @@ def cut_value_at_position(leaf, position):
     column = position[1]
     if leaf.line == position[0]:
         column -= leaf.column
+    if not lines:
+        return ''
     lines[-1] = lines[-1][:column]
     return ''.join(lines)
 
 
-def get_string_quote(leaf):
-    return re.match('\w*("""|\'{3}|"|\')', leaf.value).group(1)
+def expr_is_dotted(node):
+    """
+    Checks if a path looks like `name` or `name.foo.bar` and not `name()`.
+    """
+    if node.type == 'atom':
+        if len(node.children) == 3 and node.children[0] == '(':
+            return expr_is_dotted(node.children[1])
+        return False
+    if node.type == 'atom_expr':
+        children = node.children
+        if children[0] == 'await':
+            return False
+        if not expr_is_dotted(children[0]):
+            return False
+        # Check trailers
+        return all(c.children[0] == '.' for c in children[1:])
+    return node.type == 'name'
+
+
+def _function_is_x_method(*method_names):
+    def wrapper(function_node):
+        """
+        This is a heuristic. It will not hold ALL the times, but it will be
+        correct pretty much for anyone that doesn't try to beat it.
+        staticmethod/classmethod are builtins and unless overwritten, this will
+        be correct.
+        """
+        for decorator in function_node.get_decorators():
+            dotted_name = decorator.children[1]
+            if dotted_name.get_code() in method_names:
+                return True
+        return False
+    return wrapper
+
+
+function_is_staticmethod = _function_is_x_method('staticmethod')
+function_is_classmethod = _function_is_x_method('classmethod')
+function_is_property = _function_is_x_method('property', 'cached_property')

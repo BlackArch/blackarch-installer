@@ -20,8 +20,7 @@ Run a specific operation
 
     ./sith.py run <operation> </path/to/source/file.py> <line> <col>
 
-Where operation is one of completions, goto_assignments, goto_definitions,
-usages, or call_signatures.
+Where operation is one of complete, goto, infer, get_references or get_signatures.
 
 Note: Line numbers start at 1; columns start at 0 (this is consistent with
 many text editors, including Emacs).
@@ -45,8 +44,7 @@ Options:
   --pudb                Launch pudb when error is raised.
 """
 
-from __future__ import print_function, division, unicode_literals
-from docopt import docopt
+from docopt import docopt  # type: ignore[import]
 
 import json
 import os
@@ -95,9 +93,8 @@ class TestCase(object):
             args = json.load(f)
         return cls(*args)
 
-    operations = [
-        'completions', 'goto_assignments', 'goto_definitions', 'usages',
-        'call_signatures']
+    # Changing this? Also update the module docstring above.
+    operations = ['complete', 'goto', 'infer', 'get_references', 'get_signatures']
 
     @classmethod
     def generate(cls, file_path):
@@ -123,12 +120,12 @@ class TestCase(object):
     def run(self, debugger, record=None, print_result=False):
         try:
             with open(self.path) as f:
-                self.script = jedi.Script(f.read(), self.line, self.column, self.path)
+                self.script = jedi.Script(f.read(), path=self.path)
             kwargs = {}
-            if self.operation == 'goto_assignments':
+            if self.operation == 'goto':
                 kwargs['follow_imports'] = random.choice([False, True])
 
-            self.objects = getattr(self.script, self.operation)(**kwargs)
+            self.objects = getattr(self.script, self.operation)(self.line, self.column, **kwargs)
             if print_result:
                 print("{path}: Line {line} column {column}".format(**self.__dict__))
                 self.show_location(self.line, self.column)
@@ -153,13 +150,13 @@ class TestCase(object):
         # Three lines ought to be enough
         lower = lineno - show if lineno - show > 0 else 0
         prefix = '  |'
-        for i, line in enumerate(self.script._source.split('\n')[lower:lineno]):
+        for i, line in enumerate(self.script._code.split('\n')[lower:lineno]):
             print(prefix, lower + i + 1, line)
-        print(prefix, '   ', ' ' * (column + len(str(lineno))), '^')
+        print(prefix, ' ' * (column + len(str(lineno))), '^')
 
     def show_operation(self):
         print("%s:\n" % self.operation.capitalize())
-        if self.operation == 'completions':
+        if self.operation == 'complete':
             self.show_completions()
         else:
             self.show_definitions()
@@ -170,7 +167,7 @@ class TestCase(object):
 
     def show_definitions(self):
         for completion in self.objects:
-            print(completion.desc_with_module)
+            print(completion.full_name)
             if completion.module_path is None:
                 continue
             if os.path.abspath(completion.module_path) == os.path.abspath(self.path):
@@ -179,9 +176,9 @@ class TestCase(object):
     def show_errors(self):
         sys.stderr.write(self.traceback)
         print(("Error with running Script(...).{operation}() with\n"
-              "\tpath:   {path}\n"
-              "\tline:   {line}\n"
-              "\tcolumn: {column}").format(**self.__dict__))
+               "\tpath:   {path}\n"
+               "\tline:   {line}\n"
+               "\tcolumn: {column}").format(**self.__dict__))
 
 
 def main(arguments):
@@ -201,10 +198,10 @@ def main(arguments):
         else:
             t.run(debugger)
     elif arguments['run']:
-            TestCase(
-                arguments['<operation>'], arguments['<path>'],
-                int(arguments['<line>']), int(arguments['<column>'])
-            ).run(debugger, print_result=True)
+        TestCase(
+            arguments['<operation>'], arguments['<path>'],
+            int(arguments['<line>']), int(arguments['<column>'])
+        ).run(debugger, print_result=True)
     else:
         for _ in range(int(arguments['--maxtries'])):
             t = TestCase.generate(arguments['<path>'] or '.')

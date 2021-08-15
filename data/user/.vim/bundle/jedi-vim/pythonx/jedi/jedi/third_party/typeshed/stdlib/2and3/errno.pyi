@@ -1,7 +1,4 @@
-# Stubs for errno
-
 from typing import Mapping
-import sys
 
 errorcode: Mapping[int, str]
 
@@ -128,3 +125,13 @@ ENAVAIL: int
 EISNAM: int
 EREMOTEIO: int
 EDQUOT: int
+ECANCELED: int  # undocumented
+EKEYEXPIRED: int  # undocumented
+EKEYREJECTED: int  # undocumented
+EKEYREVOKED: int  # undocumented
+EMEDIUMTYPE: int  # undocumented
+ENOKEY: int  # undocumented
+ENOMEDIUM: int  # undocumented
+ENOTRECOVERABLE: int  # undocumented
+EOWNERDEAD: int  # undocumented
+ERFKILL: int  # undocumented

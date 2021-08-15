@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Jedi documentation build configuration file, created by
 # sphinx-quickstart on Wed Dec 26 00:11:34 2012.
 #
@@ -13,13 +11,11 @@
 
 import sys
 import os
-import datetime
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.append(os.path.abspath('_themes'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -29,7 +25,8 @@ sys.path.append(os.path.abspath('_themes'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.todo',
-              'sphinx.ext.intersphinx', 'sphinx.ext.inheritance_diagram']
+              'sphinx.ext.intersphinx', 'sphinx.ext.inheritance_diagram',
+              'sphinx_rtd_theme', 'sphinx.ext.autosummary']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -44,8 +41,8 @@ source_encoding = 'utf-8'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Jedi'
-copyright = u'jedi contributors'
+project = 'Jedi'
+copyright = 'jedi contributors'
 
 import jedi
 from jedi.utils import version_info
@@ -54,8 +51,8 @@ from jedi.utils import version_info
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = '.'.join(str(x) for x in version_info()[:2])
+# The short X.Y.Z version.
+version = '.'.join(str(x) for x in version_info()[:3])
 # The full version, including alpha/beta/rc tags.
 release = jedi.__version__
 
@@ -98,12 +95,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'flask'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    'logo_only': True,
+    'style_nav_header_background': 'white',
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['_themes']
@@ -117,7 +117,7 @@ html_theme_path = ['_themes']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = '_static/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -128,6 +128,8 @@ html_theme_path = ['_themes']
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_css_files = ['custom_style.css']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -145,7 +147,7 @@ html_sidebars = {
         #'relations.html',
         'ghbuttons.html',
         #'sourcelink.html',
-        #'searchbox.html'
+        'searchbox.html'
     ]
 }
 
@@ -163,13 +165,13 @@ html_sidebars = {
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-#html_show_sphinx = True
+html_show_sphinx = False
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-#html_show_copyright = True
+html_show_copyright = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
@@ -201,8 +203,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'Jedi.tex', u'Jedi Documentation',
-     u'Jedi contributors', 'manual'),
+    ('index', 'Jedi.tex', 'Jedi Documentation',
+     'Jedi contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,8 +233,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'jedi', u'Jedi Documentation',
-     [u'Jedi contributors'], 1)
+    ('index', 'jedi', 'Jedi Documentation',
+     ['Jedi contributors'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'Jedi', u'Jedi Documentation',
-     u'Jedi contributors', 'Jedi', 'Awesome Python autocompletion library.',
+    ('index', 'Jedi', 'Jedi Documentation',
+     'Jedi contributors', 'Jedi', 'Awesome Python autocompletion library.',
      'Miscellaneous'),
 ]
 
@@ -274,7 +276,8 @@ autodoc_default_flags = []
 # -- Options for intersphinx module --------------------------------------------
 
 intersphinx_mapping = {
-    'https://docs.python.org/': None,
+    'python': ('https://docs.python.org/', None),
+    'parso': ('https://parso.readthedocs.io/en/latest/', None),
 }
 
 

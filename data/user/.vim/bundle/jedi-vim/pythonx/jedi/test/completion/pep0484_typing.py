@@ -1,7 +1,5 @@
 """
-Test the typing library, with docstrings. This is needed since annotations
-are not supported in python 2.7 else then annotating by comment (and this is
-still TODO at 2016-01-23)
+Test the typing library, with docstrings and annotations
 """
 import typing
 class B:
@@ -99,6 +97,8 @@ def tuple(p, q, r):
     """
     #? int()
     p[0]
+    #? ['index']
+    p.index
     #? int()
     q[0]
     #? str()
@@ -214,7 +214,7 @@ def union(p, q, r, s, t):
     r
     #? int() str() float() dict()
     s
-    #? int()
+    #? int() None
     t
 
 def optional(p):
@@ -281,7 +281,17 @@ def testnewtype2(y):
     y
     #? []
     y.
-# python >= 3.4
+
+# The type of a NewType is equivalent to the type of its underlying type.
+MyInt = typing.NewType('MyInt', int)
+x = type(MyInt)
+#? type.mro
+x.mro
+
+PlainInt = int
+y = type(PlainInt)
+#? type.mro
+y.mro
 
 class TestDefaultDict(typing.DefaultDict[str, int]):
     def setdud(self):
@@ -309,7 +319,6 @@ for key in x.keys():
 for value in x.values():
     #? int()
     value
-# python >= 3.4
 
 
 """
@@ -330,15 +339,17 @@ def union4(x: U[int, str]):
     #? int() str()
     x
 
+#? typing.Optional
+typing.Optional[0]
+
 # -------------------------
 # Type Vars
 # -------------------------
 
 TYPE_VARX = typing.TypeVar('TYPE_VARX')
 TYPE_VAR_CONSTRAINTSX = typing.TypeVar('TYPE_VAR_CONSTRAINTSX', str, int)
-# TODO there should at least be some results.
-#? []
-TYPE_VARX.
+#? ['__class__']
+TYPE_VARX.__clas
 #! ["TYPE_VARX = typing.TypeVar('TYPE_VARX')"]
 TYPE_VARX
 
@@ -363,6 +374,17 @@ in_out1(str())
 #?
 in_out1()
 
+def type_in_out1(x: typing.Type[TYPE_VARX]) -> TYPE_VARX: ...
+
+#? int()
+type_in_out1(int)
+#? str()
+type_in_out1(str)
+#? float()
+type_in_out1(float)
+#?
+type_in_out1()
+
 def in_out2(x: TYPE_VAR_CONSTRAINTSX) -> TYPE_VAR_CONSTRAINTSX: ...
 
 #? int()
@@ -376,6 +398,56 @@ in_out2()
 # TODO this should actually be str() int(), because of the constraints.
 #? float()
 in_out2(1.0)
+
+def type_in_out2(x: typing.Type[TYPE_VAR_CONSTRAINTSX]) -> TYPE_VAR_CONSTRAINTSX: ...
+
+#? int()
+type_in_out2(int)
+#? str()
+type_in_out2(str)
+#? str() int()
+type_in_out2()
+# TODO this should actually be str() int(), because of the constraints.
+#? float()
+type_in_out2(float)
+
+def ma(a: typing.Callable[[str], TYPE_VARX]) -> typing.Callable[[str], TYPE_VARX]:
+    #? typing.Callable()
+    return a
+
+def mf(s: str) -> int:
+    return int(s)
+
+#? int()
+ma(mf)('2')
+
+def xxx(x: typing.Iterable[TYPE_VARX]) -> typing.Tuple[str, TYPE_VARX]: ...
+
+#? str()
+xxx([0])[0]
+#? int()
+xxx([0])[1]
+#?
+xxx([0])[2]
+
+def call_pls() -> typing.Callable[[TYPE_VARX], TYPE_VARX]: ...
+#? int()
+call_pls()(1)
+
+def call2_pls() -> typing.Callable[[str, typing.Callable[[int], TYPE_VARX]], TYPE_VARX]: ...
+#? float()
+call2_pls('')(1, lambda x: 3.0)
+
+def call3_pls() -> typing.Callable[[typing.Callable[[int], TYPE_VARX]], typing.List[TYPE_VARX]]: ...
+def the_callable() -> float: ...
+#? float()
+call3_pls()(the_callable)[0]
+
+def call4_pls(fn: typing.Callable[..., TYPE_VARX]) -> typing.Callable[..., TYPE_VARX]:
+    return ""
+
+#? int()
+call4_pls(lambda x: 1)()
 
 # -------------------------
 # TYPE_CHECKING
@@ -422,3 +494,101 @@ def cast_tests():
 
 #? str()
 cast_tests()
+
+
+# -------------------------
+# dynamic
+# -------------------------
+
+def dynamic_annotation(x: int):
+    #? int()
+    return x
+
+#? int()
+dynamic_annotation('')
+
+# -------------------------
+# TypeDict
+# -------------------------
+
+# python >= 3.8
+
+class Foo(typing.TypedDict):
+    foo: str
+    bar: typing.List[float]
+    an_int: int
+    #! ['foo: str']
+    foo
+    #? str()
+    foo
+    #? int()
+    an_int
+
+def typed_dict_test_foo(arg: Foo):
+    a_string = arg['foo']
+    a_list_of_floats = arg['bar']
+    an_int = arg['an_int']
+
+    #? str()
+    a_string
+    #? list()
+    a_list_of_floats
+    #? float()
+    a_list_of_floats[0]
+    #? int()
+    an_int
+
+    #? ['isupper']
+    a_string.isuppe
+    #? ['pop']
+    a_list_of_floats.po
+    #? ['as_integer_ratio']
+    an_int.as_integer_rati
+
+#! ['class Foo']
+d: Foo
+#? str()
+d['foo']
+#? float()
+d['bar'][0]
+#?
+d['baz']
+
+#?
+d.foo
+#?
+d.bar
+#! []
+d.foo
+
+#? []
+Foo.set
+#? ['setdefault']
+d.setdefaul
+#? []
+Foo.setdefaul
+
+#? 5 ["'foo"]
+d['fo']
+#? 5 ['"bar"']
+d["bar"]
+
+class Bar(Foo):
+    another_variable: int
+
+    #? int()
+    another_variable
+    #?
+    an_int
+
+def typed_dict_test_foo(arg: Bar):
+    #? str()
+    arg['foo']
+    #? list()
+    arg['bar']
+    #? float()
+    arg['bar'][0]
+    #? int()
+    arg['an_int']
+    #? int()
+    arg['another_variable']

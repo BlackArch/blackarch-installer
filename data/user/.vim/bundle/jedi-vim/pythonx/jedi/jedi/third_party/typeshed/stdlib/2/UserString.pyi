@@ -1,5 +1,5 @@
 import collections
-from typing import Any, Iterable, List, MutableSequence, Sequence, Optional, overload, Text, TypeVar, Tuple, Union
+from typing import Any, Iterable, List, MutableSequence, Optional, Sequence, Text, Tuple, TypeVar, Union, overload
 
 _UST = TypeVar("_UST", bound=UserString)
 _MST = TypeVar("_MST", bound=MutableString)
@@ -62,7 +62,7 @@ class UserString(Sequence[UserString]):
     def upper(self: _UST) -> _UST: ...
     def zfill(self: _UST, width: int) -> _UST: ...
 
-class MutableString(UserString, MutableSequence[MutableString]):  # type: ignore
+class MutableString(UserString, MutableSequence[MutableString]):
     @overload
     def __getitem__(self: _MST, i: int) -> _MST: ...
     @overload

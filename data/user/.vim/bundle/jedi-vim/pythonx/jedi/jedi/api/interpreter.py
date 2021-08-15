@@ -2,46 +2,73 @@
 TODO Some parts of this module are still not well documented.
 """
 
-from jedi.evaluate.context import ModuleContext
-from jedi.evaluate import compiled
-from jedi.evaluate.compiled import mixed
-from jedi.evaluate.compiled.access import create_access_path
-from jedi.evaluate.base_context import ContextWrapper
+from jedi.inference import compiled
+from jedi.inference.base_value import ValueSet
+from jedi.inference.filters import ParserTreeFilter, MergedFilter
+from jedi.inference.names import TreeNameDefinition
+from jedi.inference.compiled import mixed
+from jedi.inference.compiled.access import create_access_path
+from jedi.inference.context import ModuleContext
 
 
-def _create(evaluator, obj):
+def _create(inference_state, obj):
     return compiled.create_from_access_path(
-        evaluator, create_access_path(evaluator, obj)
+        inference_state, create_access_path(inference_state, obj)
     )
 
 
-class NamespaceObject(object):
+class NamespaceObject:
     def __init__(self, dct):
         self.__dict__ = dct
 
 
-class MixedModuleContext(ContextWrapper):
-    type = 'mixed_module'
+class MixedTreeName(TreeNameDefinition):
+    def infer(self):
+        """
+        In IPython notebook it is typical that some parts of the code that is
+        provided was already executed. In that case if something is not properly
+        inferred, it should still infer from the variables it already knows.
+        """
+        inferred = super().infer()
+        if not inferred:
+            for compiled_value in self.parent_context.mixed_values:
+                for f in compiled_value.get_filters():
+                    values = ValueSet.from_sets(
+                        n.infer() for n in f.get(self.string_name)
+                    )
+                    if values:
+                        return values
+        return inferred
 
-    def __init__(self, evaluator, tree_module, namespaces, file_io, code_lines):
-        module_context = ModuleContext(
-            evaluator, tree_module,
-            file_io=file_io,
-            string_names=('__main__',),
-            code_lines=code_lines
+
+class MixedParserTreeFilter(ParserTreeFilter):
+    name_class = MixedTreeName
+
+
+class MixedModuleContext(ModuleContext):
+    def __init__(self, tree_module_value, namespaces):
+        super().__init__(tree_module_value)
+        self.mixed_values = [
+            self._get_mixed_object(
+                _create(self.inference_state, NamespaceObject(n))
+            ) for n in namespaces
+        ]
+
+    def _get_mixed_object(self, compiled_value):
+        return mixed.MixedObject(
+            compiled_value=compiled_value,
+            tree_value=self._value
         )
-        super(MixedModuleContext, self).__init__(module_context)
-        self._namespace_objects = [NamespaceObject(n) for n in namespaces]
 
-    def get_filters(self, *args, **kwargs):
-        for filter in self._wrapped_context.get_filters(*args, **kwargs):
-            yield filter
+    def get_filters(self, until_position=None, origin_scope=None):
+        yield MergedFilter(
+            MixedParserTreeFilter(
+                parent_context=self,
+                until_position=until_position,
+                origin_scope=origin_scope
+            ),
+            self.get_global_filter(),
+        )
 
-        for namespace_obj in self._namespace_objects:
-            compiled_object = _create(self.evaluator, namespace_obj)
-            mixed_object = mixed.MixedObject(
-                compiled_object=compiled_object,
-                tree_context=self._wrapped_context
-            )
-            for filter in mixed_object.get_filters(*args, **kwargs):
-                yield filter
+        for mixed_object in self.mixed_values:
+            yield from mixed_object.get_filters(until_position, origin_scope)

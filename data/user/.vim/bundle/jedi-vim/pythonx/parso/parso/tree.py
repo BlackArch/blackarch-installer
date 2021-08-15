@@ -1,6 +1,5 @@
 from abc import abstractmethod, abstractproperty
 
-from parso._compatibility import utf8_repr, encoding, py_version
 from parso.utils import split_lines
 
 
@@ -19,12 +18,12 @@ def search_ancestor(node, *node_types):
             return node
 
 
-class NodeOrLeaf(object):
+class NodeOrLeaf:
     """
     The base class for nodes and leaves.
     """
     __slots__ = ()
-    type = None
+    type: str
     '''
     The type is a string that typically matches the types of the grammar file.
     '''
@@ -44,8 +43,12 @@ class NodeOrLeaf(object):
         Returns the node immediately following this node in this parent's
         children list. If this node does not have a next sibling, it is None
         """
+        parent = self.parent
+        if parent is None:
+            return None
+
         # Can't use index(); we need to test by identity
-        for i, child in enumerate(self.parent.children):
+        for i, child in enumerate(parent.children):
             if child is self:
                 try:
                     return self.parent.children[i + 1]
@@ -58,8 +61,12 @@ class NodeOrLeaf(object):
         children list. If this node does not have a previous sibling, it is
         None.
         """
+        parent = self.parent
+        if parent is None:
+            return None
+
         # Can't use index(); we need to test by identity
-        for i, child in enumerate(self.parent.children):
+        for i, child in enumerate(parent.children):
             if child is self:
                 if i == 0:
                     return None
@@ -70,6 +77,9 @@ class NodeOrLeaf(object):
         Returns the previous leaf in the parser tree.
         Returns `None` if this is the first element in the parser tree.
         """
+        if self.parent is None:
+            return None
+
         node = self
         while True:
             c = node.parent.children
@@ -93,6 +103,9 @@ class NodeOrLeaf(object):
         Returns the next leaf in the parser tree.
         Returns None if this is the last element in the parser tree.
         """
+        if self.parent is None:
+            return None
+
         node = self
         while True:
             c = node.parent.children
@@ -153,7 +166,7 @@ class NodeOrLeaf(object):
     @abstractmethod
     def get_code(self, include_prefix=True):
         """
-        Returns the code that was input the input for the parser for this node.
+        Returns the code that was the input for the parser for this node.
 
         :param include_prefix: Removes the prefix (whitespace and comments) of
             e.g. a statement.
@@ -223,7 +236,6 @@ class Leaf(NodeOrLeaf):
             end_pos_column = len(lines[-1])
         return end_pos_line, end_pos_column
 
-    @utf8_repr
     def __repr__(self):
         value = self.value
         if not value:
@@ -235,7 +247,7 @@ class TypedLeaf(Leaf):
     __slots__ = ('type',)
 
     def __init__(self, type, value, start_pos, prefix=''):
-        super(TypedLeaf, self).__init__(value, start_pos, prefix)
+        super().__init__(value, start_pos, prefix)
         self.type = type
 
 
@@ -245,7 +257,6 @@ class BaseNode(NodeOrLeaf):
     A node has children, a type and possibly a parent node.
     """
     __slots__ = ('children', 'parent')
-    type = None
 
     def __init__(self, children):
         self.children = children
@@ -300,7 +311,6 @@ class BaseNode(NodeOrLeaf):
                 except AttributeError:
                     return element
 
-
             index = int((lower + upper) / 2)
             element = self.children[index]
             if position <= element.end_pos:
@@ -318,11 +328,8 @@ class BaseNode(NodeOrLeaf):
     def get_last_leaf(self):
         return self.children[-1].get_last_leaf()
 
-    @utf8_repr
     def __repr__(self):
         code = self.get_code().replace('\n', ' ').replace('\r', ' ').strip()
-        if not py_version >= 30:
-            code = code.encode(encoding, 'replace')
         return "<%s: %s@%s,%s>" % \
             (type(self).__name__, code, self.start_pos[0], self.start_pos[1])
 
@@ -332,7 +339,7 @@ class Node(BaseNode):
     __slots__ = ('type',)
 
     def __init__(self, type, children):
-        super(Node, self).__init__(children)
+        super().__init__(children)
         self.type = type
 
     def __repr__(self):
@@ -358,7 +365,7 @@ class ErrorLeaf(Leaf):
     type = 'error_leaf'
 
     def __init__(self, token_type, value, start_pos, prefix=''):
-        super(ErrorLeaf, self).__init__(value, start_pos, prefix)
+        super().__init__(value, start_pos, prefix)
         self.token_type = token_type
 
     def __repr__(self):

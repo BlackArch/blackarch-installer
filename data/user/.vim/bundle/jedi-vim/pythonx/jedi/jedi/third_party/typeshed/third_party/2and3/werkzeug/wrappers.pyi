@@ -1,14 +1,36 @@
+from _typeshed.wsgi import InputStream, WSGIEnvironment
 from datetime import datetime
 from typing import (
-    Any, Callable, Iterable, Iterator, Mapping, MutableMapping, Optional, Sequence, Text, Tuple, Type, TypeVar, Union,
+    Any,
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Sequence,
+    Text,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
 )
-
-from wsgiref.types import WSGIEnvironment, InputStream
+from typing_extensions import Literal
 
 from .datastructures import (
-    Authorization, CombinedMultiDict, EnvironHeaders, Headers, ImmutableMultiDict,
-    MultiDict, ImmutableTypeConversionDict, HeaderSet,
-    Accept, MIMEAccept, CharsetAccept, LanguageAccept,
+    Accept,
+    Authorization,
+    CharsetAccept,
+    CombinedMultiDict,
+    EnvironHeaders,
+    Headers,
+    HeaderSet,
+    ImmutableMultiDict,
+    ImmutableTypeConversionDict,
+    LanguageAccept,
+    MIMEAccept,
+    MultiDict,
 )
 from .useragents import UserAgent
 
@@ -17,10 +39,10 @@ class BaseRequest:
     encoding_errors: str
     max_content_length: Optional[int]
     max_form_memory_size: int
-    parameter_storage_class: Type
-    list_storage_class: Type
-    dict_storage_class: Type
-    form_data_parser_class: Type
+    parameter_storage_class: Type[Any]
+    list_storage_class: Type[Any]
+    dict_storage_class: Type[Any]
+    form_data_parser_class: Type[Any]
     trusted_hosts: Optional[Sequence[Text]]
     disable_data_descriptor: Any
     environ: WSGIEnvironment = ...
@@ -41,14 +63,22 @@ class BaseRequest:
     @property
     def stream(self) -> InputStream: ...
     input_stream: InputStream
-    args: ImmutableMultiDict
+    args: ImmutableMultiDict[Any, Any]
     @property
     def data(self) -> bytes: ...
-    # TODO: once Literal types are supported, overload with as_text
-    def get_data(self, cache: bool = ..., as_text: bool = ..., parse_form_data: bool = ...) -> Any: ...  # returns bytes if as_text is False (the default), else Text
-    form: ImmutableMultiDict
-    values: CombinedMultiDict
-    files: MultiDict
+    @overload
+    def get_data(self, cache: bool = ..., as_text: Literal[False] = ..., parse_form_data: bool = ...) -> bytes: ...
+    @overload
+    def get_data(self, cache: bool, as_text: Literal[True], parse_form_data: bool = ...) -> Text: ...
+    @overload
+    def get_data(self, *, as_text: Literal[True], parse_form_data: bool = ...) -> Text: ...
+    @overload
+    def get_data(self, cache: bool, as_text: bool, parse_form_data: bool = ...) -> Any: ...
+    @overload
+    def get_data(self, *, as_text: bool, parse_form_data: bool = ...) -> Any: ...
+    form: ImmutableMultiDict[Any, Any]
+    values: CombinedMultiDict[Any, Any]
+    files: MultiDict[Any, Any]
     @property
     def cookies(self) -> ImmutableTypeConversionDict[str, str]: ...
     headers: EnvironHeaders
@@ -74,18 +104,13 @@ class BaseRequest:
     is_multiprocess: bool
     is_run_once: bool
 
-    # These are not preset at runtime but we add them since monkeypatching this
-    # class is quite common.
-    def __setattr__(self, name: str, value: Any): ...
-    def __getattr__(self, name: str): ...
-
-_OnCloseT = TypeVar('_OnCloseT', bound=Callable[[], Any])
-_SelfT = TypeVar('_SelfT', bound=BaseResponse)
+_OnCloseT = TypeVar("_OnCloseT", bound=Callable[[], Any])
+_SelfT = TypeVar("_SelfT", bound=BaseResponse)
 
 class BaseResponse:
     charset: str
     default_status: int
-    default_mimetype: str
+    default_mimetype: Optional[str]
     implicit_sequence_conversion: bool
     autocorrect_location_header: bool
     automatically_set_content_length: bool
@@ -94,28 +119,43 @@ class BaseResponse:
     status: str
     direct_passthrough: bool
     response: Iterable[bytes]
-    def __init__(self, response: Optional[Union[str, bytes, bytearray, Iterable[str], Iterable[bytes]]] = ...,
-                 status: Optional[Union[Text, int]] = ...,
-                 headers: Optional[Union[Headers,
-                                         Mapping[Text, Text],
-                                         Sequence[Tuple[Text, Text]]]] = ...,
-                 mimetype: Optional[Text] = ...,
-                 content_type: Optional[Text] = ...,
-                 direct_passthrough: bool = ...) -> None: ...
+    def __init__(
+        self,
+        response: Optional[Union[str, bytes, bytearray, Iterable[str], Iterable[bytes]]] = ...,
+        status: Optional[Union[Text, int]] = ...,
+        headers: Optional[Union[Headers, Mapping[Text, Text], Sequence[Tuple[Text, Text]]]] = ...,
+        mimetype: Optional[Text] = ...,
+        content_type: Optional[Text] = ...,
+        direct_passthrough: bool = ...,
+    ) -> None: ...
     def call_on_close(self, func: _OnCloseT) -> _OnCloseT: ...
     @classmethod
     def force_type(cls: Type[_SelfT], response: object, environ: Optional[WSGIEnvironment] = ...) -> _SelfT: ...
     @classmethod
     def from_app(cls: Type[_SelfT], app: Any, environ: WSGIEnvironment, buffered: bool = ...) -> _SelfT: ...
-    # TODO: once Literal types are supported, overload with as_text
-    def get_data(self, as_text: bool = ...) -> Any: ...  # returns bytes if as_text is False (the default), else Text
+    @overload
+    def get_data(self, as_text: Literal[False] = ...) -> bytes: ...
+    @overload
+    def get_data(self, as_text: Literal[True]) -> Text: ...
+    @overload
+    def get_data(self, as_text: bool) -> Any: ...
     def set_data(self, value: Union[bytes, Text]) -> None: ...
     data: Any
     def calculate_content_length(self) -> Optional[int]: ...
     def make_sequence(self) -> None: ...
     def iter_encoded(self) -> Iterator[bytes]: ...
-    def set_cookie(self, key, value: str = ..., max_age: Optional[Any] = ..., expires: Optional[Any] = ...,
-                   path: str = ..., domain: Optional[Any] = ..., secure: bool = ..., httponly: bool = ...): ...
+    def set_cookie(
+        self,
+        key: str,
+        value: Union[str, bytes] = ...,
+        max_age: Optional[int] = ...,
+        expires: Optional[int] = ...,
+        path: str = ...,
+        domain: Optional[str] = ...,
+        secure: bool = ...,
+        httponly: bool = ...,
+        samesite: Optional[str] = ...,
+    ) -> None: ...
     def delete_cookie(self, key, path: str = ..., domain: Optional[Any] = ...): ...
     @property
     def is_streamed(self) -> bool: ...

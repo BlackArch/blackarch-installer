@@ -22,8 +22,11 @@ hi WarningMsg   term=none cterm=none ctermfg=blue           ctermbg=yellow
 hi Error        term=none cterm=none ctermfg=red            ctermbg=none
 hi Cursor       term=none cterm=none ctermfg=darkcyan       ctermbg=darkcyan
 hi LineNr       term=none cterm=none ctermfg=61             ctermbg=none
-hi StatusLine   term=none cterm=none ctermfg=grey           ctermbg=236
-hi StatusLineNC term=none cterm=none ctermfg=grey           ctermbg=236
-hi VertSplit    term=none cterm=none ctermfg=grey           ctermbg=239
-hi CursorLine   term=none cterm=none ctermfg=none           ctermbg=236
-hi ColorColumn  term=none cterm=none ctermfg=none           ctermbg=61
+hi StatusLine   term=none cterm=none ctermfg=grey           ctermbg=235
+hi StatusLineNC term=none cterm=none ctermfg=grey           ctermbg=235
+hi VertSplit    term=none cterm=none ctermfg=grey           ctermbg=235
+hi CursorLine   term=none cterm=none ctermfg=none           ctermbg=235
+hi ColorColumn  term=none cterm=none ctermfg=grey           ctermbg=61
+hi Pmenu        term=none cterm=none ctermfg=15             ctermbg=8
+hi PmenuSel     term=none cterm=none ctermfg=8              ctermbg=15
+hi PmenuSbar    term=none cterm=none ctermfg=8              ctermbg=15

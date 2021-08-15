@@ -1,7 +1,5 @@
 """ Pep-0484 type hinting """
 
-# python >= 3.4
-
 
 class A():
     pass
@@ -24,7 +22,7 @@ def function_parameters(a: A, b, c: str, d: int, e: str, f: str, g: int=4):
     d
     #? str()
     e
-    #? int() str()
+    #? str()
     f
     # int()
     g
@@ -44,7 +42,7 @@ def return_none() -> None:
     """
     pass
 
-#?
+#? None
 return_none()
 
 
@@ -181,3 +179,22 @@ def argskwargs(*args: int, **kwargs: float):
     next(iter(kwargs.keys()))
     #? float()
     kwargs['']
+
+
+class NotCalledClass:
+    def __init__(self, x):
+        self.x: int = x
+        self.y: int = ''
+        #? int()
+        self.x
+        #? int()
+        self.y
+        #? int()
+        self.y
+        self.z: int
+        self.z = ''
+        #? str() int()
+        self.z
+        self.w: float
+        #? float()
+        self.w

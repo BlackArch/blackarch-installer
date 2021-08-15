@@ -1,46 +1,45 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-|jedi| is mostly being tested by what I would call "Blackbox Tests". These
-tests are just testing the interface and do input/output testing. This makes a
-lot of sense for |jedi|. Jedi supports so many different code structures, that
-it is just stupid to write 200'000 unittests in the manner of
-``regression.py``. Also, it is impossible to do doctests/unittests on most of
-the internal data structures. That's why |jedi| uses mostly these kind of
-tests.
+|jedi| is mostly being tested by what I would call "integration tests". These
+tests are testing type inference with the public API. This makes a
+lot of sense for |jedi|. Also, it is hard to write doctests/unittests for
+the internal data structures.
 
-There are different kind of tests:
+There are different kinds of tests:
 
-- completions / goto_definitions ``#?``
-- goto_assignments: ``#!``
-- usages: ``#<``
+- completions / inference ``#?``
+- goto: ``#!``
+- references: ``#<``
 
 How to run tests?
 +++++++++++++++++
 
 Jedi uses pytest_ to run unit and integration tests.  To run tests,
-simply run ``pytest``.  You can also use tox_ to run tests for
-multiple Python versions.
+simply run ``pytest``.
 
 .. _pytest: http://pytest.org
-.. _tox: http://testrun.org/tox
 
-Integration test cases are located in ``test/completion`` directory
-and each test case is indicated by either the comment ``#?`` (completions /
-definitions), ``#!`` (assignments), or ``#<`` (usages).
+Most integration test cases are located in the ``test/completion`` directory
+and each test case starts with one of these comments:
+
+- ``#?`` (completions / inference)
+- ``#!`` (goto)
+- ``#<`` (references)
+
 There is also support for third party libraries. In a normal test run they are
 not being executed, you have to provide a ``--thirdparty`` option.
 
-In addition to standard `-k` and `-m` options in pytest, you can use the
-`-T` (`--test-files`) option to specify integration test cases to run.
+In addition to pytest's ``-k`` and ``-m`` options, you can use the
+``-T`` (``--test-files`) option to specify which test cases should run.
 It takes the format of ``FILE_NAME[:LINE[,LINE[,...]]]`` where
 ``FILE_NAME`` is a file in ``test/completion`` and ``LINE`` is a line
-number of the test comment.  Here is some recipes:
+number of the test comment.  Here are some examples:
 
-Run tests only in ``basic.py`` and ``imports.py``::
+Run tests only in ``completion/basic.py`` and ``completion/imports.py``::
 
     pytest test/test_integration.py -T basic.py -T imports.py
 
-Run test at line 4, 6, and 8 in ``basic.py``::
+Run test at line 4, 6, and 8 in ``completion/basic.py``::
 
     pytest test/test_integration.py -T basic.py:4,6,8
 
@@ -57,38 +56,30 @@ that you can start by running ``./run.py``. The above example could be run by::
     ./run.py basic 4 6 8 50-80
 
 The advantage of this runner is simplicity and more customized error reports.
-Using both runners will help you to have a quicker overview of what's
-happening.
 
+Auto-Completion Tests
++++++++++++++++++++++
 
-Auto-Completion
+Uses a comment to specify a test on the next line. The comment defines the
+expected completions. The comment always begins with `#?`. The last row
+symbolizes the cursor. For example::
+
+    #? ['upper']
+    a = 'foo'; a.upp
+
+Inference Tests
 +++++++++++++++
 
-Uses comments to specify a test in the next line. The comment says which
-results are expected. The comment always begins with `#?`. The last row
-symbolizes the cursor.
-
-For example::
-
-    #? ['real']
-    a = 3; a.rea
-
-Because it follows ``a.rea`` and a is an ``int``, which has a ``real``
-property.
-
-Goto Definitions
-++++++++++++++++
-
-Definition tests use the same symbols like completion tests. This is
-possible because the completion tests are defined with a list::
+Inference tests look very simliar. The difference is that inference tests don't
+use brackets::
 
     #? int()
     ab = 3; ab
 
-Goto Assignments
-++++++++++++++++
+Goto Tests
+++++++++++
 
-Tests look like this::
+Goto Tests look like this::
 
     abc = 1
     #! ['abc=1']
@@ -100,54 +91,54 @@ describes the position of the test (otherwise it's just the end of line)::
     #! 2 ['abc=1']
     abc
 
-Usages
-++++++
+Reference Tests
++++++++++++++++
 
 Tests look like this::
 
     abc = 1
-    #< abc@1,0 abc@3,0
+    #< (1,0), (3,0)
     abc
 """
 import os
 import re
 import sys
 import operator
-from ast import literal_eval
+if sys.version_info < (3, 8):
+    literal_eval = eval
+else:
+    from ast import literal_eval
 from io import StringIO
 from functools import reduce
+from unittest.mock import ANY
+from pathlib import Path
 
 import parso
+from _pytest.outcomes import Skipped
+import pytest
 
 import jedi
 from jedi import debug
-from jedi._compatibility import unicode, is_py3
-from jedi.api.classes import Definition
-from jedi.api.completion import get_user_scope
+from jedi.api.classes import Name
+from jedi.api.completion import get_user_context
 from jedi import parser_utils
 from jedi.api.environment import get_default_environment, get_system_environment
-from jedi.evaluate.gradual.conversion import convert_contexts
+from jedi.inference.gradual.conversion import convert_values
+from jedi.inference.analysis import Warning
 
+test_dir = Path(__file__).absolute().parent
 
 TEST_COMPLETIONS = 0
-TEST_DEFINITIONS = 1
-TEST_ASSIGNMENTS = 2
-TEST_USAGES = 3
+TEST_INFERENCE = 1
+TEST_GOTO = 2
+TEST_REFERENCES = 3
 
 
 grammar36 = parso.load_grammar(version='3.6')
 
 
-class IntegrationTestCase(object):
-    def __init__(self, test_type, correct, line_nr, column, start, line,
-                 path=None, skip_version_info=None):
-        self.test_type = test_type
-        self.correct = correct
-        self.line_nr = line_nr
-        self.column = column
-        self.start = start
-        self.line = line
-        self.path = path
+class BaseTestCase(object):
+    def __init__(self, skip_version_info=None):
         self._skip_version_info = skip_version_info
         self._skip = None
 
@@ -175,6 +166,20 @@ class IntegrationTestCase(object):
                 operator_, min_version[0], min_version[1]
             )
 
+
+class IntegrationTestCase(BaseTestCase):
+    def __init__(self, test_type, correct, line_nr, column, start, line,
+                 path=None, skip_version_info=None):
+        super().__init__(skip_version_info)
+        self.test_type = test_type
+        self.correct = correct
+        self.line_nr = line_nr
+        self.column = column
+        self.start = start
+        self.line = line
+        self.path = path
+        self._project = jedi.Project(test_dir)
+
     @property
     def module_name(self):
         return os.path.splitext(os.path.basename(self.path))[0]
@@ -190,33 +195,44 @@ class IntegrationTestCase(object):
 
     def script(self, environment):
         return jedi.Script(
-            self.source, self.line_nr, self.column, self.path,
-            environment=environment
+            self.source,
+            path=self.path,
+            environment=environment,
+            project=self._project
         )
 
     def run(self, compare_cb, environment=None):
         testers = {
             TEST_COMPLETIONS: self.run_completion,
-            TEST_DEFINITIONS: self.run_goto_definitions,
-            TEST_ASSIGNMENTS: self.run_goto_assignments,
-            TEST_USAGES: self.run_usages,
+            TEST_INFERENCE: self.run_inference,
+            TEST_GOTO: self.run_goto,
+            TEST_REFERENCES: self.run_get_references,
         }
+        if (self.path.endswith('pytest.py') or self.path.endswith('conftest.py')) \
+                and environment.executable != os.path.realpath(sys.executable):
+            # It's not guarantueed that pytest is installed in test
+            # environments, if we're not running in the same environment that
+            # we're already in, so just skip that case.
+            pytest.skip()
         return testers[self.test_type](compare_cb, environment)
 
     def run_completion(self, compare_cb, environment):
-        completions = self.script(environment).completions()
-        #import cProfile; cProfile.run('script.completions()')
+        completions = self.script(environment).complete(self.line_nr, self.column)
+        # import cProfile; cProfile.run('...')
 
         comp_str = {c.name for c in completions}
+        for r in completions:
+            # Test if this access raises an error
+            assert isinstance(r.type, str)
         return compare_cb(self, comp_str, set(literal_eval(self.correct)))
 
-    def run_goto_definitions(self, compare_cb, environment):
+    def run_inference(self, compare_cb, environment):
         script = self.script(environment)
-        evaluator = script._evaluator
+        inference_state = script._inference_state
 
         def comparison(definition):
             suffix = '()' if definition.type == 'instance' else ''
-            return definition.desc_with_module + suffix
+            return definition.full_name + suffix
 
         def definition(correct, correct_start, path):
             should_be = set()
@@ -224,21 +240,16 @@ class IntegrationTestCase(object):
                 string = match.group(0)
                 parser = grammar36.parse(string, start_symbol='eval_input', error_recovery=False)
                 parser_utils.move(parser.get_root_node(), self.line_nr)
-                element = parser.get_root_node()
-                module_context = script._get_module()
-                # The context shouldn't matter for the test results.
-                user_context = get_user_scope(module_context, (self.line_nr, 0))
-                if user_context.api_type == 'function':
-                    user_context = user_context.get_function_execution()
-                element.parent = user_context.tree_node
-                results = convert_contexts(
-                    evaluator.eval_element(user_context, element),
-                )
+                node = parser.get_root_node()
+                module_context = script._get_module_context()
+                user_context = get_user_context(module_context, (self.line_nr, 0))
+                node.parent = user_context.tree_node
+                results = convert_values(user_context.infer_node(node))
                 if not results:
                     raise Exception('Could not resolve %s on line %s'
                                     % (match.string, self.line_nr - 1))
 
-                should_be |= set(Definition(evaluator, r.name) for r in results)
+                should_be |= set(Name(inference_state, r.name) for r in results)
             debug.dbg('Finished getting types', color='YELLOW')
 
             # Because the objects have different ids, `repr`, then compare.
@@ -246,19 +257,28 @@ class IntegrationTestCase(object):
             return should
 
         should = definition(self.correct, self.start, script.path)
-        result = script.goto_definitions()
+        result = script.infer(self.line_nr, self.column)
         is_str = set(comparison(r) for r in result)
+        for r in result:
+            # Test if this access raises an error
+            assert isinstance(r.type, str)
         return compare_cb(self, is_str, should)
 
-    def run_goto_assignments(self, compare_cb, environment):
-        result = self.script(environment).goto_assignments()
+    def run_goto(self, compare_cb, environment):
+        result = self.script(environment).goto(self.line_nr, self.column)
         comp_str = str(sorted(str(r.description) for r in result))
         return compare_cb(self, comp_str, self.correct)
 
-    def run_usages(self, compare_cb, environment):
-        result = self.script(environment).usages()
+    def run_get_references(self, compare_cb, environment):
+        result = self.script(environment).get_references(self.line_nr, self.column)
         self.correct = self.correct.strip()
-        compare = sorted((r.module_name, r.line, r.column) for r in result)
+        compare = sorted(
+            (('stub:' if r.is_stub() else '')
+             + re.sub(r'^completion\.', '', r.module_name),
+             r.line,
+             r.column)
+            for r in result
+        )
         wanted = []
         if not self.correct:
             positions = []
@@ -267,6 +287,8 @@ class IntegrationTestCase(object):
         for pos_tup in positions:
             if type(pos_tup[0]) == str:
                 # this means that there is a module specified
+                if pos_tup[1] == ...:
+                    pos_tup = pos_tup[0], ANY, pos_tup[2]
                 wanted.append(pos_tup)
             else:
                 line = pos_tup[0]
@@ -275,6 +297,49 @@ class IntegrationTestCase(object):
                 wanted.append((self.module_name, line, pos_tup[1]))
 
         return compare_cb(self, compare, sorted(wanted))
+
+
+class StaticAnalysisCase(BaseTestCase):
+    """
+    Static Analysis cases lie in the static_analysis folder.
+    The tests also start with `#!`, like the inference tests.
+    """
+    def __init__(self, path):
+        self._path = path
+        self.name = os.path.basename(path)
+        with open(path) as f:
+            self._source = f.read()
+
+        skip_version_info = None
+        for line in self._source.splitlines():
+            skip_version_info = skip_python_version(line) or skip_version_info
+
+        super().__init__(skip_version_info)
+
+    def collect_comparison(self):
+        cases = []
+        for line_nr, line in enumerate(self._source.splitlines(), 1):
+            match = re.match(r'(\s*)#! (\d+ )?(.*)$', line)
+            if match is not None:
+                column = int(match.group(2) or 0) + len(match.group(1))
+                cases.append((line_nr + 1, column, match.group(3)))
+        return cases
+
+    def run(self, compare_cb, environment):
+        def typ_str(inst):
+            return 'warning ' if isinstance(inst, Warning) else ''
+
+        analysis = jedi.Script(
+            self._source,
+            path=self._path,
+            environment=environment,
+        )._analysis()
+        analysis = [(r.line, r.column, typ_str(r) + r.name)
+                    for r in analysis]
+        compare_cb(self, analysis, self.collect_comparison())
+
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, os.path.basename(self._path))
 
 
 def skip_python_version(line):
@@ -306,19 +371,19 @@ def collect_file_tests(path, lines, lines_to_execute):
             else:
                 column = len(line) - 1  # -1 for the \n
             if test_type == '!':
-                yield makecase(TEST_ASSIGNMENTS)
+                yield makecase(TEST_GOTO)
             elif test_type == '<':
-                yield makecase(TEST_USAGES)
+                yield makecase(TEST_REFERENCES)
             elif correct.startswith('['):
                 yield makecase(TEST_COMPLETIONS)
             else:
-                yield makecase(TEST_DEFINITIONS)
+                yield makecase(TEST_INFERENCE)
             correct = None
         else:
             skip_version_info = skip_python_version(line) or skip_version_info
             try:
                 r = re.search(r'(?:^|(?<=\s))#([?!<])\s*([^\n]*)', line)
-                # test_type is ? for completion and ! for goto_assignments
+                # test_type is ? for completion and ! for goto
                 test_type = r.group(1)
                 correct = r.group(2)
                 # Quick hack to make everything work (not quite a bloody unicorn hack though).
@@ -355,12 +420,8 @@ def collect_dir_tests(base_dir, test_files, check_thirdparty=False):
 
             path = os.path.join(base_dir, f_name)
 
-            if is_py3:
-                with open(path, encoding='utf-8') as f:
-                    source = f.read()
-            else:
-                with open(path) as f:
-                    source = unicode(f.read(), 'UTF-8')
+            with open(path, newline='') as f:
+                source = f.read()
 
             for case in collect_file_tests(path, StringIO(source),
                                            lines_to_execute):
@@ -385,7 +446,7 @@ Options:
     --pdb           Enable pdb debugging on fail.
     -d, --debug     Enable text output debugging (please install ``colorama``).
     --thirdparty    Also run thirdparty tests (in ``completion/thirdparty``).
-    --env <dotted>  A Python version, like 2.7, 3.4, etc.
+    --env <dotted>  A Python version, like 3.9, 3.8, etc.
 """
 if __name__ == '__main__':
     import docopt
@@ -469,6 +530,8 @@ if __name__ == '__main__':
             if arguments['--pdb']:
                 import pdb
                 pdb.post_mortem()
+        except Skipped:
+            pass
 
         count += 1
 

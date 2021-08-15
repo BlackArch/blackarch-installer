@@ -188,14 +188,44 @@ def init_global_var_predefined():
 global_var_predefined
 
 
+def global_as_import():
+    from import_tree import globals
+    #? ['foo']
+    globals.foo
+    #? int()
+    globals.foo
+
+
+global r
+r = r[r]
+if r:
+    r += r + 2
+    #? int()
+    r
+
+# -----------------
+# del
+# -----------------
+
+deleted_var = 3
+del deleted_var
+#?
+deleted_var
+#? []
+deleted_var
+#! []
+deleted_var
+
 # -----------------
 # within docstrs
 # -----------------
 
 def a():
     """
-    #? ['global_define']
+    #? []
     global_define
+    #?
+    str
     """
     pass
 
@@ -261,14 +291,6 @@ except ImportError as i_a:
     i_a
     #? ImportError()
     i_a
-try:
-    import math
-except ImportError, i_b:
-    # TODO check this only in Python2
-    ##? ['i_b']
-    i_b
-    ##? ImportError()
-    i_b
 
 
 class MyException(Exception):
@@ -284,6 +306,54 @@ except MyException as e:
     for x in e.my_attr:
         pass
 
+# -----------------
+# params
+# -----------------
+
+my_param = 1
+#? 9 str()
+def foo1(my_param):
+    my_param = 3.0
+foo1("")
+
+my_type = float()
+#? 20 float()
+def foo2(my_param: my_type):
+    pass
+foo2("")
+#? 20 int()
+def foo3(my_param=my_param):
+    pass
+foo3("")
+
+some_default = ''
+#? []
+def foo(my_t
+#? []
+def foo(my_t, my_ty
+#? ['some_default']
+def foo(my_t=some_defa
+#? ['some_default']
+def foo(my_t=some_defa, my_t2=some_defa
+
+#? ['my_type']
+def foo(my_t: lala=some_defa, my_t2: my_typ
+#? ['my_type']
+def foo(my_t: lala=some_defa, my_t2: my_typ
+#? []
+def foo(my_t: lala=some_defa, my_t
+
+#? []
+lambda my_t
+#? []
+lambda my_, my_t
+#? ['some_default']
+lambda x=some_defa
+#? ['some_default']
+lambda y, x=some_defa
+
+# Just make sure we're not in some weird parsing recovery after opening brackets
+def  
 
 # -----------------
 # continuations
@@ -326,3 +396,27 @@ with open('') as f1, open('') as f2:
     f1.closed
     #? ['closed']
     f2.closed
+
+
+class Foo():
+    def __enter__(self):
+        return ''
+
+#? 14 str()
+with Foo() as f3:
+    #? str()
+    f3
+#! 14 ['with Foo() as f3: f3']
+with Foo() as f3:
+    f3
+#? 6 Foo
+with Foo() as f3:
+    f3
+
+# -----------------
+# Avoiding multiple definitions
+# -----------------
+
+some_array = ['', '']
+#! ['def upper']
+some_array[some_not_defined_index].upper

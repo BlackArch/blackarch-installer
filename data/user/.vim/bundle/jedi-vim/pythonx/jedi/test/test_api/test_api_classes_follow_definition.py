@@ -1,19 +1,21 @@
+from os.path import join
 from itertools import chain
+from functools import partial
 
 import jedi
-from ..helpers import cwd_at
+from ..helpers import test_dir
 
 
 def test_import_empty(Script):
     """ github #340, return the full word. """
-    completion = Script("import ").completions()[0]
+    completion = Script("import ").complete()[0]
     definition = completion.infer()[0]
     assert definition
 
 
 def check_follow_definition_types(Script, source):
     # nested import
-    completions = Script(source, path='some_path.py').completions()
+    completions = Script(source, path='some_path.py').complete()
     defs = chain.from_iterable(c.infer() for c in completions)
     return [d.type for d in defs]
 
@@ -21,23 +23,20 @@ def check_follow_definition_types(Script, source):
 def test_follow_import_incomplete(Script, environment):
     """
     Completion on incomplete imports should always take the full completion
-    to do any evaluation.
+    to do any type inference.
     """
     datetime = check_follow_definition_types(Script, "import itertool")
     assert datetime == ['module']
 
     # empty `from * import` parts
-    itert = jedi.Script("from itertools import ").completions()
+    itert = jedi.Script("from itertools import ").complete()
     definitions = [d for d in itert if d.name == 'chain']
     assert len(definitions) == 1
     assert [d.type for d in definitions[0].infer()] == ['class']
 
     # incomplete `from * import` part
     datetime = check_follow_definition_types(Script, "from datetime import datetim")
-    if environment.version_info.major == 2:
-        assert datetime == ['class']
-    else:
-        assert set(datetime) == {'class', 'instance'}  # py3: builtin and pure py version
+    assert set(datetime) == {'class', 'instance'}  # py3: builtin and pure py version
     # os.path check
     ospath = check_follow_definition_types(Script, "from os.path import abspat")
     assert set(ospath) == {'function'}
@@ -47,8 +46,8 @@ def test_follow_import_incomplete(Script, environment):
     assert alias == ['module']
 
 
-@cwd_at('test/completion/import_tree')
 def test_follow_definition_nested_import(Script):
+    Script = partial(Script, project=jedi.Project(join(test_dir, 'completion', 'import_tree')))
     types = check_follow_definition_types(Script, "import pkg.mod1; pkg")
     assert types == ['module']
 

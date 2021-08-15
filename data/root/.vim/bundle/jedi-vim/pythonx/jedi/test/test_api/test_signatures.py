@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 _tuple_code = 'from typing import Tuple\ndef f(x: Tuple[int]): ...\nf'
@@ -12,16 +10,16 @@ _tuple_code = 'from typing import Tuple\ndef f(x: Tuple[int]): ...\nf'
         ('def f(x: int): ...\nf', ['instance int'], True),
         ('from typing import List\ndef f(x: List[int]): ...\nf', ['instance list'], True),
         ('from typing import List\ndef f(x: List[int]): ...\nf', ['class list'], False),
-        (_tuple_code, ['Tuple: _SpecialForm = ...'], True),
-        (_tuple_code, ['Tuple: _SpecialForm = ...'], False),
+        (_tuple_code, ['instance tuple'], True),
+        (_tuple_code, ['class Tuple'], False),
         ('x=str\ndef f(p: x): ...\nx=int\nf', ['instance int'], True),
 
         ('def f(*args, **kwargs): ...\nf', [None, None], False),
         ('def f(*args: int, **kwargs: str): ...\nf', ['class int', 'class str'], False),
     ]
 )
-def test_param_annotation(Script, code, expected_params, execute_annotation, skip_python2):
-    func, = Script(code).goto_assignments()
+def test_param_annotation(Script, code, expected_params, execute_annotation):
+    func, = Script(code).goto()
     sig, = func.get_signatures()
     for p, expected in zip(sig.params, expected_params):
         annotations = p.infer_annotation(execute_annotation=execute_annotation)
@@ -40,7 +38,7 @@ def test_param_annotation(Script, code, expected_params, execute_annotation, ski
     ]
 )
 def test_param_default(Script, code, expected_params):
-    func, = Script(code).goto_assignments()
+    func, = Script(code).goto()
     sig, = func.get_signatures()
     for p, expected in zip(sig.params, expected_params):
         annotations = p.infer_default()
@@ -51,7 +49,6 @@ def test_param_default(Script, code, expected_params):
             assert annotation.description == expected
 
 
-@pytest.mark.skipif(sys.version_info < (3, 5), reason="Python <3.5 doesn't support __signature__")
 @pytest.mark.parametrize(
     'code, index, param_code, kind', [
         ('def f(x=1): pass\nf', 0, 'x=1', 'POSITIONAL_OR_KEYWORD'),
@@ -61,8 +58,8 @@ def test_param_default(Script, code, expected_params):
         ('def f(*args, x): pass\nf', 1, 'x', 'KEYWORD_ONLY'),
     ]
 )
-def test_param_kind_and_name(code, index, param_code, kind, Script, skip_python2):
-    func, = Script(code).goto_assignments()
+def test_param_kind_and_name(code, index, param_code, kind, Script):
+    func, = Script(code).goto()
     sig, = func.get_signatures()
     param = sig.params[index]
     assert param.to_string() == param_code
@@ -70,5 +67,5 @@ def test_param_kind_and_name(code, index, param_code, kind, Script, skip_python2
 
 
 def test_staticmethod(Script):
-    s, = Script('staticmethod(').call_signatures()
-    assert s.to_string() == 'staticmethod(f: Callable)'
+    s, = Script('staticmethod(').get_signatures()
+    assert s.to_string() == 'staticmethod(f: Callable[..., Any])'

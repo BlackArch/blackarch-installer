@@ -1,20 +1,22 @@
 import tempfile
 import shutil
 import os
+import sys
 from functools import partial
 
 import pytest
 
 import jedi
 from jedi.api.environment import get_system_environment, InterpreterEnvironment
-from jedi._compatibility import py_version
+from test.helpers import test_dir
 
 collect_ignore = [
     'setup.py',
-    '__main__.py',
-    'jedi/evaluate/compiled/subprocess/__main__.py',
+    'jedi/__main__.py',
+    'jedi/inference/compiled/subprocess/__main__.py',
     'build/',
     'test/examples',
+    'sith.py',
 ]
 
 
@@ -40,7 +42,7 @@ def pytest_addoption(parser):
                      help="Warnings are treated as errors.")
 
     parser.addoption("--env", action='store',
-                     help="Execute the tests in that environment (e.g. 35 for python3.5).")
+                     help="Execute the tests in that environment (e.g. 39 for python3.9).")
     parser.addoption("--interpreter-env", "-I", action='store_true',
                      help="Don't use subprocesses to guarantee having safe "
                           "code execution. Useful for debugging.")
@@ -90,14 +92,17 @@ def clean_jedi_cache(request):
 
 @pytest.fixture(scope='session')
 def environment(request):
-    if request.config.option.interpreter_env:
-        return InterpreterEnvironment()
-
     version = request.config.option.env
     if version is None:
-        version = os.environ.get('JEDI_TEST_ENVIRONMENT', str(py_version))
+        v = str(sys.version_info[0]) + str(sys.version_info[1])
+        version = os.environ.get('JEDI_TEST_ENVIRONMENT', v)
 
-    return get_system_environment(version[0] + '.' + version[1:])
+    if request.config.option.interpreter_env or version == 'interpreter':
+        return InterpreterEnvironment()
+
+    if '.' not in version:
+        version = version[0] + '.' + version[1:]
+    return get_system_environment(version)
 
 
 @pytest.fixture(scope='session')
@@ -106,32 +111,49 @@ def Script(environment):
 
 
 @pytest.fixture(scope='session')
-def names(environment):
-    return partial(jedi.names, environment=environment)
+def ScriptWithProject(Script):
+    project = jedi.Project(test_dir)
+    return partial(jedi.Script, project=project)
 
 
 @pytest.fixture(scope='session')
-def has_typing(environment):
-    if environment.version_info >= (3, 5, 0):
-        # This if is just needed to avoid that tests ever skip way more than
-        # they should for all Python versions.
-        return True
+def get_names(Script):
+    return lambda code, **kwargs: Script(code).get_names(**kwargs)
 
-    script = jedi.Script('import typing', environment=environment)
-    return bool(script.goto_definitions())
+
+@pytest.fixture(scope='session', params=['goto', 'infer'])
+def goto_or_infer(request, Script):
+    return lambda code, *args, **kwargs: getattr(Script(code), request.param)(*args, **kwargs)
+
+
+@pytest.fixture(scope='session', params=['goto', 'help'])
+def goto_or_help(request, Script):
+    return lambda code, *args, **kwargs: getattr(Script(code), request.param)(*args, **kwargs)
+
+
+@pytest.fixture(scope='session', params=['goto', 'help', 'infer'])
+def goto_or_help_or_infer(request, Script):
+    def do(code, *args, **kwargs):
+        return getattr(Script(code), request.param)(*args, **kwargs)
+
+    do.type = request.param
+    return do
+
+
+@pytest.fixture(scope='session', params=['goto', 'complete', 'help'])
+def goto_or_complete(request, Script):
+    return lambda code, *args, **kwargs: getattr(Script(code), request.param)(*args, **kwargs)
+
+
+@pytest.fixture(scope='session')
+def has_django(environment):
+    script = jedi.Script('import django', environment=environment)
+    return bool(script.infer())
 
 
 @pytest.fixture(scope='session')
 def jedi_path():
     return os.path.dirname(__file__)
-
-
-@pytest.fixture()
-def skip_python2(environment):
-    if environment.version_info.major == 2:
-        # This if is just needed to avoid that tests ever skip way more than
-        # they should for all Python versions.
-        pytest.skip()
 
 
 @pytest.fixture()
@@ -145,14 +167,6 @@ def skip_pre_python38(environment):
 @pytest.fixture()
 def skip_pre_python37(environment):
     if environment.version_info < (3, 7):
-        # This if is just needed to avoid that tests ever skip way more than
-        # they should for all Python versions.
-        pytest.skip()
-
-
-@pytest.fixture()
-def skip_pre_python35(environment):
-    if environment.version_info < (3, 5):
         # This if is just needed to avoid that tests ever skip way more than
         # they should for all Python versions.
         pytest.skip()

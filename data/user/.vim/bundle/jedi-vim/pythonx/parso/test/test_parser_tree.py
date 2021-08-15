@@ -8,7 +8,7 @@ from parso import parse
 from parso.python import tree
 
 
-class TestsFunctionAndLambdaParsing(object):
+class TestsFunctionAndLambdaParsing:
 
     FIXTURES = [
         ('def my_function(x, y, z) -> str:\n    return x + y * z\n', {
@@ -26,7 +26,7 @@ class TestsFunctionAndLambdaParsing(object):
 
     @pytest.fixture(params=FIXTURES)
     def node(self, request):
-        parsed = parse(dedent(request.param[0]), version='3.5')
+        parsed = parse(dedent(request.param[0]), version='3.10')
         request.keywords['expected'] = request.param[1]
         child = parsed.children[0]
         if child.type == 'simple_stmt':
@@ -79,16 +79,16 @@ def test_default_param(each_version):
     assert not param.star_count
 
 
-def test_annotation_param(each_py3_version):
-    func = parse('def x(foo: 3): pass', version=each_py3_version).children[0]
+def test_annotation_param(each_version):
+    func = parse('def x(foo: 3): pass', version=each_version).children[0]
     param, = func.get_params()
     assert param.default is None
     assert param.annotation.value == '3'
     assert not param.star_count
 
 
-def test_annotation_params(each_py3_version):
-    func = parse('def x(foo: 3, bar: 4): pass', version=each_py3_version).children[0]
+def test_annotation_params(each_version):
+    func = parse('def x(foo: 3, bar: 4): pass', version=each_version).children[0]
     param1, param2 = func.get_params()
 
     assert param1.default is None
@@ -100,21 +100,12 @@ def test_annotation_params(each_py3_version):
     assert not param2.star_count
 
 
-def test_default_and_annotation_param(each_py3_version):
-    func = parse('def x(foo:3=42): pass', version=each_py3_version).children[0]
+def test_default_and_annotation_param(each_version):
+    func = parse('def x(foo:3=42): pass', version=each_version).children[0]
     param, = func.get_params()
     assert param.default.value == '42'
     assert param.annotation.value == '3'
     assert not param.star_count
-
-
-def test_ellipsis_py2(each_py2_version):
-    module = parse('[0][...]', version=each_py2_version, error_recovery=False)
-    expr = module.children[0]
-    trailer = expr.children[-1]
-    subscript = trailer.children[1]
-    assert subscript.type == 'subscript'
-    assert [leaf.value for leaf in subscript.children] == ['.', '.', '.']
 
 
 def get_yield_exprs(code, version):
@@ -142,7 +133,7 @@ def test_yields(each_version):
 
 
 def test_yield_from():
-    y, = get_yield_exprs('def x(): (yield from 1)', '3.3')
+    y, = get_yield_exprs('def x(): (yield from 1)', '3.8')
     assert y.type == 'yield_expr'
 
 
@@ -172,11 +163,79 @@ def top_function_three():
     raise Exception
     """
 
-    r = get_raise_stmts(code, 0) #  Lists in a simple Function
+    r = get_raise_stmts(code, 0)  # Lists in a simple Function
     assert len(list(r)) == 1
 
-    r = get_raise_stmts(code, 1) #  Doesn't Exceptions list in closures
+    r = get_raise_stmts(code, 1)  # Doesn't Exceptions list in closures
     assert len(list(r)) == 1
 
-    r = get_raise_stmts(code, 2) #  Lists inside try-catch
+    r = get_raise_stmts(code, 2)  # Lists inside try-catch
     assert len(list(r)) == 2
+
+
+@pytest.mark.parametrize(
+    'code, name_index, is_definition, include_setitem', [
+        ('x = 3', 0, True, False),
+        ('x.y = 3', 0, False, False),
+        ('x.y = 3', 1, True, False),
+        ('x.y = u.v = z', 0, False, False),
+        ('x.y = u.v = z', 1, True, False),
+        ('x.y = u.v = z', 2, False, False),
+        ('x.y = u.v, w = z', 3, True, False),
+        ('x.y = u.v, w = z', 4, True, False),
+        ('x.y = u.v, w = z', 5, False, False),
+
+        ('x, y = z', 0, True, False),
+        ('x, y = z', 1, True, False),
+        ('x, y = z', 2, False, False),
+        ('x, y = z', 2, False, False),
+        ('x[0], y = z', 2, False, False),
+        ('x[0] = z', 0, False, False),
+        ('x[0], y = z', 0, False, False),
+        ('x[0], y = z', 2, False, True),
+        ('x[0] = z', 0, True, True),
+        ('x[0], y = z', 0, True, True),
+        ('x: int = z', 0, True, False),
+        ('x: int = z', 1, False, False),
+        ('x: int = z', 2, False, False),
+        ('x: int', 0, True, False),
+        ('x: int', 1, False, False),
+    ]
+)
+def test_is_definition(code, name_index, is_definition, include_setitem):
+    module = parse(code, version='3.8')
+    name = module.get_first_leaf()
+    while True:
+        if name.type == 'name':
+            if name_index == 0:
+                break
+            name_index -= 1
+        name = name.get_next_leaf()
+
+    assert name.is_definition(include_setitem=include_setitem) == is_definition
+
+
+def test_iter_funcdefs():
+    code = dedent('''
+        def normal(): ...
+        async def asyn(): ...
+        @dec
+        def dec_normal(): ...
+        @dec1
+        @dec2
+        async def dec_async(): ...
+        def broken
+        ''')
+    module = parse(code, version='3.8')
+    func_names = [f.name.value for f in module.iter_funcdefs()]
+    assert func_names == ['normal', 'asyn', 'dec_normal', 'dec_async']
+
+
+def test_with_stmt_get_test_node_from_name():
+    code = "with A as X.Y, B as (Z), C as Q[0], D as Q['foo']: pass"
+    with_stmt = parse(code, version='3').children[0]
+    tests = [
+        with_stmt.get_test_node_from_name(name).value
+        for name in with_stmt.get_defined_names(include_setitem=True)
+    ]
+    assert tests == ["A", "B", "C", "D"]

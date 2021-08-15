@@ -1,16 +1,26 @@
 import os
-import re
+import sys
 import subprocess
+from itertools import count
 
 import pytest
 
 from . import helpers
 from . import run
 from . import refactor
+from jedi import InterpreterEnvironment, get_system_environment
+from jedi.inference.compiled.value import create_from_access_path
+from jedi.inference.imports import _load_python_module
+from jedi.file_io import KnownContentFileIO
+from jedi.inference.base_value import ValueSet
+from jedi.api.interpreter import MixedModuleContext
 
-import jedi
-from jedi.api.environment import InterpreterEnvironment
-from jedi.evaluate.analysis import Warning
+# For interpreter tests sometimes the path of this directory is in the sys
+# path, which we definitely don't want. So just remove it globally.
+try:
+    sys.path.remove(helpers.test_dir)
+except ValueError:
+    pass
 
 
 def pytest_addoption(parser):
@@ -66,9 +76,11 @@ def pytest_generate_tests(metafunc):
 
     if 'refactor_case' in metafunc.fixturenames:
         base_dir = metafunc.config.option.refactor_case_dir
+        cases = list(refactor.collect_dir_tests(base_dir, test_files))
         metafunc.parametrize(
-            'refactor_case',
-            refactor.collect_dir_tests(base_dir, test_files))
+            'refactor_case', cases,
+            ids=[c.refactor_type + '-' + c.name for c in cases]
+        )
 
     if 'static_analysis_case' in metafunc.fixturenames:
         base_dir = os.path.join(os.path.dirname(__file__), 'static_analysis')
@@ -85,55 +97,20 @@ def collect_static_analysis_tests(base_dir, test_files):
         files_to_execute = [a for a in test_files.items() if a[0] in f_name]
         if f_name.endswith(".py") and (not test_files or files_to_execute):
             path = os.path.join(base_dir, f_name)
-            yield StaticAnalysisCase(path)
-
-
-class StaticAnalysisCase(object):
-    """
-    Static Analysis cases lie in the static_analysis folder.
-    The tests also start with `#!`, like the goto_definition tests.
-    """
-    def __init__(self, path):
-        self._path = path
-        self.name = os.path.basename(path)
-        with open(path) as f:
-            self._source = f.read()
-
-        self.skip = False
-        for line in self._source.splitlines():
-            self.skip = self.skip or run.skip_python_version(line)
-
-    def collect_comparison(self):
-        cases = []
-        for line_nr, line in enumerate(self._source.splitlines(), 1):
-            match = re.match(r'(\s*)#! (\d+ )?(.*)$', line)
-            if match is not None:
-                column = int(match.group(2) or 0) + len(match.group(1))
-                cases.append((line_nr + 1, column, match.group(3)))
-        return cases
-
-    def run(self, compare_cb, environment):
-        analysis = jedi.Script(
-            self._source,
-            path=self._path,
-            environment=environment,
-        )._analysis()
-        typ_str = lambda inst: 'warning ' if isinstance(inst, Warning) else ''
-        analysis = [(r.line, r.column, typ_str(r) + r.name)
-                    for r in analysis]
-        compare_cb(self, analysis, self.collect_comparison())
-
-    def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, os.path.basename(self._path))
+            yield run.StaticAnalysisCase(path)
 
 
 @pytest.fixture(scope='session')
 def venv_path(tmpdir_factory, environment):
-    if environment.version_info.major < 3:
-        pytest.skip("python -m venv does not exist in Python 2")
+    if isinstance(environment, InterpreterEnvironment):
+        # The environment can be a tox virtualenv environment which we don't
+        # want, so use the system environment.
+        environment = get_system_environment(
+            '.'.join(str(x) for x in environment.version_info[:2])
+        )
 
     tmpdir = tmpdir_factory.mktemp('venv_path')
-    dirname = os.path.join(tmpdir.dirname, 'venv')
+    dirname = os.path.join(tmpdir.strpath, 'venv')
 
     # We cannot use the Python from tox because tox creates virtualenvs and
     # they have different site.py files that work differently than the default
@@ -151,7 +128,8 @@ def venv_path(tmpdir_factory, environment):
         executable_name = os.path.basename(environment.executable)
         executable_path = os.path.join(prefix, 'bin', executable_name)
 
-    subprocess.call([executable_path, '-m', 'venv', dirname])
+    return_code = subprocess.call([executable_path, '-m', 'venv', dirname])
+    assert return_code == 0, return_code
     return dirname
 
 
@@ -162,10 +140,48 @@ def cwd_tmpdir(monkeypatch, tmpdir):
 
 
 @pytest.fixture
-def evaluator(Script):
-    return Script('')._evaluator
+def inference_state(Script):
+    return Script('')._inference_state
 
 
 @pytest.fixture
-def same_process_evaluator(Script):
-    return Script('', environment=InterpreterEnvironment())._evaluator
+def same_process_inference_state(Script):
+    return Script('', environment=InterpreterEnvironment())._inference_state
+
+
+@pytest.fixture
+def disable_typeshed(monkeypatch):
+    from jedi.inference.gradual import typeshed
+    monkeypatch.setattr(typeshed, '_load_from_typeshed', lambda *args, **kwargs: None)
+
+
+@pytest.fixture
+def create_compiled_object(inference_state):
+    return lambda obj: create_from_access_path(
+        inference_state,
+        inference_state.compiled_subprocess.create_simple_object(obj)
+    )
+
+
+@pytest.fixture
+def module_injector():
+    counter = count()
+
+    def module_injector(inference_state, names, code):
+        assert isinstance(names, tuple)
+        file_io = KnownContentFileIO('/foo/bar/module-injector-%s.py' % next(counter), code)
+        v = _load_python_module(inference_state, file_io, names)
+        inference_state.module_cache.add(names, ValueSet([v]))
+
+    return module_injector
+
+
+@pytest.fixture(params=[False, True])
+def class_findable(monkeypatch, request):
+    if not request.param:
+        monkeypatch.setattr(
+            MixedModuleContext,
+            '_get_mixed_object',
+            lambda self, compiled_object: compiled_object.as_context()
+        )
+    return request.param

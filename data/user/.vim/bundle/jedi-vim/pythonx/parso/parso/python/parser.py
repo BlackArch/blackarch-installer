@@ -43,13 +43,10 @@ class Parser(BaseParser):
         # Not sure if this is the best idea, but IMO it's the easiest way to
         # avoid extreme amounts of work around the subtle difference of 2/3
         # grammar in list comoprehensions.
-        'list_for': tree.SyncCompFor,
-        # Same here. This just exists in Python 2.6.
-        'gen_for': tree.SyncCompFor,
         'decorator': tree.Decorator,
         'lambdef': tree.Lambda,
-        'old_lambdef': tree.Lambda,
         'lambdef_nocond': tree.Lambda,
+        'namedexpr_test': tree.NamedExpr,
     }
     default_node = tree.PythonNode
 
@@ -65,8 +62,8 @@ class Parser(BaseParser):
     }
 
     def __init__(self, pgen_grammar, error_recovery=True, start_nonterminal='file_input'):
-        super(Parser, self).__init__(pgen_grammar, start_nonterminal,
-                                     error_recovery=error_recovery)
+        super().__init__(pgen_grammar, start_nonterminal,
+                         error_recovery=error_recovery)
 
         self.syntax_errors = []
         self._omit_dedent_list = []
@@ -79,7 +76,7 @@ class Parser(BaseParser):
 
             tokens = self._recovery_tokenize(tokens)
 
-        return super(Parser, self).parse(tokens)
+        return super().parse(tokens)
 
     def convert_node(self, nonterminal, children):
         """
@@ -98,12 +95,6 @@ class Parser(BaseParser):
                 # ones and therefore have pseudo start/end positions and no
                 # prefixes. Just ignore them.
                 children = [children[0]] + children[2:-1]
-            elif nonterminal == 'list_if':
-                # Make transitioning from 2 to 3 easier.
-                nonterminal = 'comp_if'
-            elif nonterminal == 'listmaker':
-                # Same as list_if above.
-                nonterminal = 'testlist_comp'
             node = self.default_node(nonterminal, children)
         for c in children:
             c.parent = node
@@ -128,10 +119,10 @@ class Parser(BaseParser):
 
         if self._start_nonterminal == 'file_input' and \
                 (token.type == PythonTokenTypes.ENDMARKER
-                 or token.type == DEDENT and '\n' not in last_leaf.value
-                 and '\r' not in last_leaf.value):
+                 or token.type == DEDENT and not last_leaf.value.endswith('\n')
+                 and not last_leaf.value.endswith('\r')):
             # In Python statements need to end with a newline. But since it's
-            # possible (and valid in Python ) that there's no newline at the
+            # possible (and valid in Python) that there's no newline at the
             # end of a file, we have to recover even if the user doesn't want
             # error recovery.
             if self.stack[-1].dfa.from_rule == 'simple_stmt':
@@ -148,7 +139,7 @@ class Parser(BaseParser):
                         return
 
         if not self._error_recovery:
-            return super(Parser, self).error_recovery(token)
+            return super().error_recovery(token)
 
         def current_suite(stack):
             # For now just discard everything that is not a suite or
@@ -210,6 +201,7 @@ class Parser(BaseParser):
                 o = self._omit_dedent_list
                 if o and o[-1] == self._indent_counter:
                     o.pop()
+                    self._indent_counter -= 1
                     continue
 
                 self._indent_counter -= 1

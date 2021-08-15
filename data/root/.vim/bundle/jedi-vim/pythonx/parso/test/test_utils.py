@@ -1,6 +1,11 @@
 from codecs import BOM_UTF8
 
-from parso.utils import split_lines, python_bytes_to_unicode
+from parso.utils import (
+    split_lines,
+    parse_version_string,
+    python_bytes_to_unicode,
+)
+
 import parso
 
 import pytest
@@ -63,3 +68,36 @@ def test_utf8_bom():
     expr_stmt = module.children[0]
     assert expr_stmt.type == 'expr_stmt'
     assert unicode_bom == expr_stmt.get_first_leaf().prefix
+
+
+@pytest.mark.parametrize(
+    ('code', 'errors'), [
+        (b'# coding: wtf-12\nfoo', 'strict'),
+        (b'# coding: wtf-12\nfoo', 'replace'),
+    ]
+)
+def test_bytes_to_unicode_failing_encoding(code, errors):
+    if errors == 'strict':
+        with pytest.raises(LookupError):
+            python_bytes_to_unicode(code, errors=errors)
+    else:
+        python_bytes_to_unicode(code, errors=errors)
+
+
+@pytest.mark.parametrize(
+    ('version_str', 'version'), [
+        ('3', (3,)),
+        ('3.6', (3, 6)),
+        ('3.6.10', (3, 6)),
+        ('3.10', (3, 10)),
+        ('3.10a9', (3, 10)),
+        ('3.10b9', (3, 10)),
+        ('3.10rc9', (3, 10)),
+    ]
+)
+def test_parse_version_string(version_str, version):
+    parsed_version = parse_version_string(version_str)
+    if len(version) == 1:
+        assert parsed_version[0] == version[0]
+    else:
+        assert parsed_version == version

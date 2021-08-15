@@ -91,3 +91,27 @@ class B:
             for i in self.a(i):
                 #?
                 yield i
+
+
+foo = int
+foo = foo  # type: foo
+#? int
+foo
+
+while True:
+    bar = int
+    bar = bar  # type: bar
+    #? int()
+    bar
+
+
+class Comprehension:
+    def __init__(self, foo):
+        self.foo = foo
+
+    def update(self):
+        self.foo = (self.foo,)
+
+
+#? int() tuple()
+Comprehension(1).foo[0]

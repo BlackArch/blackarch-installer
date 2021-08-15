@@ -19,6 +19,14 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: add help text for each section if feasible
 
 
+===> 1.2.22
+
+  [x] update/sync blackarch-config-vim data
+  [x] ypdate/sync blackarch-cofnig-awesome data
+  [x] ypdate/sync blackarch-cofnig-openbox data
+  [x] ypdate/sync blackarch-cofnig-fluxbox data
+
+
 ===> 1.2.21
 
   [x] reflector: search for max 5 mirrors.

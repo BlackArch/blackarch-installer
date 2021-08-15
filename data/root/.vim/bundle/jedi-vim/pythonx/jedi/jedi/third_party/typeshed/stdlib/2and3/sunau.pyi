@@ -1,7 +1,5 @@
-# Stubs for sunau (Python 2 and 3)
-
 import sys
-from typing import Any, NamedTuple, NoReturn, Optional, Text, IO, Union, Tuple
+from typing import IO, Any, NamedTuple, NoReturn, Optional, Text, Tuple, Union
 
 _File = Union[Text, IO[bytes]]
 
@@ -25,14 +23,13 @@ AUDIO_UNKNOWN_SIZE: int
 if sys.version_info < (3, 0):
     _sunau_params = Tuple[int, int, int, int, str, str]
 else:
-    _sunau_params = NamedTuple('_sunau_params', [
-        ('nchannels', int),
-        ('sampwidth', int),
-        ('framerate', int),
-        ('nframes', int),
-        ('comptype', str),
-        ('compname', str),
-    ])
+    class _sunau_params(NamedTuple):
+        nchannels: int
+        sampwidth: int
+        framerate: int
+        nframes: int
+        comptype: str
+        compname: str
 
 class Au_read:
     def __init__(self, f: _File) -> None: ...
@@ -84,4 +81,6 @@ class Au_write:
 
 # Returns a Au_read if mode is rb and Au_write if mode is wb
 def open(f: _File, mode: Optional[str] = ...) -> Any: ...
-openfp = open
+
+if sys.version_info < (3, 9):
+    openfp = open

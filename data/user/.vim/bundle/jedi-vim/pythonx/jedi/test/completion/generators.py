@@ -24,7 +24,7 @@ next(gen_ret(1))
 #? []
 next(gen_ret()).
 
-# generators evaluate to true if cast by bool.
+# generators infer to true if cast by bool.
 a = ''
 if gen_ret():
     a = 3
@@ -77,6 +77,28 @@ next(g)
 g = iter([1.0])
 #? float()
 next(g)
+
+x, y = Get()
+#? int() str()
+x
+#? int() str()
+x
+
+class Iter:
+    def __iter__(self):
+        yield ""
+        i = 0
+        while True:
+            v = 1
+            yield v
+            i += 1
+a, b, c = Iter()
+#? str() int()
+a
+#? str() int()
+b
+#? str() int()
+c
 
 
 # -----------------
@@ -134,7 +156,7 @@ a, b = simple()
 #? int() str()
 a
 # For now this is ok.
-#?
+#? int() str()
 b
 
 
@@ -220,8 +242,6 @@ def x():
 # yield from
 # -----------------
 
-# python >= 3.4
-
 def yield_from():
     yield from iter([1])
 
@@ -270,3 +290,22 @@ def test_in_brackets():
     x = yield from [1]
     #? None
     x
+
+
+# -----------------
+# Annotations
+# -----------------
+
+from typing import Iterator
+
+def annotation1() -> float:
+    yield 1
+
+def annotation2() -> Iterator[float]:
+    yield 1
+
+
+#?
+next(annotation1())
+#? float()
+next(annotation2())

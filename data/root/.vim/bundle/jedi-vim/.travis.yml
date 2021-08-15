@@ -1,15 +1,10 @@
-dist: xenial
+dist: bionic
 language: python
-python: 3.7
+python: 3.8
 env:
-  matrix:
-    - ENV=test
-    - ENV=check
-    - ENV=test_coverage
-matrix:
-  include:
-    - env: ENV=test_coverage
-      python: 2.7
+  - ENV=test
+  - ENV=check
+  - ENV=test_coverage
 install:
   - |
     if [ "$ENV" = "test" ]; then
@@ -20,13 +15,15 @@ install:
       sudo apt-get install neovim -y
 
       pip install pynvim pytest-cov
+      pip list
+      nvim --version
     else
       vim --version
     fi
 script:
   - make --keep-going "$ENV" BUILD_VIRTUAL_ENV=$VIRTUAL_ENV
 
-after_success:
+after_script:
   - |
     if [ "$ENV" = "test_coverage" ]; then
       coverage xml

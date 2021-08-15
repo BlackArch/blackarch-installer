@@ -1,27 +1,22 @@
-from typing import Any, Optional, List, Type
-
-import threading
-import sys
-import weakref
 import array
 import itertools
-
+import sys
+import threading
+import weakref
 from multiprocessing import TimeoutError, cpu_count
 from multiprocessing.dummy.connection import Pipe
-from threading import Lock, RLock, Semaphore, BoundedSemaphore
-from threading import Event
 from Queue import Queue
-
+from threading import BoundedSemaphore, Event, Lock, RLock, Semaphore
+from typing import Any, List, Optional, Type
 
 class DummyProcess(threading.Thread):
-    _children: weakref.WeakKeyDictionary
+    _children: weakref.WeakKeyDictionary[Any, Any]
     _parent: threading.Thread
     _pid: None
     _start_called: bool
     def __init__(self, group=..., target=..., name=..., args=..., kwargs=...) -> None: ...
     @property
     def exitcode(self) -> Optional[int]: ...
-
 
 Process = DummyProcess
 
@@ -42,10 +37,10 @@ class Value(object):
 
 JoinableQueue = Queue
 
-def Array(typecode, sequence, lock=...) -> array.array: ...
+def Array(typecode, sequence, lock=...) -> array.array[Any]: ...
 def Manager() -> Any: ...
 def Pool(processes=..., initializer=..., initargs=...) -> Any: ...
-def active_children() -> List: ...
+def active_children() -> List[Any]: ...
 def current_process() -> threading.Thread: ...
 def freeze_support() -> None: ...
 def shutdown() -> None: ...

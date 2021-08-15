@@ -1,5 +1,4 @@
 #!/usr/bin/env python3.6
-# -*- coding: utf-8 -*-
 """
 Profile a piece of Python code with ``profile``. Tries a completion on a
 certain piece of code.
@@ -19,11 +18,7 @@ Options:
 """
 
 import time
-try:
-    # For Python 2
-    import cProfile as profile
-except ImportError:
-    import profile
+import profile
 import pstats
 
 from docopt import docopt
@@ -45,9 +40,9 @@ def run(code, index, infer=False):
     start = time.time()
     script = jedi.Script(code)
     if infer:
-        result = script.goto_definitions()
+        result = script.infer()
     else:
-        result = script.completions()
+        result = script.complete()
     print('Used %ss for the %sth run.' % (time.time() - start, index + 1))
     return result
 

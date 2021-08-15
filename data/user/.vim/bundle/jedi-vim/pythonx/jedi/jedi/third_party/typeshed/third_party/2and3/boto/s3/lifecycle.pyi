@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 class Rule:
     id: Any
@@ -6,7 +6,14 @@ class Rule:
     status: Any
     expiration: Any
     transition: Any
-    def __init__(self, id: Optional[Any] = ..., prefix: Optional[Any] = ..., status: Optional[Any] = ..., expiration: Optional[Any] = ..., transition: Optional[Any] = ...) -> None: ...
+    def __init__(
+        self,
+        id: Optional[Any] = ...,
+        prefix: Optional[Any] = ...,
+        status: Optional[Any] = ...,
+        expiration: Optional[Any] = ...,
+        transition: Optional[Any] = ...,
+    ) -> None: ...
     def startElement(self, name, attrs, connection): ...
     def endElement(self, name, value, connection): ...
     def to_xml(self): ...
@@ -26,7 +33,7 @@ class Transition:
     def __init__(self, days: Optional[Any] = ..., date: Optional[Any] = ..., storage_class: Optional[Any] = ...) -> None: ...
     def to_xml(self): ...
 
-class Transitions(list):
+class Transitions(List[Transition]):
     transition_properties: int
     current_transition_property: int
     temp_days: Any
@@ -44,8 +51,15 @@ class Transitions(list):
     @property
     def storage_class(self): ...
 
-class Lifecycle(list):
+class Lifecycle(List[Rule]):
     def startElement(self, name, attrs, connection): ...
     def endElement(self, name, value, connection): ...
     def to_xml(self): ...
-    def add_rule(self, id: Optional[Any] = ..., prefix: str = ..., status: str = ..., expiration: Optional[Any] = ..., transition: Optional[Any] = ...): ...
+    def add_rule(
+        self,
+        id: Optional[Any] = ...,
+        prefix: str = ...,
+        status: str = ...,
+        expiration: Optional[Any] = ...,
+        transition: Optional[Any] = ...,
+    ): ...

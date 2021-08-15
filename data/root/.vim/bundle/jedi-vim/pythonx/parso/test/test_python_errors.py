@@ -7,6 +7,8 @@ import warnings
 import pytest
 
 import parso
+
+from textwrap import dedent
 from parso._compatibility import is_pypy
 from .failing_examples import FAILING_EXAMPLES, indent, build_nested
 
@@ -37,7 +39,7 @@ def test_python_exception_matches(code):
         error, = errors
         actual = error.message
     assert actual in wanted
-    # Somehow in Python3.3 the SyntaxError().lineno is sometimes None
+    # Somehow in Python2.7 the SyntaxError().lineno is sometimes None
     assert line_nr is None or line_nr == error.start_pos[0]
 
 
@@ -46,10 +48,7 @@ def test_non_async_in_async():
     This example doesn't work with FAILING_EXAMPLES, because the line numbers
     are not always the same / incorrect in Python 3.8.
     """
-    if sys.version_info[:2] < (3, 5):
-        pytest.skip()
-
-        # Raises multiple errors in previous versions.
+    # Raises multiple errors in previous versions.
     code = 'async def foo():\n def nofoo():[x async for x in []]'
     wanted, line_nr = _get_actual_exception(code)
 
@@ -118,26 +117,9 @@ def _get_actual_exception(code):
             assert False, "The piece of code should raise an exception."
 
     # SyntaxError
-    # Python 2.6 has a bit different error messages here, so skip it.
-    if sys.version_info[:2] == (2, 6) and wanted == 'SyntaxError: unexpected EOF while parsing':
-        wanted = 'SyntaxError: invalid syntax'
-
-    if wanted == 'SyntaxError: non-keyword arg after keyword arg':
-        # The python 3.5+ way, a bit nicer.
-        wanted = 'SyntaxError: positional argument follows keyword argument'
-    elif wanted == 'SyntaxError: assignment to keyword':
+    if wanted == 'SyntaxError: assignment to keyword':
         return [wanted, "SyntaxError: can't assign to keyword",
                 'SyntaxError: cannot assign to __debug__'], line_nr
-    elif wanted == 'SyntaxError: assignment to None':
-        # Python 2.6 does has a slightly different error.
-        wanted = 'SyntaxError: cannot assign to None'
-    elif wanted == 'SyntaxError: can not assign to __debug__':
-        # Python 2.6 does has a slightly different error.
-        wanted = 'SyntaxError: cannot assign to __debug__'
-    elif wanted == 'SyntaxError: can use starred expression only as assignment target':
-        # Python 3.4/3.4 have a bit of a different warning than 3.5/3.6 in
-        # certain places. But in others this error makes sense.
-        return [wanted, "SyntaxError: can't use starred expression here"], line_nr
     elif wanted == 'SyntaxError: f-string: unterminated string':
         wanted = 'SyntaxError: EOL while scanning string literal'
     elif wanted == 'SyntaxError: f-string expression part cannot include a backslash':
@@ -195,12 +177,13 @@ def test_statically_nested_blocks():
 
 
 def test_future_import_first():
-    def is_issue(code, *args):
+    def is_issue(code, *args, **kwargs):
         code = code % args
-        return bool(_get_error_list(code))
+        return bool(_get_error_list(code, **kwargs))
 
     i1 = 'from __future__ import division'
     i2 = 'from __future__ import absolute_import'
+    i3 = 'from __future__ import annotations'
     assert not is_issue(i1)
     assert not is_issue(i1 + ';' + i2)
     assert not is_issue(i1 + '\n' + i2)
@@ -211,6 +194,8 @@ def test_future_import_first():
     assert not is_issue('""\n%s;%s', i1, i2)
     assert not is_issue('"";%s;%s ', i1, i2)
     assert not is_issue('"";%s\n%s ', i1, i2)
+    assert not is_issue(i3, version="3.7")
+    assert is_issue(i3, version="3.6")
     assert is_issue('1;' + i1)
     assert is_issue('1\n' + i1)
     assert is_issue('"";1\n' + i1)
@@ -264,10 +249,7 @@ def test_escape_decode_literals(each_version):
 
     # Finally bytes.
     error, = _get_error_list(r'b"\x"', version=each_version)
-    wanted = r'SyntaxError: (value error) invalid \x escape'
-    if sys.version_info >= (3, 0):
-        # The positioning information is only available in Python 3.
-        wanted += ' at position 0'
+    wanted = r'SyntaxError: (value error) invalid \x escape at position 0'
     assert error.message == wanted
 
 
@@ -279,6 +261,11 @@ def test_too_many_levels_of_indentation():
     assert _get_error_list(build_nested('pass', 50, base=base))
 
 
+def test_paren_kwarg():
+    assert _get_error_list("print((sep)=seperator)", version="3.8")
+    assert not _get_error_list("print((sep)=seperator)", version="3.7")
+
+
 @pytest.mark.parametrize(
     'code', [
         "f'{*args,}'",
@@ -287,10 +274,50 @@ def test_too_many_levels_of_indentation():
         r'fr"\""',
         r'fr"\\\""',
         r"print(f'Some {x:.2f} and some {y}')",
+        # Unparenthesized yield expression
+        'def foo(): return f"{yield 1}"',
     ]
 )
 def test_valid_fstrings(code):
     assert not _get_error_list(code, version='3.6')
+
+
+@pytest.mark.parametrize(
+    'code', [
+        'a = (b := 1)',
+        '[x4 := x ** 5 for x in range(7)]',
+        '[total := total + v for v in range(10)]',
+        'while chunk := file.read(2):\n pass',
+        'numbers = [y := math.factorial(x), y**2, y**3]',
+        '{(a:="a"): (b:=1)}',
+        '{(y:=1): 2 for x in range(5)}',
+        'a[(b:=0)]',
+        'a[(b:=0, c:=0)]',
+        'a[(b:=0):1:2]',
+    ]
+)
+def test_valid_namedexpr(code):
+    assert not _get_error_list(code, version='3.8')
+
+
+@pytest.mark.parametrize(
+    'code', [
+        '{x := 1, 2, 3}',
+        '{x4 := x ** 5 for x in range(7)}',
+    ]
+)
+def test_valid_namedexpr_set(code):
+    assert not _get_error_list(code, version='3.9')
+
+
+@pytest.mark.parametrize(
+    'code', [
+        'a[b:=0]',
+        'a[b:=0, c:=0]',
+    ]
+)
+def test_valid_namedexpr_index(code):
+    assert not _get_error_list(code, version='3.10')
 
 
 @pytest.mark.parametrize(
@@ -307,3 +334,101 @@ def test_invalid_fstrings(code, message):
     """
     error, = _get_error_list(code, version='3.6')
     assert message in error.message
+
+
+@pytest.mark.parametrize(
+    'code', [
+        "from foo import (\nbar,\n rab,\n)",
+        "from foo import (bar, rab, )",
+    ]
+)
+def test_trailing_comma(code):
+    errors = _get_error_list(code)
+    assert not errors
+
+
+def test_continue_in_finally():
+    code = dedent('''\
+        for a in [1]:
+            try:
+                pass
+            finally:
+                continue
+        ''')
+    assert not _get_error_list(code, version="3.8")
+    assert _get_error_list(code, version="3.7")
+
+
+@pytest.mark.parametrize(
+    'template', [
+        "a, b, {target}, c = d",
+        "a, b, *{target}, c = d",
+        "(a, *{target}), c = d",
+        "for x, {target} in y: pass",
+        "for x, q, {target} in y: pass",
+        "for x, q, *{target} in y: pass",
+        "for (x, *{target}), q in y: pass",
+    ]
+)
+@pytest.mark.parametrize(
+    'target', [
+        "True",
+        "False",
+        "None",
+        "__debug__"
+    ]
+)
+def test_forbidden_name(template, target):
+    assert _get_error_list(template.format(target=target), version="3")
+
+
+def test_repeated_kwarg():
+    # python 3.9+ shows which argument is repeated
+    assert (
+        _get_error_list("f(q=1, q=2)", version="3.8")[0].message
+        == "SyntaxError: keyword argument repeated"
+    )
+    assert (
+        _get_error_list("f(q=1, q=2)", version="3.9")[0].message
+        == "SyntaxError: keyword argument repeated: q"
+    )
+
+
+@pytest.mark.parametrize(
+    ('source', 'no_errors'), [
+        ('a(a for a in b,)', False),
+        ('a(a for a in b, a)', False),
+        ('a(a, a for a in b)', False),
+        ('a(a, b, a for a in b, c, d)', False),
+        ('a(a for a in b)', True),
+        ('a((a for a in b), c)', True),
+        ('a(c, (a for a in b))', True),
+        ('a(a, b, (a for a in b), c, d)', True),
+    ]
+)
+def test_unparenthesized_genexp(source, no_errors):
+    assert bool(_get_error_list(source)) ^ no_errors
+
+
+@pytest.mark.parametrize(
+    ('source', 'no_errors'), [
+        ('*x = 2', False),
+        ('(*y) = 1', False),
+        ('((*z)) = 1', False),
+        ('a, *b = 1', True),
+        ('a, *b, c = 1', True),
+        ('a, (*b), c = 1', True),
+        ('a, ((*b)), c = 1', True),
+        ('a, (*b, c), d = 1', True),
+        ('[*(1,2,3)]', True),
+        ('{*(1,2,3)}', True),
+        ('[*(1,2,3),]', True),
+        ('[*(1,2,3), *(4,5,6)]', True),
+        ('[0, *(1,2,3)]', True),
+        ('{*(1,2,3),}', True),
+        ('{*(1,2,3), *(4,5,6)}', True),
+        ('{0, *(4,5,6)}', True)
+    ]
+)
+def test_starred_expr(source, no_errors):
+    assert bool(_get_error_list(source, version="3")) ^ no_errors

@@ -11,6 +11,10 @@ parso - A Python Parser
     :target: https://coveralls.io/github/davidhalter/parso?branch=master
     :alt: Coverage Status
 
+.. image:: https://pepy.tech/badge/parso
+    :target: https://pepy.tech/project/parso
+    :alt: PyPI Downloads
+
 .. image:: https://raw.githubusercontent.com/davidhalter/parso/master/docs/_static/logo_characters.png
 
 Parso is a Python parser that supports error recovery and round-trip parsing
@@ -27,7 +31,7 @@ A simple example:
 .. code-block:: python
 
     >>> import parso
-    >>> module = parso.parse('hello + 1', version="3.6")
+    >>> module = parso.parse('hello + 1', version="3.9")
     >>> expr = module.children[0]
     >>> expr
     PythonNode(arith_expr, [<Name: hello@1,0>, <Operator: +>, <Number: 1>])

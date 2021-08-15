@@ -3,6 +3,67 @@
 Changelog
 ---------
 
+Unreleased
+++++++++++
+
+0.8.1 (2020-12-10)
+++++++++++++++++++
+
+- Various small bugfixes
+
+0.8.0 (2020-08-05)
+++++++++++++++++++
+
+- Dropped Support for Python 2.7, 3.4, 3.5
+- It's possible to use ``pathlib.Path`` objects now in the API
+- The stubs are gone, we are now using annotations
+- ``namedexpr_test`` nodes are now a proper class called ``NamedExpr``
+- A lot of smaller refactorings
+
+0.7.1 (2020-07-24)
+++++++++++++++++++
+
+- Fixed a couple of smaller bugs (mostly syntax error detection in
+  ``Grammar.iter_errors``)
+
+This is going to be the last release that supports Python 2.7, 3.4 and 3.5.
+
+0.7.0 (2020-04-13)
+++++++++++++++++++
+
+- Fix a lot of annoying bugs in the diff parser. The fuzzer did not find
+  issues anymore even after running it for more than 24 hours (500k tests).
+- Small grammar change: suites can now contain newlines even after a newline.
+  This should really not matter if you don't use error recovery. It allows for
+  nicer error recovery.
+
+0.6.2 (2020-02-27)
+++++++++++++++++++
+
+- Bugfixes
+- Add Grammar.refactor (might still be subject to change until 0.7.0)
+
+0.6.1 (2020-02-03)
+++++++++++++++++++
+
+- Add ``parso.normalizer.Issue.end_pos`` to make it possible to know where an
+  issue ends
+
+0.6.0 (2020-01-26)
+++++++++++++++++++
+
+- Dropped Python 2.6/Python 3.3 support
+- del_stmt names are now considered as a definition
+  (for ``name.is_definition()``)
+- Bugfixes
+
+0.5.2 (2019-12-15)
+++++++++++++++++++
+
+- Add include_setitem to get_definition/is_definition and get_defined_names (#66)
+- Fix named expression error listing (#89, #90)
+- Fix some f-string tokenizer issues (#93)
+
 0.5.1 (2019-07-13)
 ++++++++++++++++++
 

@@ -208,6 +208,18 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
 
+An example for setting up your project:
+
+.. code-block:: vim
+
+    let g:jedi#environment_path = "/usr/bin/python3.9"
+
+jedi-vim tries its best to guess your virtual env. If you want to work with a
+specific virtual environment however, you can point jedi-vim towards it:
+
+.. code-block:: vim
+
+    let g:jedi#environment_path = "venv"
 
 Finally, if you don't want completion, but all the other features, use:
 
@@ -217,6 +229,12 @@ Finally, if you don't want completion, but all the other features, use:
 
 FAQ
 ===
+
+I want to use Jedi with a Python 2 Environment, but it's not listed under "Known environments"
+----------------------------------------------------------------------------------------------
+
+Starting with version 0.18.0 Jedi dropped support for Python 2.
+
 
 I don't want the docstring window to popup during completion
 ------------------------------------------------------------

@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 from parso import parse, load_grammar
 
 
@@ -72,7 +74,7 @@ def test_invalid_token():
 
 
 def test_invalid_token_in_fstr():
-    module = load_grammar(version='3.6').parse('f"{a + ? + b}"')
+    module = load_grammar(version='3.9').parse('f"{a + ? + b}"')
     error_node, q, plus_b, error1, error2, endmarker = module.children
     assert error_node.get_code() == 'f"{a +'
     assert q.value == '?'
@@ -83,3 +85,65 @@ def test_invalid_token_in_fstr():
     assert error1.type == 'error_leaf'
     assert error2.value == '"'
     assert error2.type == 'error_leaf'
+
+
+def test_dedent_issues1():
+    code = dedent('''\
+        class C:
+            @property
+                f
+                    g
+            end
+        ''')
+    module = load_grammar(version='3.8').parse(code)
+    klass, endmarker = module.children
+    suite = klass.children[-1]
+    assert suite.children[2].type == 'error_leaf'
+    assert suite.children[3].get_code(include_prefix=False) == 'f\n'
+    assert suite.children[5].get_code(include_prefix=False) == 'g\n'
+    assert suite.type == 'suite'
+
+
+def test_dedent_issues2():
+    code = dedent('''\
+        class C:
+            @property
+                if 1:
+                    g
+                else:
+                    h
+            end
+        ''')
+    module = load_grammar(version='3.8').parse(code)
+    klass, endmarker = module.children
+    suite = klass.children[-1]
+    assert suite.children[2].type == 'error_leaf'
+    if_ = suite.children[3]
+    assert if_.children[0] == 'if'
+    assert if_.children[3].type == 'suite'
+    assert if_.children[3].get_code() == '\n            g\n'
+    assert if_.children[4] == 'else'
+    assert if_.children[6].type == 'suite'
+    assert if_.children[6].get_code() == '\n            h\n'
+
+    assert suite.children[4].get_code(include_prefix=False) == 'end\n'
+    assert suite.type == 'suite'
+
+
+def test_dedent_issues3():
+    code = dedent('''\
+        class C:
+          f
+         g
+        ''')
+    module = load_grammar(version='3.8').parse(code)
+    klass, endmarker = module.children
+    suite = klass.children[-1]
+    assert len(suite.children) == 4
+    assert suite.children[1].get_code() == '  f\n'
+    assert suite.children[1].type == 'simple_stmt'
+    assert suite.children[2].get_code() == ''
+    assert suite.children[2].type == 'error_leaf'
+    assert suite.children[2].token_type == 'ERROR_DEDENT'
+    assert suite.children[3].get_code() == ' g\n'
+    assert suite.children[3].type == 'simple_stmt'

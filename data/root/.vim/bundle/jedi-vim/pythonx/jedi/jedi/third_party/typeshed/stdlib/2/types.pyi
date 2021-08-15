@@ -1,14 +1,11 @@
-# Stubs for types
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Tuple, Type, TypeVar, Union, overload
+
+_T = TypeVar("_T")
+
 # Note, all classes "defined" here require special handling.
 
-from typing import (
-    Any, Callable, Dict, Iterable, Iterator, List, Optional,
-    Tuple, Type, TypeVar, Union, overload,
-)
-
-_T = TypeVar('_T')
-
 class NoneType: ...
+
 TypeType = type
 ObjectType = object
 
@@ -43,7 +40,14 @@ class FunctionType:
     __dict__ = func_dict
     __globals__ = func_globals
     __name__ = func_name
-    def __init__(self, code: CodeType, globals: Dict[str, Any], name: Optional[str] = ..., argdefs: Optional[Tuple[object, ...]] = ..., closure: Optional[Tuple[_Cell, ...]] = ...) -> None: ...
+    def __init__(
+        self,
+        code: CodeType,
+        globals: Dict[str, Any],
+        name: Optional[str] = ...,
+        argdefs: Optional[Tuple[object, ...]] = ...,
+        closure: Optional[Tuple[_Cell, ...]] = ...,
+    ) -> None: ...
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
     def __get__(self, obj: Optional[object], type: Optional[type]) -> UnboundMethodType: ...
 
@@ -64,6 +68,23 @@ class CodeType:
     co_nlocals: int
     co_stacksize: int
     co_varnames: Tuple[str, ...]
+    def __init__(
+        self,
+        argcount: int,
+        nlocals: int,
+        stacksize: int,
+        flags: int,
+        codestring: str,
+        constants: Tuple[Any, ...],
+        names: Tuple[str, ...],
+        varnames: Tuple[str, ...],
+        filename: str,
+        name: str,
+        firstlineno: int,
+        lnotab: str,
+        freevars: Tuple[str, ...] = ...,
+        cellvars: Tuple[str, ...] = ...,
+    ) -> None: ...
 
 class GeneratorType:
     gi_code: CodeType
@@ -72,13 +93,16 @@ class GeneratorType:
     def __iter__(self) -> GeneratorType: ...
     def close(self) -> None: ...
     def next(self) -> Any: ...
-    def send(self, arg: Any) -> Any: ...
+    def send(self, __arg: Any) -> Any: ...
     @overload
-    def throw(self, val: BaseException) -> Any: ...
+    def throw(
+        self, __typ: Type[BaseException], __val: Union[BaseException, object] = ..., __tb: Optional[TracebackType] = ...
+    ) -> Any: ...
     @overload
-    def throw(self, typ: type, val: BaseException = ..., tb: TracebackType = ...) -> Any: ...
+    def throw(self, __typ: BaseException, __val: None = ..., __tb: Optional[TracebackType] = ...) -> Any: ...
 
 class ClassType: ...
+
 class UnboundMethodType:
     im_class: type = ...
     im_func: FunctionType = ...
@@ -86,7 +110,7 @@ class UnboundMethodType:
     __name__: str
     __func__ = im_func
     __self__ = im_self
-    def __init__(self, func: Callable, obj: object) -> None: ...
+    def __init__(self, func: Callable[..., Any], obj: object) -> None: ...
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
 
 class InstanceType(object): ...
@@ -96,6 +120,7 @@ MethodType = UnboundMethodType
 class BuiltinFunctionType:
     __self__: Optional[object]
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
+
 BuiltinMethodType = BuiltinFunctionType
 
 class ModuleType:
@@ -106,6 +131,7 @@ class ModuleType:
     __path__: Optional[Iterable[str]]
     __dict__: Dict[str, Any]
     def __init__(self, name: str, doc: Optional[str] = ...) -> None: ...
+
 FileType = file
 XRangeType = xrange
 
@@ -128,16 +154,16 @@ class FrameType:
     f_locals: Dict[str, Any]
     f_restricted: bool
     f_trace: Callable[[], None]
-
     def clear(self) -> None: ...
 
 SliceType = slice
+
 class EllipsisType: ...
 
 class DictProxyType:
     # TODO is it possible to have non-string keys?
     # no __init__
-    def copy(self) -> dict: ...
+    def copy(self) -> Dict[Any, Any]: ...
     def get(self, key: str, default: _T = ...) -> Union[Any, _T]: ...
     def has_key(self, key: str) -> bool: ...
     def items(self) -> List[Tuple[str, Any]]: ...
@@ -159,6 +185,7 @@ class GetSetDescriptorType:
     def __get__(self, obj: Any, type: type = ...) -> Any: ...
     def __set__(self, obj: Any) -> None: ...
     def __delete__(self, obj: Any) -> None: ...
+
 # Same type on Jython, different on CPython and PyPy, unknown on IronPython.
 class MemberDescriptorType:
     __name__: str

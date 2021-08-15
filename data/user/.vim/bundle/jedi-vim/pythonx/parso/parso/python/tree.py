@@ -1,5 +1,5 @@
 """
-This is the syntax tree for Python syntaxes (2 & 3).  The classes represent
+This is the syntax tree for Python 3 syntaxes. The classes represent
 syntax elements like functions and imports.
 
 All of the nodes can be traced back to the `Python grammar file
@@ -48,7 +48,6 @@ try:
 except ImportError:
     from collections import Mapping
 
-from parso._compatibility import utf8_repr, unicode
 from parso.tree import Node, BaseNode, Leaf, ErrorNode, ErrorLeaf, \
     search_ancestor
 from parso.python.prefix import split_prefix
@@ -57,15 +56,19 @@ from parso.utils import split_lines
 _FLOW_CONTAINERS = set(['if_stmt', 'while_stmt', 'for_stmt', 'try_stmt',
                         'with_stmt', 'async_stmt', 'suite'])
 _RETURN_STMT_CONTAINERS = set(['suite', 'simple_stmt']) | _FLOW_CONTAINERS
-_FUNC_CONTAINERS = set(['suite', 'simple_stmt', 'decorated']) | _FLOW_CONTAINERS
+
+_FUNC_CONTAINERS = set(
+    ['suite', 'simple_stmt', 'decorated', 'async_funcdef']
+) | _FLOW_CONTAINERS
+
 _GET_DEFINITION_TYPES = set([
     'expr_stmt', 'sync_comp_for', 'with_stmt', 'for_stmt', 'import_name',
-    'import_from', 'param'
+    'import_from', 'param', 'del_stmt', 'namedexpr_test',
 ])
 _IMPORTS = set(['import_name', 'import_from'])
 
 
-class DocstringMixin(object):
+class DocstringMixin:
     __slots__ = ()
 
     def get_doc_node(self):
@@ -93,9 +96,9 @@ class DocstringMixin(object):
         return None
 
 
-class PythonMixin(object):
+class PythonMixin:
     """
-    Some Python specific utitilies.
+    Some Python specific utilities.
     """
     __slots__ = ()
 
@@ -171,7 +174,6 @@ class EndMarker(_LeafWithoutNewlines):
     __slots__ = ()
     type = 'endmarker'
 
-    @utf8_repr
     def __repr__(self):
         return "<%s: prefix=%s end_pos=%s>" % (
             type(self).__name__, repr(self.prefix), self.end_pos
@@ -183,7 +185,6 @@ class Newline(PythonLeaf):
     __slots__ = ()
     type = 'newline'
 
-    @utf8_repr
     def __repr__(self):
         return "<%s: %s>" % (type(self).__name__, repr(self.value))
 
@@ -200,25 +201,22 @@ class Name(_LeafWithoutNewlines):
         return "<%s: %s@%s,%s>" % (type(self).__name__, self.value,
                                    self.line, self.column)
 
-    def is_definition(self):
+    def is_definition(self, include_setitem=False):
         """
         Returns True if the name is being defined.
         """
-        return self.get_definition() is not None
+        return self.get_definition(include_setitem=include_setitem) is not None
 
-    def get_definition(self, import_name_always=False):
+    def get_definition(self, import_name_always=False, include_setitem=False):
         """
-        Returns None if there's on definition for a name.
+        Returns None if there's no definition for a name.
 
-        :param import_name_alway: Specifies if an import name is always a
+        :param import_name_always: Specifies if an import name is always a
             definition. Normally foo in `from foo import bar` is not a
             definition.
         """
         node = self.parent
         type_ = node.type
-        if type_ in ('power', 'atom_expr'):
-            # In `self.x = 3` self is not a definition, but x is.
-            return None
 
         if type_ in ('funcdef', 'classdef'):
             if self == node.name:
@@ -226,9 +224,6 @@ class Name(_LeafWithoutNewlines):
             return None
 
         if type_ == 'except_clause':
-            # TODO in Python 2 this doesn't work correctly. See grammar file.
-            #      I think we'll just let it be. Python 2 will be gone in a few
-            #      years.
             if self.get_previous_sibling() == 'as':
                 return node.parent  # The try_stmt.
             return None
@@ -237,7 +232,7 @@ class Name(_LeafWithoutNewlines):
             if node.type == 'suite':
                 return None
             if node.type in _GET_DEFINITION_TYPES:
-                if self in node.get_defined_names():
+                if self in node.get_defined_names(include_setitem):
                     return node
                 if import_name_always and node.type in _IMPORTS:
                     return node
@@ -299,20 +294,16 @@ class FStringEnd(PythonLeaf):
     __slots__ = ()
 
 
-class _StringComparisonMixin(object):
+class _StringComparisonMixin:
     def __eq__(self, other):
         """
         Make comparisons with strings easy.
         Improves the readability of the parser.
         """
-        if isinstance(other, (str, unicode)):
+        if isinstance(other, str):
             return self.value == other
 
         return self is other
-
-    def __ne__(self, other):
-        """Python 2 compatibility."""
-        return not self.__eq__(other)
 
     def __hash__(self):
         return hash(self.value)
@@ -337,7 +328,7 @@ class Scope(PythonBaseNode, DocstringMixin):
     __slots__ = ()
 
     def __init__(self, children):
-        super(Scope, self).__init__(children)
+        super().__init__(children)
 
     def iter_funcdefs(self):
         """
@@ -363,8 +354,7 @@ class Scope(PythonBaseNode, DocstringMixin):
                 if element.type in names:
                     yield element
                 if element.type in _FUNC_CONTAINERS:
-                    for e in scan(element.children):
-                        yield e
+                    yield from scan(element.children)
 
         return scan(self.children)
 
@@ -394,7 +384,7 @@ class Module(Scope):
     type = 'file_input'
 
     def __init__(self, children):
-        super(Module, self).__init__(children)
+        super().__init__(children)
         self._used_names = None
 
     def _iter_future_import_names(self):
@@ -412,18 +402,6 @@ class Module(Scope):
                     names = [name.value for name in path]
                     if len(names) == 2 and names[0] == '__future__':
                         yield names[1]
-
-    def _has_explicit_absolute_import(self):
-        """
-        Checks if imports in this module are explicitly absolute, i.e. there
-        is a ``__future__`` import.
-        Currently not public, might be in the future.
-        :return bool:
-        """
-        for name in self._iter_future_import_names():
-            if name == 'absolute_import':
-                return True
-        return False
 
     def get_used_names(self):
         """
@@ -490,7 +468,7 @@ class Class(ClassOrFunc):
     __slots__ = ()
 
     def __init__(self, children):
-        super(Class, self).__init__(children)
+        super().__init__(children)
 
     def get_super_arglist(self):
         """
@@ -517,24 +495,13 @@ def _create_params(parent, argslist_list):
     You could also say that this function replaces the argslist node with a
     list of Param objects.
     """
-    def check_python2_nested_param(node):
-        """
-        Python 2 allows params to look like ``def x(a, (b, c))``, which is
-        basically a way of unpacking tuples in params. Python 3 has ditched
-        this behavior. Jedi currently just ignores those constructs.
-        """
-        return node.type == 'fpdef' and node.children[0] == '('
-
     try:
         first = argslist_list[0]
     except IndexError:
         return []
 
     if first.type in ('name', 'fpdef'):
-        if check_python2_nested_param(first):
-            return [first]
-        else:
-            return [Param([first], parent)]
+        return [Param([first], parent)]
     elif first == '*':
         return [first]
     else:  # argslist is a `typedargslist` or a `varargslist`.
@@ -552,7 +519,6 @@ def _create_params(parent, argslist_list):
                     if param_children[0] == '*' \
                             and (len(param_children) == 1
                                  or param_children[1] == ',') \
-                            or check_python2_nested_param(param_children[0]) \
                             or param_children[0] == '/':
                         for p in param_children:
                             p.parent = parent
@@ -580,7 +546,7 @@ class Function(ClassOrFunc):
     type = 'funcdef'
 
     def __init__(self, children):
-        super(Function, self).__init__(children)
+        super().__init__(children)
         parameters = self.children[2]  # After `def foo`
         parameters.children[1:-1] = _create_params(parameters, parameters.children[1:-1])
 
@@ -615,8 +581,7 @@ class Function(ClassOrFunc):
                         else:
                             yield element
                 else:
-                    for result in scan(nested_children):
-                        yield result
+                    yield from scan(nested_children)
 
         return scan(self.children)
 
@@ -630,8 +595,7 @@ class Function(ClassOrFunc):
                         or element.type == 'keyword' and element.value == 'return':
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
-                    for e in scan(element.children):
-                        yield e
+                    yield from scan(element.children)
 
         return scan(self.children)
 
@@ -645,8 +609,7 @@ class Function(ClassOrFunc):
                         or element.type == 'keyword' and element.value == 'raise':
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
-                    for e in scan(element.children):
-                        yield e
+                    yield from scan(element.children)
 
         return scan(self.children)
 
@@ -775,8 +738,8 @@ class ForStmt(Flow):
         """
         return self.children[3]
 
-    def get_defined_names(self):
-        return _defined_names(self.children[1])
+    def get_defined_names(self, include_setitem=False):
+        return _defined_names(self.children[1], include_setitem)
 
 
 class TryStmt(Flow):
@@ -799,7 +762,7 @@ class WithStmt(Flow):
     type = 'with_stmt'
     __slots__ = ()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         """
         Returns the a list of `Name` that the with statement defines. The
         defined names are set after `as`.
@@ -808,12 +771,12 @@ class WithStmt(Flow):
         for with_item in self.children[1:-2:2]:
             # Check with items for 'as' names.
             if with_item.type == 'with_item':
-                names += _defined_names(with_item.children[2])
+                names += _defined_names(with_item.children[2], include_setitem)
         return names
 
     def get_test_node_from_name(self, name):
-        node = name.parent
-        if node.type != 'with_item':
+        node = search_ancestor(name, "with_item")
+        if node is None:
             raise ValueError('The name is not actually part of a with statement.')
         return node.children[0]
 
@@ -849,7 +812,7 @@ class ImportFrom(Import):
     type = 'import_from'
     __slots__ = ()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         """
         Returns the a list of `Name` that the import defines. The
         defined names are set after `import` or in case an alias - `as` - is
@@ -920,7 +883,7 @@ class ImportName(Import):
     type = 'import_name'
     __slots__ = ()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         """
         Returns the a list of `Name` that the import defines. The defined names
         is always the first name after `import` or in case an alias - `as` - is
@@ -996,6 +959,14 @@ class KeywordStatement(PythonBaseNode):
     def keyword(self):
         return self.children[0].value
 
+    def get_defined_names(self, include_setitem=False):
+        keyword = self.keyword
+        if keyword == 'del':
+            return _defined_names(self.children[1], include_setitem)
+        if keyword in ('global', 'nonlocal'):
+            return self.children[1::2]
+        return []
+
 
 class AssertStmt(KeywordStatement):
     __slots__ = ()
@@ -1021,7 +992,7 @@ class YieldExpr(PythonBaseNode):
     __slots__ = ()
 
 
-def _defined_names(current):
+def _defined_names(current, include_setitem):
     """
     A helper function to find the defined names in statements, for loops and
     list comprehensions.
@@ -1029,14 +1000,22 @@ def _defined_names(current):
     names = []
     if current.type in ('testlist_star_expr', 'testlist_comp', 'exprlist', 'testlist'):
         for child in current.children[::2]:
-            names += _defined_names(child)
+            names += _defined_names(child, include_setitem)
     elif current.type in ('atom', 'star_expr'):
-        names += _defined_names(current.children[1])
+        names += _defined_names(current.children[1], include_setitem)
     elif current.type in ('power', 'atom_expr'):
         if current.children[-2] != '**':  # Just if there's no operation
             trailer = current.children[-1]
             if trailer.children[0] == '.':
                 names.append(trailer.children[1])
+            elif trailer.children[0] == '[' and include_setitem:
+                for node in current.children[-2::-1]:
+                    if node.type == 'trailer':
+                        names.append(node.children[1])
+                        break
+                    if node.type == 'name':
+                        names.append(node)
+                        break
     else:
         names.append(current)
     return names
@@ -1046,23 +1025,29 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
     type = 'expr_stmt'
     __slots__ = ()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         """
         Returns a list of `Name` defined before the `=` sign.
         """
         names = []
         if self.children[1].type == 'annassign':
-            names = _defined_names(self.children[0])
+            names = _defined_names(self.children[0], include_setitem)
         return [
             name
             for i in range(0, len(self.children) - 2, 2)
             if '=' in self.children[i + 1].value
-            for name in _defined_names(self.children[i])
+            for name in _defined_names(self.children[i], include_setitem)
         ] + names
 
     def get_rhs(self):
         """Returns the right-hand-side of the equals."""
-        return self.children[-1]
+        node = self.children[-1]
+        if node.type == 'annassign':
+            if len(node.children) == 4:
+                node = node.children[3]
+            else:
+                node = node.children[1]
+        return node
 
     def yield_operators(self):
         """
@@ -1076,8 +1061,14 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
             first = first.children[2]
         yield first
 
-        for operator in self.children[3::2]:
-            yield operator
+        yield from self.children[3::2]
+
+
+class NamedExpr(PythonBaseNode):
+    type = 'namedexpr_test'
+
+    def get_defined_names(self, include_setitem=False):
+        return _defined_names(self.children[0], include_setitem)
 
 
 class Param(PythonBaseNode):
@@ -1089,7 +1080,7 @@ class Param(PythonBaseNode):
     type = 'param'
 
     def __init__(self, children, parent):
-        super(Param, self).__init__(children)
+        super().__init__(children)
         self.parent = parent
         for child in children:
             child.parent = self
@@ -1150,7 +1141,7 @@ class Param(PythonBaseNode):
         else:
             return self._tfpdef()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         return [self.name]
 
     @property
@@ -1189,7 +1180,7 @@ class Param(PythonBaseNode):
         :param include_comma bool: If enabled includes the comma in the string output.
         """
         if include_comma:
-            return super(Param, self).get_code(include_prefix)
+            return super().get_code(include_prefix)
 
         children = self.children
         if children[-1] == ',':
@@ -1208,12 +1199,12 @@ class SyncCompFor(PythonBaseNode):
     type = 'sync_comp_for'
     __slots__ = ()
 
-    def get_defined_names(self):
+    def get_defined_names(self, include_setitem=False):
         """
         Returns the a list of `Name` that the comprehension defines.
         """
         # allow async for
-        return _defined_names(self.children[1])
+        return _defined_names(self.children[1], include_setitem)
 
 
 # This is simply here so an older Jedi version can work with this new parso

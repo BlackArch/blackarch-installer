@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from textwrap import dedent
 import logging
-import sys
 
 import pytest
 
 from parso.utils import split_lines
 from parso import cache
 from parso import load_grammar
-from parso.python.diff import DiffParser, _assert_valid_graph
+from parso.python.diff import DiffParser, _assert_valid_graph, _assert_nodes_are_equal
 from parso import parse
 
 ANY = object()
@@ -39,7 +38,7 @@ def _check_error_leaves_nodes(node):
     return None
 
 
-class Differ(object):
+class Differ:
     grammar = load_grammar()
 
     def initialize(self, code):
@@ -69,6 +68,9 @@ class Differ(object):
 
         _assert_valid_graph(new_module)
 
+        without_diff_parser_module = parse(code)
+        _assert_nodes_are_equal(new_module, without_diff_parser_module)
+
         error_node = _check_error_leaves_nodes(new_module)
         assert expect_error_leaves == (error_node is not None), error_node
         if parsers is not ANY:
@@ -88,15 +90,15 @@ def test_change_and_undo(differ):
     # Parse the function and a.
     differ.initialize(func_before + 'a')
     # Parse just b.
-    differ.parse(func_before + 'b', copies=1, parsers=1)
+    differ.parse(func_before + 'b', copies=1, parsers=2)
     # b has changed to a again, so parse that.
-    differ.parse(func_before + 'a', copies=1, parsers=1)
+    differ.parse(func_before + 'a', copies=1, parsers=2)
     # Same as before parsers should not be used. Just a simple copy.
     differ.parse(func_before + 'a', copies=1)
 
     # Now that we have a newline at the end, everything is easier in Python
     # syntax, we can parse once and then get a copy.
-    differ.parse(func_before + 'a\n', copies=1, parsers=1)
+    differ.parse(func_before + 'a\n', copies=1, parsers=2)
     differ.parse(func_before + 'a\n', copies=1)
 
     # Getting rid of an old parser: Still no parsers used.
@@ -135,7 +137,7 @@ def test_if_simple(differ):
     differ.initialize(src + 'a')
     differ.parse(src + else_ + "a", copies=0, parsers=1)
 
-    differ.parse(else_, parsers=1, copies=1, expect_error_leaves=True)
+    differ.parse(else_, parsers=2, expect_error_leaves=True)
     differ.parse(src + else_, parsers=1)
 
 
@@ -152,7 +154,7 @@ def test_func_with_for_and_comment(differ):
         # COMMENT
         a""")
     differ.initialize(src)
-    differ.parse('a\n' + src, copies=1, parsers=2)
+    differ.parse('a\n' + src, copies=1, parsers=3)
 
 
 def test_one_statement_func(differ):
@@ -236,7 +238,7 @@ def test_backslash(differ):
         def y():
             pass
     """)
-    differ.parse(src, parsers=2)
+    differ.parse(src, parsers=1)
 
     src = dedent(r"""
     def first():
@@ -247,7 +249,7 @@ def test_backslash(differ):
     def second():
         pass
     """)
-    differ.parse(src, parsers=1)
+    differ.parse(src, parsers=2)
 
 
 def test_full_copy(differ):
@@ -261,10 +263,10 @@ def test_wrong_whitespace(differ):
     hello
     '''
     differ.initialize(code)
-    differ.parse(code + 'bar\n    ', parsers=3)
+    differ.parse(code + 'bar\n    ', parsers=2, expect_error_leaves=True)
 
     code += """abc(\npass\n    """
-    differ.parse(code, parsers=2, copies=1, expect_error_leaves=True)
+    differ.parse(code, parsers=2, expect_error_leaves=True)
 
 
 def test_issues_with_error_leaves(differ):
@@ -279,7 +281,7 @@ def test_issues_with_error_leaves(differ):
         str
     ''')
     differ.initialize(code)
-    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+    differ.parse(code2, parsers=1, expect_error_leaves=True)
 
 
 def test_unfinished_nodes(differ):
@@ -299,7 +301,7 @@ def test_unfinished_nodes(differ):
     a(1)
     ''')
     differ.initialize(code)
-    differ.parse(code2, parsers=1, copies=2)
+    differ.parse(code2, parsers=2, copies=2)
 
 
 def test_nested_if_and_scopes(differ):
@@ -365,7 +367,7 @@ def test_totally_wrong_whitespace(differ):
     '''
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=4, copies=0, expect_error_leaves=True)
+    differ.parse(code2, parsers=2, copies=0, expect_error_leaves=True)
 
 
 def test_node_insertion(differ):
@@ -439,7 +441,7 @@ def test_in_class_movements(differ):
     """)
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=2, copies=1)
+    differ.parse(code2, parsers=1)
 
 
 def test_in_parentheses_newlines(differ):
@@ -484,7 +486,7 @@ def test_indentation_issue(differ):
     """)
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=1)
+    differ.parse(code2, parsers=2)
 
 
 def test_endmarker_newline(differ):
@@ -585,7 +587,7 @@ def test_if_removal_and_reappearence(differ):
             la
     ''')
     differ.initialize(code1)
-    differ.parse(code2, parsers=1, copies=4, expect_error_leaves=True)
+    differ.parse(code2, parsers=3, copies=2, expect_error_leaves=True)
     differ.parse(code1, parsers=1, copies=1)
     differ.parse(code3, parsers=1, copies=1)
 
@@ -618,8 +620,8 @@ def test_differing_docstrings(differ):
         ''')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=3, copies=1)
-    differ.parse(code1, parsers=3, copies=1)
+    differ.parse(code2, parsers=2, copies=1)
+    differ.parse(code1, parsers=2, copies=1)
 
 
 def test_one_call_in_function_change(differ):
@@ -649,7 +651,7 @@ def test_one_call_in_function_change(differ):
         ''')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
     differ.parse(code1, parsers=2, copies=1)
 
 
@@ -711,7 +713,7 @@ def test_docstring_removal(differ):
 
     differ.initialize(code1)
     differ.parse(code2, parsers=1, copies=2)
-    differ.parse(code1, parsers=2, copies=1)
+    differ.parse(code1, parsers=3, copies=1)
 
 
 def test_paren_in_strange_position(differ):
@@ -783,7 +785,7 @@ def test_parentheses_before_method(differ):
 
     differ.initialize(code1)
     differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
-    differ.parse(code1, parsers=1, copies=1)
+    differ.parse(code1, parsers=2, copies=1)
 
 
 def test_indentation_issues(differ):
@@ -824,10 +826,10 @@ def test_indentation_issues(differ):
         ''')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=2, copies=2, expect_error_leaves=True)
-    differ.parse(code1, copies=2)
+    differ.parse(code2, parsers=3, copies=1, expect_error_leaves=True)
+    differ.parse(code1, copies=1, parsers=2)
     differ.parse(code3, parsers=2, copies=1)
-    differ.parse(code1, parsers=1, copies=2)
+    differ.parse(code1, parsers=2, copies=1)
 
 
 def test_error_dedent_issues(differ):
@@ -860,7 +862,7 @@ def test_error_dedent_issues(differ):
         ''')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=6, copies=2, expect_error_leaves=True)
+    differ.parse(code2, parsers=3, copies=0, expect_error_leaves=True)
     differ.parse(code1, parsers=1, copies=0)
 
 
@@ -892,8 +894,8 @@ Some'random text: yeah
         ''')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
-    differ.parse(code1, parsers=1, copies=1)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
+    differ.parse(code1, parsers=2, copies=1)
 
 
 def test_many_nested_ifs(differ):
@@ -931,7 +933,6 @@ def test_many_nested_ifs(differ):
     differ.parse(code1, parsers=1, copies=1)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 5), reason="Async starts working in 3.5")
 @pytest.mark.parametrize('prefix', ['', 'async '])
 def test_with_and_funcdef_in_call(differ, prefix):
     code1 = prefix + dedent('''\
@@ -946,7 +947,7 @@ def test_with_and_funcdef_in_call(differ, prefix):
     code2 = insert_line_into_code(code1, 3, 'def y(self, args):\n')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=3, expect_error_leaves=True)
+    differ.parse(code2, parsers=1, expect_error_leaves=True)
     differ.parse(code1, parsers=1)
 
 
@@ -961,12 +962,8 @@ def test_wrong_backslash(differ):
     code2 = insert_line_into_code(code1, 3, '\\.whl$\n')
 
     differ.initialize(code1)
-    differ.parse(code2, parsers=2, copies=2, expect_error_leaves=True)
+    differ.parse(code2, parsers=3, copies=1, expect_error_leaves=True)
     differ.parse(code1, parsers=1, copies=1)
-
-
-def test_comment_change(differ):
-    differ.initialize('')
 
 
 def test_random_unicode_characters(differ):
@@ -974,22 +971,20 @@ def test_random_unicode_characters(differ):
     Those issues were all found with the fuzzer.
     """
     differ.initialize('')
-    differ.parse(u'\x1dĔBϞɛˁşʑ˳˻ȣſéÎ\x90̕ȟòwʘ\x1dĔBϞɛˁşʑ˳˻ȣſéÎ', parsers=1,
+    differ.parse('\x1dĔBϞɛˁşʑ˳˻ȣſéÎ\x90̕ȟòwʘ\x1dĔBϞɛˁşʑ˳˻ȣſéÎ', parsers=1,
                  expect_error_leaves=True)
-    differ.parse(u'\r\r', parsers=1)
-    differ.parse(u"˟Ę\x05À\r   rúƣ@\x8a\x15r()\n", parsers=1, expect_error_leaves=True)
-    differ.parse(u'a\ntaǁ\rGĒōns__\n\nb', parsers=1,
-                 expect_error_leaves=sys.version_info[0] == 2)
+    differ.parse('\r\r', parsers=1)
+    differ.parse("˟Ę\x05À\r   rúƣ@\x8a\x15r()\n", parsers=1, expect_error_leaves=True)
+    differ.parse('a\ntaǁ\rGĒōns__\n\nb', parsers=1)
     s = '        if not (self, "_fi\x02\x0e\x08\n\nle"):'
     differ.parse(s, parsers=1, expect_error_leaves=True)
     differ.parse('')
     differ.parse(s + '\n', parsers=1, expect_error_leaves=True)
-    differ.parse(u'   result = (\r\f\x17\t\x11res)', parsers=2, expect_error_leaves=True)
+    differ.parse('   result = (\r\f\x17\t\x11res)', parsers=1, expect_error_leaves=True)
     differ.parse('')
-    differ.parse('   a( # xx\ndef', parsers=2, expect_error_leaves=True)
+    differ.parse('   a( # xx\ndef', parsers=1, expect_error_leaves=True)
 
 
-@pytest.mark.skipif(sys.version_info < (2, 7), reason="No set literals in Python 2.6")
 def test_dedent_end_positions(differ):
     code1 = dedent('''\
         if 1:
@@ -1041,7 +1036,7 @@ def test_random_character_insertion(differ):
             # 4
         ''')
     differ.initialize(code1)
-    differ.parse(code2, copies=1, parsers=3, expect_error_leaves=True)
+    differ.parse(code2, copies=1, parsers=1, expect_error_leaves=True)
     differ.parse(code1, copies=1, parsers=1)
 
 
@@ -1102,8 +1097,8 @@ def test_all_sorts_of_indentation(differ):
                 end
         ''')
     differ.initialize(code1)
-    differ.parse(code2, copies=1, parsers=4, expect_error_leaves=True)
-    differ.parse(code1, copies=1, parsers=3)
+    differ.parse(code2, copies=1, parsers=1, expect_error_leaves=True)
+    differ.parse(code1, copies=1, parsers=1, expect_error_leaves=True)
 
     code3 = dedent('''\
             if 1:
@@ -1113,7 +1108,7 @@ def test_all_sorts_of_indentation(differ):
                    d
         \x00
         ''')
-    differ.parse(code3, parsers=2, expect_error_leaves=True)
+    differ.parse(code3, parsers=1, expect_error_leaves=True)
     differ.parse('')
 
 
@@ -1130,7 +1125,7 @@ def test_dont_copy_dedents_in_beginning(differ):
         ''')
     differ.initialize(code1)
     differ.parse(code2, copies=1, parsers=1, expect_error_leaves=True)
-    differ.parse(code1, parsers=2)
+    differ.parse(code1, parsers=1, copies=1)
 
 
 def test_dont_copy_error_leaves(differ):
@@ -1150,7 +1145,7 @@ def test_dont_copy_error_leaves(differ):
         ''')
     differ.initialize(code1)
     differ.parse(code2, parsers=1, expect_error_leaves=True)
-    differ.parse(code1, parsers=2)
+    differ.parse(code1, parsers=1)
 
 
 def test_error_dedent_in_between(differ):
@@ -1174,7 +1169,7 @@ def test_error_dedent_in_between(differ):
             z
         ''')
     differ.initialize(code1)
-    differ.parse(code2, copies=1, parsers=1, expect_error_leaves=True)
+    differ.parse(code2, copies=1, parsers=2, expect_error_leaves=True)
     differ.parse(code1, copies=1, parsers=2)
 
 
@@ -1200,8 +1195,8 @@ def test_some_other_indentation_issues(differ):
         a
         ''')
     differ.initialize(code1)
-    differ.parse(code2, copies=2, parsers=1, expect_error_leaves=True)
-    differ.parse(code1, copies=2, parsers=2)
+    differ.parse(code2, copies=0, parsers=1, expect_error_leaves=True)
+    differ.parse(code1, copies=1, parsers=1)
 
 
 def test_open_bracket_case1(differ):
@@ -1241,8 +1236,8 @@ def test_open_bracket_case2(differ):
                 d
         ''')
     differ.initialize(code1)
-    differ.parse(code2, copies=1, parsers=2, expect_error_leaves=True)
-    differ.parse(code1, copies=2, parsers=0, expect_error_leaves=True)
+    differ.parse(code2, copies=0, parsers=1, expect_error_leaves=True)
+    differ.parse(code1, copies=0, parsers=1, expect_error_leaves=True)
 
 
 def test_some_weird_removals(differ):
@@ -1267,11 +1262,10 @@ def test_some_weird_removals(differ):
         ''')
     differ.initialize(code1)
     differ.parse(code2, copies=1, parsers=1, expect_error_leaves=True)
-    differ.parse(code3, copies=1, parsers=2, expect_error_leaves=True)
+    differ.parse(code3, copies=1, parsers=3, expect_error_leaves=True)
     differ.parse(code1, copies=1)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 5), reason="Async starts working in 3.5")
 def test_async_copy(differ):
     code1 = dedent('''\
         async def main():
@@ -1286,3 +1280,467 @@ def test_async_copy(differ):
     differ.initialize(code1)
     differ.parse(code2, copies=1, parsers=1)
     differ.parse(code1, copies=1, parsers=1, expect_error_leaves=True)
+
+
+def test_parent_on_decorator(differ):
+    code1 = dedent('''\
+        class AClass:
+            @decorator()
+                def b_test(self):
+                print("Hello")
+                print("world")
+
+            def a_test(self):
+                pass''')
+    code2 = dedent('''\
+        class AClass:
+            @decorator()
+            def b_test(self):
+                print("Hello")
+                print("world")
+
+            def a_test(self):
+                pass''')
+    differ.initialize(code1)
+    module_node = differ.parse(code2, parsers=1)
+    cls = module_node.children[0]
+    cls_suite = cls.children[-1]
+    assert len(cls_suite.children) == 3
+
+
+def test_wrong_indent_in_def(differ):
+    code1 = dedent('''\
+        def x():
+          a
+          b
+        ''')
+
+    code2 = dedent('''\
+        def x():
+         //
+          b
+          c
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, expect_error_leaves=True)
+    differ.parse(code1, parsers=1)
+
+
+def test_backslash_issue(differ):
+    code1 = dedent('''
+        pre = (
+            '')
+        after = 'instead'
+        ''')
+    code2 = dedent('''
+        pre = (
+            '')
+             \\if 
+        ''')  # noqa
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+    differ.parse(code1, parsers=1, copies=1)
+
+
+def test_paren_with_indentation(differ):
+    code1 = dedent('''
+        class C:
+            def f(self, fullname, path=None):
+                x
+
+            def load_module(self, fullname):
+                a
+                for prefix in self.search_path:
+                    try:
+                        b
+                    except ImportError:
+                        c
+                else:
+                    raise
+            def x():
+                pass
+        ''')
+    code2 = dedent('''
+        class C:
+            def f(self, fullname, path=None):
+                x
+
+                    (
+                a
+                for prefix in self.search_path:
+                    try:
+                        b
+                    except ImportError:
+                        c
+                else:
+                    raise
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+    differ.parse(code1, parsers=3, copies=1)
+
+
+def test_error_dedent_in_function(differ):
+    code1 = dedent('''\
+        def x():
+            a
+            b
+            c
+            d
+        ''')
+    code2 = dedent('''\
+        def x():
+            a
+            b
+          c
+            d
+            e
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
+
+
+def test_with_formfeed(differ):
+    code1 = dedent('''\
+        @bla
+        async def foo():
+            1
+            yield from []
+            return
+            return ''
+        ''')
+    code2 = dedent('''\
+        @bla
+        async def foo():
+            1
+        \x0cimport 
+            return
+            return ''
+        ''')  # noqa
+    differ.initialize(code1)
+    differ.parse(code2, parsers=ANY, copies=ANY, expect_error_leaves=True)
+
+
+def test_repeating_invalid_indent(differ):
+    code1 = dedent('''\
+        def foo():
+            return
+
+        @bla
+            a
+        def foo():
+            a
+            b
+            c
+        ''')
+    code2 = dedent('''\
+        def foo():
+            return
+
+        @bla
+            a
+            b
+            c
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
+
+
+def test_another_random_indent(differ):
+    code1 = dedent('''\
+        def foo():
+            a
+        b
+            c
+            return
+        def foo():
+            d
+        ''')
+    code2 = dedent('''\
+        def foo():
+            a
+            c
+            return
+        def foo():
+            d
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=3)
+
+
+def test_invalid_function(differ):
+    code1 = dedent('''\
+        a
+        def foo():
+        def foo():
+            b
+        ''')
+    code2 = dedent('''\
+        a
+        def foo():
+        def foo():
+            b
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+
+
+def test_async_func2(differ):
+    code1 = dedent('''\
+        async def foo():
+            return ''
+        @bla
+        async def foo():
+            x
+        ''')
+    code2 = dedent('''\
+        async def foo():
+            return ''
+
+          {
+        @bla
+        async def foo():
+            x
+          y
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=ANY, copies=ANY, expect_error_leaves=True)
+
+
+def test_weird_ending(differ):
+    code1 = dedent('''\
+        def foo():
+            a
+            return
+        ''')
+    code2 = dedent('''\
+        def foo():
+            a
+           nonlocal xF"""
+        y"""''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+
+
+def test_nested_class(differ):
+    code1 = dedent('''\
+def c():
+    a = 3
+        class X:
+            b
+        ''')
+    code2 = dedent('''\
+def c():
+    a = 3
+        class X:
+ elif
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+
+
+def test_class_with_paren_breaker(differ):
+    code1 = dedent('''\
+class Grammar:
+    x
+    def parse():
+        y
+        parser(
+        )
+        z
+        ''')
+    code2 = dedent('''\
+class Grammar:
+    x
+    def parse():
+        y
+        parser(
+   finally ;
+        )
+        z
+        ''')
+    differ.initialize(code1)
+    differ.parse(code2, parsers=3, copies=1, expect_error_leaves=True)
+
+
+def test_byte_order_mark(differ):
+    code2 = dedent('''\
+
+        x
+        \ufeff
+                 else :
+        ''')
+    differ.initialize('\n')
+    differ.parse(code2, parsers=2, expect_error_leaves=True)
+
+    code3 = dedent('''\
+        \ufeff
+                 if:
+
+        x
+        ''')
+    differ.initialize('\n')
+    differ.parse(code3, parsers=2, expect_error_leaves=True)
+
+
+def test_byte_order_mark2(differ):
+    code = '\ufeff# foo'
+    differ.initialize(code)
+    differ.parse(code + 'x', parsers=ANY)
+
+
+def test_byte_order_mark3(differ):
+    code1 = "\ufeff#\ny\n"
+    code2 = 'x\n\ufeff#\n\ufeff#\ny\n'
+    differ.initialize(code1)
+    differ.parse(code2, expect_error_leaves=True, parsers=ANY, copies=ANY)
+    differ.parse(code1, parsers=1)
+
+
+def test_backslash_insertion(differ):
+    code1 = dedent('''
+        def f():
+            x
+            def g():
+                base = "" \\
+                       ""
+                return
+        ''')
+    code2 = dedent('''
+        def f():
+            x
+            def g():
+                base = "" \\
+        def h():
+                       ""
+                return
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)
+    differ.parse(code1, parsers=2, copies=1)
+
+
+def test_fstring_with_error_leaf(differ):
+    code1 = dedent("""\
+        def f():
+            x
+        def g():
+            y
+        """)
+    code2 = dedent("""\
+        def f():
+            x
+            F'''
+        def g():
+            y
+            {a
+        \x01
+        """)
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+
+
+def test_yet_another_backslash(differ):
+    code1 = dedent('''\
+        def f():
+            x
+            def g():
+                y
+                base = "" \\
+                       "" % to
+                return
+        ''')
+    code2 = dedent('''\
+        def f():
+            x
+            def g():
+                y
+                base = "" \\
+          \x0f
+                return
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=ANY, copies=ANY, expect_error_leaves=True)
+    differ.parse(code1, parsers=ANY, copies=ANY)
+
+
+def test_backslash_before_def(differ):
+    code1 = dedent('''\
+        def f():
+            x
+
+        def g():
+            y
+            z
+        ''')
+    code2 = dedent('''\
+        def f():
+            x
+         >\\
+        def g():
+            y
+         x
+            z
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=3, copies=1, expect_error_leaves=True)
+
+
+def test_backslash_with_imports(differ):
+    code1 = dedent('''\
+        from x import y, \\
+        ''')
+    code2 = dedent('''\
+        from x import y, \\
+            z
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1)
+    differ.parse(code1, parsers=1)
+
+
+def test_one_line_function_error_recovery(differ):
+    code1 = dedent('''\
+        class X:
+            x
+            def y(): word """
+                # a
+                # b
+                c(self)
+        ''')
+    code2 = dedent('''\
+        class X:
+            x
+            def y(): word """
+                # a
+                # b
+                c(\x01+self)
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=1, copies=1, expect_error_leaves=True)
+
+
+def test_one_line_property_error_recovery(differ):
+    code1 = dedent('''\
+        class X:
+            x
+            @property
+            def encoding(self): True -
+                return 1
+        ''')
+    code2 = dedent('''\
+        class X:
+            x
+            @property
+            def encoding(self): True -
+                return 1
+        ''')
+
+    differ.initialize(code1)
+    differ.parse(code2, parsers=2, copies=1, expect_error_leaves=True)

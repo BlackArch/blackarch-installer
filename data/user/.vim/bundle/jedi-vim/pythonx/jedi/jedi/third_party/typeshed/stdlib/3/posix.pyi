@@ -1,40 +1,36 @@
-# Stubs for posix
-
-# NOTE: These are incomplete!
-
 import sys
-from typing import NamedTuple, Tuple
-
+from builtins import _PathLike  # See comment in builtins
 from os import stat_result as stat_result
+from typing import Dict, List, NamedTuple, Optional, overload
 
-uname_result = NamedTuple('uname_result', [
-    ('sysname', str),
-    ('nodename', str),
-    ('release', str),
-    ('version', str),
-    ('machine', str),
-])
+class uname_result(NamedTuple):
+    sysname: str
+    nodename: str
+    release: str
+    version: str
+    machine: str
 
-times_result = NamedTuple('times_result', [
-    ('user', float),
-    ('system', float),
-    ('children_user', float),
-    ('children_system', float),
-    ('elapsed', float),
-])
+class times_result(NamedTuple):
+    user: float
+    system: float
+    children_user: float
+    children_system: float
+    elapsed: float
 
-waitid_result = NamedTuple('waitid_result', [
-    ('si_pid', int),
-    ('si_uid', int),
-    ('si_signo', int),
-    ('si_status', int),
-    ('si_code', int),
-])
+class waitid_result(NamedTuple):
+    si_pid: int
+    si_uid: int
+    si_signo: int
+    si_status: int
+    si_code: int
 
-sched_param = NamedTuple('sched_param', [
-    ('sched_priority', int),
-])
+class sched_param(NamedTuple):
+    sched_priority: int
 
+CLD_CONTINUED: int
+CLD_DUMPED: int
+CLD_EXITED: int
+CLD_TRAPPED: int
 
 EX_CANTCREAT: int
 EX_CONFIG: int
@@ -59,14 +55,17 @@ R_OK: int
 W_OK: int
 X_OK: int
 
-if sys.version_info >= (3, 6):
-    GRND_NONBLOCK: int
-    GRND_RANDOM: int
+F_LOCK: int
+F_TEST: int
+F_TLOCK: int
+F_ULOCK: int
+
+GRND_NONBLOCK: int
+GRND_RANDOM: int
 NGROUPS_MAX: int
 
 O_APPEND: int
-if sys.version_info >= (3, 4):
-    O_ACCMODE: int
+O_ACCMODE: int
 O_ASYNC: int
 O_CREAT: int
 O_DIRECT: int
@@ -86,6 +85,39 @@ O_SYNC: int
 O_TRUNC: int
 O_WRONLY: int
 
+POSIX_FADV_DONTNEED: int
+POSIX_FADV_NOREUSE: int
+POSIX_FADV_NORMAL: int
+POSIX_FADV_RANDOM: int
+POSIX_FADV_SEQUENTIAL: int
+POSIX_FADV_WILLNEED: int
+
+PRIO_PGRP: int
+PRIO_PROCESS: int
+PRIO_USER: int
+
+P_ALL: int
+P_PGID: int
+P_PID: int
+
+RTLD_DEEPBIND: int
+RTLD_GLOBAL: int
+RTLD_LAZY: int
+RTLD_LOCAL: int
+RTLD_NODELETE: int
+RTLD_NOLOAD: int
+RTLD_NOW: int
+
+SCHED_BATCH: int
+SCHED_FIFO: int
+SCHED_IDLE: int
+SCHED_OTHER: int
+SCHED_RESET_ON_FORK: int
+SCHED_RR: int
+
+SEEK_DATA: int
+SEEK_HOLE: int
+
 ST_APPEND: int
 ST_MANDLOCK: int
 ST_NOATIME: int
@@ -100,13 +132,34 @@ ST_WRITE: int
 
 TMP_MAX: int
 WCONTINUED: int
-WCOREDUMP: int
-WEXITSTATUS: int
-WIFCONTINUED: int
-WIFEXITED: int
-WIFSIGNALED: int
-WIFSTOPPED: int
+
+def WCOREDUMP(__status: int) -> bool: ...
+def WEXITSTATUS(status: int) -> int: ...
+def WIFCONTINUED(status: int) -> bool: ...
+def WIFEXITED(status: int) -> bool: ...
+def WIFSIGNALED(status: int) -> bool: ...
+def WIFSTOPPED(status: int) -> bool: ...
+
 WNOHANG: int
-WSTOPSIG: int
-WTERMSIG: int
+
+def WSTOPSIG(status: int) -> int: ...
+def WTERMSIG(status: int) -> int: ...
+
 WUNTRACED: int
+
+XATTR_CREATE: int
+XATTR_REPLACE: int
+XATTR_SIZE_MAX: int
+@overload
+def listdir(path: Optional[str] = ...) -> List[str]: ...
+@overload
+def listdir(path: bytes) -> List[bytes]: ...
+@overload
+def listdir(path: int) -> List[str]: ...
+@overload
+def listdir(path: _PathLike[str]) -> List[str]: ...
+
+if sys.platform == "win32":
+    environ: Dict[str, str]
+else:
+    environ: Dict[bytes, bytes]

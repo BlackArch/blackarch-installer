@@ -12,9 +12,14 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
+Plugin 'vim-scripts/c.vim'
 Plugin 'scrooloose/nerdtree.git'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'xavierd/clang_complete'
+Plugin 'fatih/vim-go'
+Plugin 'rust-lang/rust.vim'
+Plugin 'ycm-core/YouCompleteMe'
+Plugin 'Yggdroot/indentLine'
 
 call vundle#end()            " required
 " Vundle -----------------------------------------------------------------------
@@ -124,7 +129,7 @@ au WinEnter * set cursorline
 set cursorline
 
 " clang stuff
-let g:clang_library_path='/usr/lib/'
+let g:clang_library_path='/usr/lib/llvm/12/lib64/'
 let g:clang_user_options='|| exit 0'
 let g:clang_complete_auto = 0
 let g:clang_compelte_macros=1
@@ -141,3 +146,8 @@ let g:clang_complete_optional_args_in_snippets = 1
 let g:jedi#completions_enabled = 1
 let g:jedi#force_py_version = 3
 
+" youcompleteme
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+
+" identLine
+let g:indentLine_char='|'

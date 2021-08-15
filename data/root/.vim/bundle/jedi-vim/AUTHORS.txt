@@ -53,5 +53,7 @@ Tommy Allen (@tweekmonster)
 Mingliang (@Aulddays)
 Brian Mego (@brianmego)
 Stevan Milic (@stevanmilic) <stevan.milic@yahoo.com>
+Konstantin Glukhov (@Konstantin-Glukhov)
+Seungchan An (@SeungChan92) <dev.issea1015@gmail.com>
 
 @something are github user names.
