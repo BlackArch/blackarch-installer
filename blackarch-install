@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.20'
+VERSION='1.2.21-dev'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -753,6 +753,8 @@ net_conf_auto()
   printf "\n\n"
 
   dhcpcd "$opts" -i "$NET_IF" > $VERBOSE 2>&1
+
+  sleep 10
 
   return $SUCCESS
 }
