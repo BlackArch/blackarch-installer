@@ -21,6 +21,8 @@ ChangeLog and TODO list for blackarch-installer
 
 ===> 1.2.21
 
+  [x] set halifax to default mirror
+  [x] remove dead mirrors
   [x] sleep 10 seconds after dhcpcd call
 
 
