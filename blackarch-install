@@ -230,7 +230,7 @@ err()
   return $FAILURE
 }
 
-# leet banner (very important)
+# leet banner (very important, very 1337)
 banner()
 {
   columns="$(tput cols)"
@@ -306,6 +306,11 @@ confirm()
   done
 
   return $SUCCESS
+}
+
+install_keyrings()
+{
+  pacman -Syy archlinux-keyring blackarch-keyring
 }
 
 
@@ -2453,6 +2458,9 @@ main()
   check_env
   check_boot_mode
   check_iso_type
+
+  # Update keyrings
+  install_keyrings
 
   # install mode
   ask_install_mode
