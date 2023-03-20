@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.22'
+VERSION='1.2.23'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -254,7 +254,8 @@ banner()
 # check boot mode
 check_boot_mode()
 {
-  if [ "$(efivar --list 2> /dev/null)" ]
+  efivars=$(ls /sys/firmware/efi/efivars > /dev/null 2>&1; echo $?)
+  if [ "$efivars" -eq "0" ]
   then
      BOOT_MODE="uefi"
   fi
