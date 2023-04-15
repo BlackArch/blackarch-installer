@@ -1005,26 +1005,47 @@ ask_partitions()
           read -r BOOT_PART
         done
       done
+      # Boot partition filesystem options
+      BOOT_FS_OPTS=("ext2" "ext3" "ext4")
+      while [ -z "$BOOT_FS_TYPE" ]; do
       wprintf '[?] Choose a filesystem to use in your boot partition (ext2, ext3, ext4)? (default: ext4): '
       read -r BOOT_FS_TYPE
+        #use default ext4 if none was selected
       if [ -z "$BOOT_FS_TYPE" ]; then
         BOOT_FS_TYPE="ext4"
+          warn "Setting default filesystem: ext4"
       fi
+        #check if chosen fs type is valid
+        if [[ ! ${BOOT_FS_OPTS[*]} =~ (^|[[:space:]])"$BOOT_FS_TYPE"($|[[:space:]]) ]]; then
+          unset BOOT_FS_TYPE
+          err "Invalid filesystem detected"
+        fi
+      done
     fi
     while [ -z "$ROOT_PART" ]; do
       wprintf "[?] Root partition (${HD_DEV}X): "
       read -r ROOT_PART
-      until [[ "$PARTITIONS" =~ $ROOT_PART ]]; do
+      until [[ "$PARTITIONS" =~ (^|[[:space:]])"$ROOT_PART"($|[[:space:]]) ]]; do
           wprintf "[?] Your partition $ROOT_PART is not in the partitions list.\n"
           wprintf "[?] Root partition (${HD_DEV}X): "
           read -r ROOT_PART
       done
     done
+    # Root partition filesystem options
+    ROOT_FS_OPTS=("ext2" "ext3" "ext4" btrfs"")
+    while [ -z "$ROOT_FS_TYPE" ]; do
     wprintf '[?] Choose a filesystem to use in your root partition (ext2, ext3, ext4, btrfs)? (default: ext4): '
     read -r ROOT_FS_TYPE
     if [ -z "$ROOT_FS_TYPE" ]; then
       ROOT_FS_TYPE="ext4"
+        warn "Setting default filesystem: ext4"
     fi
+      #check if chosen fs type is valid
+      if [[ ! ${ROOT_FS_OPTS[*]} =~ (^|[[:space:]])"$ROOT_FS_TYPE"($|[[:space:]]) ]]; then
+        unset ROOT_FS_TYPE
+        err "Invalid filesystem detected"
+      fi
+    done
     wprintf "[?] Swap partition (${HD_DEV}X - empty for none): "
     read -r SWAP_PART
     if [ -n "$SWAP_PART" ]; then
