@@ -667,7 +667,9 @@ ask_net_if()
       clear
       break
     fi
-    clear
+    sleep_clear 0
+    warn "Interface not found"
+    sleep_clear 1
   done
 
   return $SUCCESS
