@@ -178,7 +178,12 @@ ISO_TYPE=''
 
 # Exit on CTRL + c
 ctrl_c() {
+  sleep_clear 0
   err "Keyboard Interrupt detected, leaving..."
+
+  # cleanup
+  rm -f /tmp/ba-*
+
   exit $FAILURE
 }
 
@@ -1834,11 +1839,15 @@ ask_mirror()
   local IFS='|'
   count=1
   mirror_url='https://raw.githubusercontent.com/BlackArch/blackarch/master/mirror/mirror.lst'
-  mirror_file='/tmp/mirror.lst'
+  mirror_file='/tmp/ba-mirror.lst'
+  mirror_fmt_file='/tmp/ba-mirror_fmt.lst'
 
+  if [ -z "$rerun" ]
+  then
   wprintf '[+] Fetching mirror list'
   printf "\n\n"
   curl -s -o $mirror_file $mirror_url > $VERBOSE
+  fi
 
   while read -r country url mirror_name
   do
@@ -1846,10 +1855,18 @@ ask_mirror()
     printf "\n"
     wprintf "   * %s" "$url"
     printf "\n"
+    if [ -z "$rerun" ]
+    then
+      # create file to put into less
+      echo " $count. $country - $mirror_name" >> $mirror_fmt_file
+      echo "   * $url" >> $mirror_fmt_file
+    fi
     count=$((count + 1))
   done < "$mirror_file"
 
   printf "\n"
+  wprintf '>> Enter 0 to scroll through the mirrorlist'
+  printf "\n\n"
   wprintf '[?] Select a mirror number (enter for default): '
   read -r a
   printf "\n"
@@ -1857,9 +1874,32 @@ ask_mirror()
   # bugfix: detected chars added sometimes - clear chars
   _a=$(printf "%s" "$a" | sed 's/[a-z]//Ig' 2> /dev/null)
 
-  if [ -z "$_a" ]
+  # check if value is a number
+  if [[ ! "$_a" == ?(-)+([[:digit:]]) ]]
+  then
+    warn "Value is not a number"
+    sleep 3
+    rerun=1
+    ask_mirror
+  fi
+  # check for out of bounds
+  if [ "$_a" -gt "$count" ]
+  then
+    warn "Value out of bounds"
+    sleep 3
+    rerun=1
+    ask_mirror
+  # check for less option
+  elif [ "$_a" = "0" ]
+  then
+    cat $mirror_fmt_file | less
+    rerun=1
+    ask_mirror
+  # check for default option
+  elif [ -z "$_a" ]
   then
     wprintf "[+] Choosing default mirror: %s " $BA_REPO_URL
+  # set chosen mirror
   else
     BA_REPO_URL=$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 2)
     wprintf "[+] Mirror from '%s' selected" \
@@ -1867,7 +1907,9 @@ ask_mirror()
     printf "\n\n"
   fi
 
+  # cleanup
   rm -f $mirror_file
+  rm -f $formatted_file
 
   return $SUCCESS
 }
