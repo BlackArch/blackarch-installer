@@ -894,7 +894,9 @@ ask_hd_dev()
       clear
       break
     fi
-    clear
+    sleep_clear 0
+    warn "Hard Drive not found"
+    sleep_clear 1
   done
 
 
