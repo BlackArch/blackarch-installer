@@ -336,6 +336,7 @@ check_uid()
   if [ "$(id -u)" != '0' ]
   then
     err 'You must be root to run the BlackArch installer!'
+    exit $FAILURE
   fi
 
   return $SUCCESS
