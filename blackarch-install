@@ -867,6 +867,12 @@ get_hd_devs()
 {
   HD_DEVS="$(lsblk | grep disk | awk '{print $1}')"
 
+  if [ -z "${HD_DEVS[*]}" ]
+  then
+    err "No Hard Drives were found, leaving..."
+    exit $FAILURE
+  fi
+
   return $SUCCESS
 }
 
