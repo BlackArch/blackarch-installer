@@ -1352,7 +1352,7 @@ install_base_packages()
   warn 'This can take a while, please wait...'
 
   pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
-    terminus-font terminus-font-ttf feh > $VERBOSE 2>&1
+    terminus-font terminus-font-ttf rxvt-unicode feh > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
