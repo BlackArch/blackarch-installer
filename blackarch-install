@@ -298,9 +298,15 @@ confirm()
   return $SUCCESS
 }
 
-install_keyrings()
+
+update_keyrings()
 {
-  pacman -Syy archlinux-keyring blackarch-keyring
+    title 'Pacman Setup > Keyring Update'    
+
+    wprintf '[+] Updating keyrings'
+    printf "\n\n"
+
+    pacman -Syy --noconfirm archlinux-keyring blackarch-keyring > $VERBOSE 2>&1
 }
 
 
@@ -2513,11 +2519,9 @@ main()
   check_boot_mode
   check_iso_type
 
-  # Update keyrings
-  install_keyrings
-
   # install mode
   ask_install_mode
+  sleep_clear 0
 
   # output mode
   ask_output_mode
@@ -2562,6 +2566,10 @@ main()
     esac
     sleep_clear 1
     check_inet_conn
+    sleep_clear 1
+
+    # update keyrings
+    update_keyrings
     sleep_clear 1
 
     # self updater
