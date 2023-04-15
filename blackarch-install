@@ -1668,12 +1668,10 @@ setup_user()
     wprintf "[+] Added user: $user"
     printf "\n\n"
   # environment
-  elif [ -z "$NORMAL_USER" ]
-  then
-    cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
-  else
     cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
     chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
+  else
+    cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   fi
 
   # password
