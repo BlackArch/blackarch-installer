@@ -190,22 +190,6 @@ ctrl_c() {
 trap ctrl_c 2
 
 
-# check exit status
-check()
-{
-  es=$1
-  func="$2"
-  info="$3"
-
-  if [ "$es" -ne 0 ]
-  then
-    echo
-    warn "Something went wrong with $func. $info."
-    sleep 5
-  fi
-}
-
-
 # print formatted output
 wprintf()
 {
@@ -432,7 +416,7 @@ ask_locale()
 
   clear
 
-  return $SUCCESS
+  set_locale
 }
 
 
@@ -451,8 +435,8 @@ set_locale()
     sleep 1
     LOCALE='en_US.UTF-8'
   fi
-  localectl set-locale "LANG=$LOCALE"
-  check $? 'setting locale'
+  localectl set-locale "LANG=$LOCALE" > $VERBOSE 2>&1
+  check $? 'setting locale' ask_locale locale_opt
 
   return $SUCCESS
 }
@@ -488,7 +472,7 @@ ask_keymap()
 
   clear
 
-  return $SUCCESS
+  set_keymap
 }
 
 
@@ -507,9 +491,9 @@ set_keymap()
     sleep 1
     KEYMAP='us'
   fi
-  localectl set-keymap --no-convert "$KEYMAP"
+  localectl set-keymap --no-convert "$KEYMAP" > $VERBOSE 2>&1
   loadkeys "$KEYMAP" > $VERBOSE 2>&1
-  check $? 'setting keymap'
+  check $? 'setting keymap' ask_keymap keymap_opt
 
   return $SUCCESS
 }
@@ -2492,6 +2476,33 @@ self_updater()
 }
 
 
+# check exit status
+check()
+{
+  es=$1
+  func="$2"
+  execute=$3
+  unset=$4
+
+  if [ "$es" -ne 0 ]
+  then
+    echo
+    warn "Something went wrong with $func."
+    sleep_clear 3
+   
+    # unset variables and execute function on error if needed
+    if [ -n $unset ]
+    then
+      unset "$unset"
+    fi
+    if [ -n $execute ]
+    then
+        $execute
+    fi
+  fi
+}
+
+
 # controller and program flow
 main()
 {
@@ -2514,12 +2525,10 @@ main()
 
   # locale
   ask_locale
-  set_locale
   sleep_clear 0
 
   # keymap
   ask_keymap
-  set_keymap
   sleep_clear 0
 
   # network
