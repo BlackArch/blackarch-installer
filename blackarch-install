@@ -2150,7 +2150,7 @@ setup_window_managers()
         ;;
       5)
         warn "Setting up spectrwm, please wait..."
-        chroot $CHROOT pacman -S spectrwm --needed --overwrite='*' --noconfirm \
+        chroot $CHROOT pacman -S spectrwm xlockmore --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
         cp -r "$BI_PATH/data/usr/share/xsessions/spectrwm.desktop" "$CHROOT/usr/share/xsessions"
@@ -2158,7 +2158,7 @@ setup_window_managers()
         ;;
       *)
         warn "Setting up all of the above, please wait..."
-        chroot $CHROOT pacman -S fluxbox openbox awesome i3 spectrwm --needed \
+        chroot $CHROOT pacman -S fluxbox openbox awesome i3 spectrwm xlockmore --needed \
           --overwrite='*' --noconfirm > $VERBOSE 2>&1
 
         # awesome
