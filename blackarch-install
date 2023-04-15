@@ -1352,7 +1352,7 @@ install_base_packages()
   warn 'This can take a while, please wait...'
 
   pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
-    terminus-font terminus-font-ttf rxvt-unicode feh > $VERBOSE 2>&1
+    terminus-font terminus-font-ttf rxvt-unicode feh iwd > $VERBOSE 2>&1
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1842,15 +1842,27 @@ setup_base_system()
 }
 
 
-# enable systemd-networkd services
-enable_iwd_networkd()
+# enable networking services
+enable_networkd()
 {
   title 'BlackArch Linux Setup > Network'
 
-  wprintf '[+] Enabling Iwd and Networkd'
+  wprintf '[+] Enabling Networkd'
   printf "\n\n"
 
-  chroot $CHROOT systemctl enable iwd systemd-networkd > $VERBOSE 2>&1
+  chroot $CHROOT systemctl enable systemd-networkd > $VERBOSE 2>&1
+
+  return $SUCCESS
+}
+
+enable_iwd()
+{
+  title 'BlackArch Linux Setup > Network'
+
+  wprintf '[+] Enabling Iwd'
+  printf "\n\n"
+
+  chroot $CHROOT systemctl enable iwd > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -2403,7 +2415,10 @@ setup_blackarch()
   update_etc
   sleep_clear 1
 
-  enable_iwd_networkd
+  enable_networkd
+  sleep_clear 1
+
+  enable_iwd
   sleep_clear 1
 
   ask_mirror
