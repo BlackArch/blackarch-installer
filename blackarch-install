@@ -853,7 +853,7 @@ ask_luks()
 {
   while [ "$LUKS" = '' ]
   do
-    if confirm 'Hard Drive Setup > Crypto' '[?] Full encrypted root [y/n]: '
+    if confirm 'Hard Drive Setup > Crypto' '[?] Fully encrypted root [y/n]: '
     then
       LUKS=$TRUE
     else
@@ -933,7 +933,7 @@ ask_cfdisk()
     zero_part
   else
     echo
-    warn 'No partitions chosed? Make sure you have them already configured.'
+    warn 'No partitions chosen? Make sure you have them already configured.'
     get_partitions
   fi
 
