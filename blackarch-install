@@ -942,12 +942,16 @@ zero_part()
     sync
   fi
   get_partitions
-  if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
+  if [ -z "${PARTITIONS[*]}" ] && [ $zeroed_part -eq 1 ] ; then
+    sleep_clear 0
     err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
+    sleep_clear 5
     zero_part
   fi
   if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
-    err 'You are booting in UEFI mode but not EFI partition was created, make sure you select the "EFI System" type for your EFI partition.'
+    sleep_clear 0
+    err 'You are booting in UEFI mode but no EFI partition was created, make sure you select the "EFI System" type for your EFI partition.'
+    sleep_clear 3
     zero_part
   fi
   return $SUCCESS
