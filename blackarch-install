@@ -1436,24 +1436,10 @@ setup_time()
       wprintf "\n[+] Time zone setup correctly\n"
     fi
   else
-    wprintf "\n[+] Setting up default time and timezone\n"
-    sleep 2
-    default_time
-  fi
-
-  printf "\n"
-
-  return $SUCCESS
-}
-
-
-# default time and timezone
-default_time()
-{
-  echo
   warn 'Setting up default time and timezone: UTC'
-  printf "\n\n"
   chroot $CHROOT ln -sf /usr/share/zoneinfo/UTC /etc/localtime > $VERBOSE 2>&1
+    sleep 1
+  fi
 
   return $SUCCESS
 }
