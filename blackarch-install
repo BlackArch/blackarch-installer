@@ -2111,6 +2111,7 @@ setup_window_managers()
     echo
     case $choice in
       1)
+        warn "Setting up Awesome, please wait..."
         chroot $CHROOT pacman -S awesome --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
@@ -2122,6 +2123,7 @@ setup_window_managers()
         break
         ;;
       2)
+        warn "Setting up Fluxbox, please wait..."
         chroot $CHROOT pacman -S fluxbox --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
@@ -2129,6 +2131,7 @@ setup_window_managers()
         break
         ;;
       3)
+        warn "Setting up i3, please wait..."
         chroot $CHROOT pacman -S i3 dmenu rofi --needed --overwrite='*' \
           --noconfirm > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
@@ -2136,6 +2139,7 @@ setup_window_managers()
         break
         ;;
       4)
+        warn "Setting up Openbox, please wait..."
         chroot $CHROOT pacman -S openbox --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
@@ -2145,6 +2149,7 @@ setup_window_managers()
         break
         ;;
       5)
+        warn "Setting up spectrwm, please wait..."
         chroot $CHROOT pacman -S spectrwm --needed --overwrite='*' --noconfirm \
           > $VERBOSE 2>&1
         cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
@@ -2152,6 +2157,7 @@ setup_window_managers()
         break
         ;;
       *)
+        warn "Setting up all of the above, please wait..."
         chroot $CHROOT pacman -S fluxbox openbox awesome i3 spectrwm --needed \
           --overwrite='*' --noconfirm > $VERBOSE 2>&1
 
