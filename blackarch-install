@@ -377,6 +377,7 @@ ask_install_mode()
 # ask for output mode
 ask_output_mode()
 {
+  opts=(1 2)
   title 'Environment > Output Mode'
   wprintf '[+] Available output modes:'
   printf "\n
@@ -384,7 +385,11 @@ ask_output_mode()
   2. Verbose (output of system commands: mkfs, pacman, etc.)\n\n"
   wprintf "[?] Make a choice: "
   read -r output_opt
-  if [ "$output_opt" = 2 ]
+  # exact match to see if one of the options is selected
+  if [[ ! ${opts[*]} =~ (^|[[:space:]])"$output_opt"($|[[:space:]]) ]]
+  then
+    ask_output_mode
+  elif [ "$output_opt" = 2 ]
   then
     VERBOSE='/dev/stdout'
   fi
