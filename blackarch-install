@@ -988,7 +988,7 @@ ask_partitions()
       while [ -z "$BOOT_PART" ]; do
         wprintf "[?] EFI System partition (${HD_DEV}X): "
         read -r BOOT_PART
-        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
+        until [[ "$PARTITIONS" =~ (^|[[:space:]])"$BOOT_PART"($|[[:space:]]) ]]; do
           wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
           wprintf "[?] EFI System partition (${HD_DEV}X): "
           read -r BOOT_PART
@@ -999,7 +999,7 @@ ask_partitions()
       while [ -z "$BOOT_PART" ]; do
         wprintf "[?] Boot partition (${HD_DEV}X): "
         read -r BOOT_PART
-        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
+        until [[ "$PARTITIONS" =~ (^|[[:space:]])"$BOOT_PART"($|[[:space:]]) ]]; do
           wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
           wprintf "[?] Boot partition (${HD_DEV}X): "
           read -r BOOT_PART
