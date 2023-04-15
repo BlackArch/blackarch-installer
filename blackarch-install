@@ -633,6 +633,7 @@ ask_hostname()
     title 'Network Setup > Hostname'
     wprintf '[?] Set your hostname: '
     read -r HOST_NAME
+    sleep_clear 0
   done
 
   return $SUCCESS
@@ -818,7 +819,9 @@ net_conf_wlan()
 check_inet_conn()
 {
   title 'Network Setup > Connection Check'
+
   wprintf '[+] Checking for Internet connection...'
+  printf "\n\n"
 
   if ! curl -s http://www.yahoo.com/ > $VERBOSE
   then
@@ -1435,7 +1438,8 @@ setup_time()
       sleep 1
       default_time
     else
-      wprintf "\n[+] Time zone setup correctly\n"
+      wprintf "\n[+] Time zone setup correctly"
+      printf "\n\n"
     fi
   else
   warn 'Setting up default time and timezone: UTC'
@@ -1476,7 +1480,7 @@ setup_initramfs()
   fi
 
   warn 'This can take a while, please wait...'
-  printf "\n"
+
   chroot $CHROOT mkinitcpio -P > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1695,7 +1699,7 @@ reinitialize_keyring()
   title 'Base System Setup > Keyring Reinitialization'
 
   wprintf '[+] Reinitializing keyrings'
-  printf "\n"
+  printf "\n\n"
   sleep 2
 
   chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring \
@@ -1763,7 +1767,7 @@ setup_extra_packages()
   \n"
 
   warn 'This can take a while, please wait...'
-  printf "\n"
+
   sleep 2
 
   chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $all \
@@ -2021,7 +2025,6 @@ run_strap_sh()
   wprintf '[+] Downloading and executing strap.sh'
   printf "\n\n"
   warn 'This can take a while, please wait...'
-  printf "\n"
 
   curl -s -o $strap_sh 'https://www.blackarch.org/strap.sh' > $VERBOSE 2>&1
   sha1="$(sha1sum $strap_sh | awk '{print $1}')"
@@ -2314,6 +2317,7 @@ setup_blackarch_tools()
     read -r BA_GROUPS
     printf "\n"
     warn 'This can take a while, please wait...'
+
     if [ -z "$BA_GROUPS" ]
     then
       printf "\n"
@@ -2396,7 +2400,7 @@ dump_full_iso()
   wprintf '[+] Installing the backdoors to /'
   printf "\n\n"
   warn 'This can take a while, please wait...'
-  printf "\n"
+  
   rsync -aWx --human-readable --info=progress2 / $CHROOT > $VERBOSE 2>&1
   wprintf "[+] Installation done!\n"
 
