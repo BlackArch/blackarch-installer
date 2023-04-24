@@ -68,6 +68,9 @@ SET_KEYMAP='1'
 # list keymaps
 LIST_KEYMAP='2'
 
+# number of parallel pacman downloads
+PARALLEL_DOWNLOADS=''
+
 # network interfaces
 NET_IFS=''
 
@@ -632,15 +635,47 @@ enable_pacman_misc()
 }
 
 
-# update pacman package database
-update_pkg_database()
+# ask user for the number of parallel downloads
+ask_pacman_parallel_downloads()
 {
-  title 'Pacman Setup > Package Database'
+  while [ -z "$PARALLEL_DOWNLOADS" ]
+  do
+    title 'Pacman Setup > Parallel Downloads'
+    wprintf '[?] Set number of parallel downloads: '
+    read -r PARALLEL_DOWNLOADS
 
-  wprintf '[+] Updating pacman database'
+    # check if value is a number
+    if [[ ! "$PARALLEL_DOWNLOADS" == ?(-)+([[:digit:]]) ]]
+    then
+      warn "You need to enter a number"
+      sleep 3
+      unset PARALLEL_DOWNLOADS
+      ask_pacman_parallel_downloads
+    fi
+  done
+
+  return $SUCCESS
+}
+
+
+# set number of parallel downloads
+set_pacman_parallel_downloads()
+{
+  path="$1"
+
+  if [ "$path" = 'chroot' ]
+  then
+    path="$CHROOT"
+  else
+    path=""
+  fi
+
+  title 'Pacman Setup > Parallel Downloads'
+
+  wprintf "[+] Enabling $PARALLEL_DOWNLOADS parallel downloads"
   printf "\n\n"
 
-  pacman -Syy --noconfirm > $VERBOSE 2>&1
+  sed -i 's/.*ParallelDownloads.*/ParallelDownloads = '$PARALLEL_DOWNLOADS'/g' "$path/etc/pacman.conf"
 
   return $SUCCESS
 }
@@ -658,7 +693,7 @@ update_pacman()
   enable_pacman_misc
   sleep_clear 1
 
-  update_pkg_database
+  set_pacman_parallel_downloads
   sleep_clear 1
 
   return $SUCCESS
@@ -2607,6 +2642,8 @@ main()
     ask_mirror
     sleep_clear 1
     ask_mirror_arch
+    sleep_clear 1
+    ask_pacman_parallel_downloads
     sleep_clear 1
     update_pacman
 
