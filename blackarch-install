@@ -1427,10 +1427,7 @@ setup_time()
 {
   if confirm 'Base System Setup > Timezone' '[?] Default: UTC. Choose other timezone [y/n]: '
   then
-    for t in $(timedatectl list-timezones)
-    do
-      echo "    > $t"
-    done
+    timedatectl list-timezones | less
 
     wprintf "\n[?] What is your (Zone/SubZone): "
     read -r timezone
