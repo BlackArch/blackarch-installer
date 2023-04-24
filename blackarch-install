@@ -1594,30 +1594,6 @@ EOF
 }
 
 
-setup_wallpaper()
-{
-  
-  title 'Base System Setup > Wallpaper'
-
-  wprintf '[+] Setting up wallpaper'
-  printf "\n\n"
-
-  echo "
-  [Unit]
-  Description=Wallpaper systemd service
-
-  [Service]
-  Type=simple
-  ExecStart=/sbin/feh --bg-scale /usr/share/blackarch/wallpaper.png
-
-  [Install]
-  WantedBy=multi-user.target" > "$CHROOT/etc/systemd/system/wallpaper.service" > $VERBOSE 2>&1
-
-  chmod 644 "$CHROOT/etc/systemd/system/wallpaper.service"
-  chroot $CHROOT systemctl enable wallpaper.service > $VERBOSE 2>&1
-}
-
-
 # ask for normal user account to setup
 ask_user_account()
 {
@@ -1837,9 +1813,6 @@ setup_base_system()
   fi
 
   setup_bootloader
-  sleep_clear 1
-
-  setup_wallpaper
   sleep_clear 1
 
   return $SUCCESS
