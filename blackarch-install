@@ -307,6 +307,8 @@ update_keyrings()
     printf "\n\n"
 
     pacman -Syy --noconfirm archlinux-keyring blackarch-keyring > $VERBOSE 2>&1
+
+    return $SUCCESS
 }
 
 
