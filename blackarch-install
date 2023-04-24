@@ -666,8 +666,12 @@ ask_net_if()
       echo "    > $i"
     done
     echo
-    wprintf '[?] Please choose a network interface: '
+    wprintf "[?] Please choose a network interface (default: ${NET_IFS[0]}): "
     read -r NET_IF
+    if [ -z $NET_IF ]
+    then
+      NET_IF=${NET_IFS[0]}
+    fi
     if echo "$NET_IFS" | grep "\<$NET_IF\>" > /dev/null
     then
       clear
