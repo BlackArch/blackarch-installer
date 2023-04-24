@@ -298,6 +298,41 @@ confirm()
   return $SUCCESS
 }
 
+setup_installer_data()
+{
+  if [ ! -d /usr/share/blackarch-installer/data ]
+  then
+    title 'Installer Setup > Fetching Data'
+
+    wprintf '[+] Installing git'
+    printf "\n\n"
+
+    pacman -S --overwrite='*' --noconfirm git > $VERBOSE 2>&1
+
+    wprintf '[+] Cloning git repo'
+    printf "\n\n"
+
+    git clone https://github.com/BlackArch/blackarch-installer.git ~/blackarch-installer > $VERBOSE 2>&1
+
+    wprintf '[+] Copying data'
+    printf "\n\n"
+
+    mkdir -p /usr/share/blackarch-installer/data/ 
+    cp -R ~/blackarch-installer/data/ /usr/share/blackarch-installer/
+    sleep 3
+
+    # cleanup
+    rm -rf ~/blackarch-installer
+
+    if [ ! -d /usr/share/blackarch-installer/data ]
+    then
+      err 'Could not create data directory, leaving...'
+      exit $FAILURE
+    fi
+  fi
+
+  return $SUCCESS
+}
 
 update_keyrings()
 {
@@ -2587,10 +2622,9 @@ main()
     self_updater
     sleep_clear 1
 
-    # pacman
-    ask_mirror_arch
+    # check if needed data exists and clone + copy from git repo if needed
+    setup_installer_data
     sleep_clear 1
-    update_pacman
   fi
 
   # hard drive
