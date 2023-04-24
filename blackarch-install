@@ -1920,36 +1920,60 @@ pass_mirror_conf()
 # run strap.sh
 run_strap_sh()
 {
-  strap_sh='/tmp/strap.sh'
+  path="$1"
+
+  if [ "$path" = 'chroot' ]
+  then
+    path="$CHROOT"
+  else
+    path=""
+  fi
+
+  strap_sh='/tmp/ba-strap.sh'
   orig_sha1="$(curl -s https://blackarch.org/checksums/strap | awk '{print $1}')"
 
   title 'BlackArch Linux Setup > Strap'
 
-  wprintf '[+] Downloading and executing strap.sh'
+  wprintf '[+] Downloading strap.sh'
   printf "\n\n"
   warn 'This can take a while, please wait...'
+  printf "\n"
 
-  curl -s -o $strap_sh 'https://www.blackarch.org/strap.sh' > $VERBOSE 2>&1
-  sha1="$(sha1sum $strap_sh | awk '{print $1}')"
+  curl -s -o "${path}${strap_sh}" 'https://www.blackarch.org/strap.sh' > $VERBOSE 2>&1
+  sha1="$(sha1sum "${path}${strap_sh}" | awk '{print $1}')"
 
   if [ "$sha1" = "$orig_sha1" ]
   then
-    mv $strap_sh "${CHROOT}${strap_sh}"
-    chmod a+x "${CHROOT}${strap_sh}"
-    chroot $CHROOT echo "$BA_REPO_URL" | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
+    wprintf '[+] File verified'
+    printf "\n\n"
+    wprintf '[+] Executing strap.sh'
+    printf "\n\n"
+
+    chmod a+x "${path}${strap_sh}"
+
+    if [ "$path" = "$CHROOT" ]
+    then
+      chroot $path sh ${path}${strap_sh} > $VERBOSE 2>&1
+    fi
+
+    sh ${path}${strap_sh} > $VERBOSE 2>&1
+
   else
     { err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE; }
   fi
 
-  # add blackarch linux mirror if we are in chroot
-  if ! grep -q 'blackarch' "$CHROOT/etc/pacman.conf"
+  # add blackarch linux default server
+  if ! grep -q 'blackarch' "$path/etc/pacman.conf"
   then
     printf '[blackarch]\nServer = %s\n' "$BA_REPO_URL" \
-      >> "$CHROOT/etc/pacman.conf"
+      >> "$path/etc/pacman.conf"
   else
     sed -i "/\[blackarch\]/{ n;s?Server.*?Server = $BA_REPO_URL?; }" \
-      "$CHROOT/etc/pacman.conf"
+      "$path/etc/pacman.conf"
   fi
+
+  # cleanup
+  rm -f "${path}${strap_sh}"
 
   return $SUCCESS
 }
@@ -2336,10 +2360,7 @@ setup_blackarch()
   enable_iwd
   sleep_clear 1
 
-  ask_mirror
-  sleep_clear 1
-
-  run_strap_sh
+  run_strap_sh 'chroot'
   sleep_clear 1
 
   ask_x_setup
@@ -2549,6 +2570,10 @@ main()
     esac
     sleep_clear 1
     check_inet_conn
+    sleep_clear 1
+
+    # check if blackarch repo is configured and set it up if needed
+    run_strap_sh
     sleep_clear 1
 
     # update keyrings
