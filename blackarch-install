@@ -328,7 +328,10 @@ check_env()
   if [ -f '/var/lib/pacman/db.lck' ]
   then
     err 'pacman locked - Please remove /var/lib/pacman/db.lck'
+    exit $FAILURE
   fi
+
+  return $SUCCESS
 }
 
 
