@@ -2396,14 +2396,6 @@ setup_blackarch()
     sleep_clear 1
   fi
 
-  sleep_clear 1
-
-  enable_pacman_multilib 'chroot'
-  sleep_clear 1
-
-  enable_pacman_color 'chroot'
-  sleep_clear 1
-
   ask_ba_tools_setup
   sleep_clear 1
 
@@ -2625,6 +2617,14 @@ main()
   setup_base_system
   sleep_clear 1
   setup_time
+  sleep_clear 1
+
+  # chroot pacman setup
+  enable_pacman_multilib 'chroot'
+  sleep_clear 1
+  enable_pacman_color 'chroot'
+  sleep_clear 1
+  set_pacman_parallel_downloads 'chroot'
   sleep_clear 1
 
   # blackarch Linux
