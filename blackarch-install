@@ -1682,74 +1682,6 @@ reinitialize_keyring()
   return $SUCCESS
 }
 
-# install extra (missing) packages
-setup_extra_packages()
-{
-  arch='arch-install-scripts pkgfile'
-
-  bluetooth='bluez bluez-hid2hci bluez-tools bluez-utils'
-
-  browser='chromium elinks firefox'
-
-  editor='hexedit nano vim'
-
-  filesystem='cifs-utils dmraid dosfstools exfat-utils f2fs-tools
-  gpart gptfdisk mtools nilfs-utils ntfs-3g partclone parted partimage'
-
-  fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-misc'
-
-  hardware='amd-ucode intel-ucode'
-
-  kernel='linux-headers'
-
-  misc='acpi alsa-utils b43-fwcutter bash-completion bc cmake ctags expac
-  feh git gpm haveged hdparm htop inotify-tools ipython irssi
-  linux-atm lsof mercurial mesa mlocate moreutils mpv p7zip rsync
-  rtorrent screen scrot smartmontools strace tmux udisks2 unace unrar
-  unzip upower usb_modeswitch usbutils zip zsh'
-
-  network='atftp bind-tools bridge-utils curl darkhttpd dhclient dhcpcd dialog
-  dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
-  iwd lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill
-  rp-pppoe socat vpnc wget wireless_tools wpa_supplicant wvdial xl2tpd'
-
-  xorg='rxvt-unicode xf86-video-amdgpu xf86-video-ati
-  xf86-video-dummy xf86-video-fbdev xf86-video-intel xf86-video-nouveau
-  xf86-video-openchrome xf86-video-sisusb xf86-video-vesa xf86-video-vmware
-  xf86-video-voodoo xorg-server xorg-xbacklight xorg-xinit xterm'
-
-  all="$arch $bluetooth $browser $editor $filesystem $fonts $hardware $kernel"
-  all="$all $misc $network $xorg"
-
-  title 'Base System Setup > Extra Packages'
-
-  wprintf '[+] Installing extra packages'
-  printf "\n"
-
-  printf "
-  > ArchLinux   : $(echo "$arch" | wc -w) packages
-  > Browser     : $(echo "$browser" | wc -w) packages
-  > Bluetooth   : $(echo "$bluetooth" | wc -w) packages
-  > Editor      : $(echo "$editor" | wc -w) packages
-  > Filesystem  : $(echo "$filesystem" | wc -w) packages
-  > Fonts       : $(echo "$fonts" | wc -w) packages
-  > Hardware    : $(echo "$hardware" | wc -w) packages
-  > Kernel      : $(echo "$kernel" | wc -w) packages
-  > Misc        : $(echo "$misc" | wc -w) packages
-  > Network     : $(echo "$network" | wc -w) packages
-  > Xorg        : $(echo "$xorg" | wc -w) packages
-  \n"
-
-  warn 'This can take a while, please wait...'
-
-  sleep 2
-
-  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $all \
-    > $VERBOSE 2>&1
-
-  return $SUCCESS
-}
-
 
 # perform system base setup/configurations
 setup_base_system()
@@ -1807,8 +1739,6 @@ setup_base_system()
   if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     reinitialize_keyring
-    sleep_clear 1
-    setup_extra_packages
     sleep_clear 1
   fi
 
