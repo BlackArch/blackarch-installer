@@ -1833,7 +1833,7 @@ ask_mirror()
   printf "\n"
   wprintf '>> Enter 0 to scroll through the mirrorlist'
   printf "\n\n"
-  wprintf '[?] Select a mirror number (enter for default): '
+  wprintf '[?] Select a blackarch mirror number (enter for default): '
   read -r a
   printf "\n"
 
@@ -1886,7 +1886,7 @@ ask_mirror_arch()
   local mirrold='cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup'
 
   if confirm 'Pacman Setup > ArchLinux Mirrorlist' \
-    "[+] Worldwide mirror will be used\n\n[?] Look for the best server [y/n]: "
+    "[+] Worldwide mirror will be used\n\n[?] Look for the best archlinux mirror [y/n]: "
   then
     printf "\n"
     warn 'This may take time depending on your connection'
@@ -2575,6 +2575,13 @@ main()
     sleep_clear 1
     check_inet_conn
     sleep_clear 1
+
+    # pacman
+    ask_mirror
+    sleep_clear 1
+    ask_mirror_arch
+    sleep_clear 1
+    update_pacman
 
     # check if blackarch repo is configured and set it up if needed
     run_strap_sh
