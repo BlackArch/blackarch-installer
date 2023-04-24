@@ -138,7 +138,7 @@ BOOT_FS_TYPE=''
 ROOT_FS_TYPE=''
 
 # chroot directory / blackarch linux installation
-CHROOT='/mnt'
+CHROOT='/mnt/blackarch'
 
 # normal system user
 NORMAL_USER=''
@@ -2497,6 +2497,9 @@ main()
   check_env
   check_boot_mode
   check_iso_type
+
+  #create mountpoint
+  mkdir -p /mnt/blackarch
 
   # install mode
   ask_install_mode
