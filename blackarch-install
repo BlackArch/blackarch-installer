@@ -1907,39 +1907,35 @@ ask_mirror()
   read -r a
   printf "\n"
 
-  # bugfix: detected chars added sometimes - clear chars
-  _a=$(printf "%s" "$a" | sed 's/[a-z]//Ig' 2> /dev/null)
-
+  # check for default option
+  if [ -z "$a" ]
+  then
+    wprintf "[+] Choosing default mirror: %s " $BA_REPO_URL
   # check if value is a number
-  if [[ ! "$_a" == ?(-)+([[:digit:]]) ]]
+  elif [[ ! "$a" == ?(-)+([[:digit:]]) ]]
   then
     warn "Value is not a number"
     sleep 3
     rerun=1
     ask_mirror
-  fi
+  # check for less option
+  elif [ "$a" = "0" ]
+  then
+    cat $mirror_fmt_file | less
+    rerun=1
+    ask_mirror
   # check for out of bounds
-  if [ "$_a" -gt "$count" ]
+  elif [ "$a" -gt "$count" ]
   then
     warn "Value out of bounds"
     sleep 3
     rerun=1
     ask_mirror
-  # check for less option
-  elif [ "$_a" = "0" ]
-  then
-    cat $mirror_fmt_file | less
-    rerun=1
-    ask_mirror
-  # check for default option
-  elif [ -z "$_a" ]
-  then
-    wprintf "[+] Choosing default mirror: %s " $BA_REPO_URL
   # set chosen mirror
   else
-    BA_REPO_URL=$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 2)
+    BA_REPO_URL=$(sed -n "${a}p" $mirror_file | cut -d "|" -f 2)
     wprintf "[+] Mirror from '%s' selected" \
-      "$(sed -n "${_a}p" $mirror_file | cut -d "|" -f 3)"
+      "$(sed -n "${a}p" $mirror_file | cut -d "|" -f 3)"
     printf "\n\n"
   fi
 
