@@ -344,7 +344,7 @@ update_keyrings()
     wprintf '[+] Updating keyrings'
     printf "\n\n"
 
-    pacman -Syy --noconfirm archlinux-keyring blackarch-keyring > $VERBOSE 2>&1
+    pacman -S --noconfirm archlinux-keyring blackarch-keyring > $VERBOSE 2>&1
 
     return $SUCCESS
 }
@@ -694,6 +694,10 @@ update_pacman()
   sleep_clear 1
 
   set_pacman_parallel_downloads
+  sleep_clear 1
+
+  # force reload pacman database
+  pacman -Syy > $VERBOSE 2>&1
   sleep_clear 1
 
   return $SUCCESS
@@ -1437,7 +1441,6 @@ install_base_packages()
 
   pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
     terminus-font terminus-font-ttf rxvt-unicode feh iwd > $VERBOSE 2>&1
-  chroot $CHROOT pacman -S --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -1958,7 +1961,6 @@ ask_mirror_arch()
     warn 'This may take time depending on your connection'
     printf "\n"
     $mirrold
-    pacman -Sy --noconfirm > $VERBOSE 2>&1
     pacman -S --needed --noconfirm reflector > $VERBOSE 2>&1
     yes | pacman -Scc > $VERBOSE 2>&1
     reflector --verbose --latest 5 --protocol https --sort rate \
@@ -2635,13 +2637,15 @@ main()
     sleep_clear 1
 
     # pacman
+    ask_pacman_parallel_downloads
+    sleep_clear 1
+    update_pacman
+
+    # mirror
     ask_mirror
     sleep_clear 1
     ask_mirror_arch
     sleep_clear 1
-    ask_pacman_parallel_downloads
-    sleep_clear 1
-    update_pacman
 
     # check if blackarch repo is configured and set it up if needed
     run_strap_sh
