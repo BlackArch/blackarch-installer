@@ -2074,7 +2074,7 @@ setup_display_manager()
   printf "\n\n"
 
   # install lxdm packages
-  chroot $CHROOT pacman -S lxdm --needed --overwrite='*' --noconfirm \
+  chroot $CHROOT pacman -S lxdm xorg-xinit --needed --overwrite='*' --noconfirm \
     > $VERBOSE 2>&1
 
   # config files
