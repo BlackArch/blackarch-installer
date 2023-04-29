@@ -1415,7 +1415,7 @@ umount_filesystems()
     wprintf '[+] Unmounting filesystems'
     printf "\n\n"
 
-    umount -Rf /mnt > /dev/null 2>&1; \
+    umount -Rf $CHROOT > /dev/null 2>&1; \
     umount -Rf "$HD_DEV"{1..128} > /dev/null 2>&1 # gpt max - 128
   else
     title 'Game Over'
