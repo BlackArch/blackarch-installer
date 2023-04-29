@@ -303,7 +303,21 @@ confirm()
 
 setup_installer_data()
 {
-  if [ ! -d /usr/share/blackarch-installer/data ]
+  dircheck=$SUCCESS
+  for dir in \
+          "boot" \
+          "etc" \
+          "root" \
+          "user" \
+          "usr"
+  do
+      if [ ! -d "${BI_PATH}/data/${dir}" ]; then
+          dircheck=$FAILURE
+          break
+      fi
+  done
+
+  if [ $dircheck = $FAILURE ]
   then
     title 'Installer Setup > Fetching Data'
 
@@ -320,18 +334,12 @@ setup_installer_data()
     wprintf '[+] Copying data'
     printf "\n\n"
 
-    mkdir -p /usr/share/blackarch-installer/data/ 
-    cp -R ~/blackarch-installer/data/ /usr/share/blackarch-installer/
+    mkdir -p $BI_PATH/data 
+    cp -R ~/blackarch-installer/data $BI_PATH
     sleep 3
 
     # cleanup
     rm -rf ~/blackarch-installer
-
-    if [ ! -d /usr/share/blackarch-installer/data ]
-    then
-      err 'Could not create data directory, leaving...'
-      exit $FAILURE
-    fi
   fi
 
   return $SUCCESS
