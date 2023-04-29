@@ -1785,20 +1785,6 @@ setup_user()
   return $SUCCESS
 }
 
-reinitialize_keyring()
-{
-  title 'Base System Setup > Keyring Reinitialization'
-
-  wprintf '[+] Reinitializing keyrings'
-  printf "\n\n"
-  sleep 2
-
-  chroot $CHROOT pacman -S --overwrite='*' --noconfirm archlinux-keyring \
-    > $VERBOSE 2>&1
-
-  return $SUCCESS
-}
-
 
 # perform system base setup/configurations
 setup_base_system()
@@ -1857,12 +1843,6 @@ setup_base_system()
   else
     setup_testuser
     sleep_clear 2
-  fi
-
-  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
-  then
-    reinitialize_keyring
-    sleep_clear 1
   fi
 
   setup_bootloader
