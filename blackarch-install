@@ -689,6 +689,20 @@ set_pacman_parallel_downloads()
 }
 
 
+# update pacman package database
+update_pkg_database()
+{
+  title 'Pacman Setup > Package Database'
+
+  wprintf '[+] Updating pacman database'
+  printf "\n\n"
+
+  pacman -Syy --noconfirm > $VERBOSE 2>&1
+
+  return $SUCCESS
+}
+
+
 # update pacman.conf and database
 update_pacman()
 {
@@ -704,8 +718,7 @@ update_pacman()
   set_pacman_parallel_downloads
   sleep_clear 1
 
-  # force reload pacman database
-  pacman -Syy > $VERBOSE 2>&1
+  update_pkg_database
   sleep_clear 1
 
   return $SUCCESS
