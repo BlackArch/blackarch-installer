@@ -1828,14 +1828,14 @@ setup_base_system()
     sleep_clear 1
   fi
 
-  set_ucode
-
   configure_initramfs
   sleep_clear 1
 
   if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     pass_mirror_conf # copy mirror list to chroot env
+
+    set_ucode
 
     setup_resolvconf
     sleep_clear 1
