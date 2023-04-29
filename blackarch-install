@@ -1873,6 +1873,18 @@ setup_base_system()
 
 
 # enable networking services
+enable_resolved()
+{
+  title 'BlackArch Linux Setup > Network'
+
+  wprintf '[+] Enabling Resolved'
+  printf "\n\n"
+
+  chroot $CHROOT systemctl enable systemd-resolved > $VERBOSE 2>&1
+
+  return $SUCCESS
+}
+
 enable_networkd()
 {
   title 'BlackArch Linux Setup > Network'
@@ -2468,6 +2480,9 @@ dump_full_iso()
 setup_blackarch()
 {
   update_etc
+  sleep_clear 1
+
+  enable_resolved
   sleep_clear 1
 
   enable_networkd
