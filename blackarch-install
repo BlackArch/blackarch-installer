@@ -178,6 +178,9 @@ BOOT_MODE=''
 # check type of ISO (Full? netinst?)
 ISO_TYPE=''
 
+# check type of ucode needed
+UCODE=''
+
 
 # Exit on CTRL + c
 ctrl_c() {
@@ -1461,7 +1464,7 @@ install_base_packages()
   warn 'This can take a while, please wait...'
 
   pacstrap -P $CHROOT base base-devel btrfs-progs linux linux-firmware \
-    terminus-font terminus-font-ttf rxvt-unicode feh iwd > $VERBOSE 2>&1
+  terminus-font terminus-font-ttf rxvt-unicode feh iwd $UCODE > $VERBOSE 2>&1 
 
   return $SUCCESS
 }
@@ -1786,6 +1789,36 @@ setup_user()
 }
 
 
+set_ucode()
+{
+
+    title 'Base System Setup > Ucode'
+
+    UCODE=$(cat /proc/cpuinfo | grep -m 1 vendor_id | cut -c 13-)
+
+    if [ "$UCODE" = "GenuineIntel" ]
+    then
+      UCODE=intel-ucode
+      wprintf "[+] Setting up $UCODE"
+      printf "\n\n"
+      sleep_clear 3
+    elif [ "$UCODE" = "AuthenticAMD" ]
+    then
+      UCODE=amd-ucode
+      wprintf "[+] Setting up $UCODE"
+      printf "\n\n"
+      sleep_clear 3
+    else
+      warn 'No ucode will be installed'
+      sleep_clear 3
+      unset UCODE
+      return $SUCCESS
+    fi
+
+  return $SUCCESS
+}
+
+
 # perform system base setup/configurations
 setup_base_system()
 {
@@ -1794,6 +1827,8 @@ setup_base_system()
     dump_full_iso
     sleep_clear 1
   fi
+
+  set_ucode
 
   configure_initramfs
   sleep_clear 1
