@@ -1919,8 +1919,7 @@ update_etc()
   printf "\n\n"
 
   # /etc/*
-  cp -r "$BI_PATH/data/etc/"{arch-release,issue,motd,\
-os-release,sysctl.d,systemd} "$CHROOT/etc/." > $VERBOSE 2>&1
+  cp -r "$BI_PATH/data/etc/"{arch-release,issue,motd,os-release,sysctl.d,systemd} "$CHROOT/etc/" > $VERBOSE 2>&1
 
   return $SUCCESS
 }
