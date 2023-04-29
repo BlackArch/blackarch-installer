@@ -1551,14 +1551,15 @@ setup_time()
 }
 
 
-# setup initramfs
-setup_initramfs()
+# configure initramfs
+configure_initramfs()
 {
   title 'Base System Setup > InitramFS'
 
-  wprintf '[+] Setting up InitramFS'
+  wprintf '[+] Configuring InitramFS'
   printf "\n\n"
 
+  mkdir -p "$CHROOT/etc/" > $VERBOSE 2>&1
   cp -f "$BI_PATH/data/etc/mkinitcpio.conf" "$CHROOT/etc/mkinitcpio.conf"
   cp -fr "$BI_PATH/data/etc/mkinitcpio.d" "$CHROOT/etc/"
 
@@ -1579,13 +1580,20 @@ setup_initramfs()
       "$CHROOT/etc/mkinitcpio.conf"
   fi
 
-  warn 'This can take a while, please wait...'
-
-  chroot $CHROOT mkinitcpio -P > $VERBOSE 2>&1
-
   return $SUCCESS
 }
 
+# generate initramfs
+generate_initramfs()
+{
+  title 'Base System Setup > InitramFS'
+
+  wprintf '[+] Generating InitramFS'
+  printf "\n\n"
+
+  warn 'This can take a while, please wait...'
+  chroot $CHROOT mkinitcpio -P > $VERBOSE 2>&1
+}
 
 # mount /proc, /sys and /dev
 setup_proc_sys_dev()
@@ -1792,6 +1800,9 @@ setup_base_system()
     sleep_clear 1
   fi
 
+  configure_initramfs
+  sleep_clear 1
+
   if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
   then
     pass_mirror_conf # copy mirror list to chroot env
@@ -1815,8 +1826,11 @@ setup_base_system()
   setup_locale
   sleep_clear 1
 
-  setup_initramfs
-  sleep_clear 1
+  if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
+  then
+    generate_initramfs
+    sleep_clear 1
+  fi
 
   setup_hostname
   sleep_clear 1
