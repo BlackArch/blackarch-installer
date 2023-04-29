@@ -2041,6 +2041,8 @@ pass_mirror_conf()
   mkdir -p "$CHROOT/etc/pacman.d/" > $VERBOSE 2>&1
   cp -f /etc/pacman.d/mirrorlist "$CHROOT/etc/pacman.d/mirrorlist" \
     > $VERBOSE 2>&1
+  cp -f /etc/pacman.d/blackarch-mirrorlist "$CHROOT/etc/pacman.d/blackarch-mirrorlist" \
+  > $VERBOSE 2>&1
 }
 
 
