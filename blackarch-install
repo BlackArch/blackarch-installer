@@ -1460,7 +1460,7 @@ install_base_packages()
   printf "\n\n"
   warn 'This can take a while, please wait...'
 
-  pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
+  pacstrap -P $CHROOT base base-devel btrfs-progs linux linux-firmware \
     terminus-font terminus-font-ttf rxvt-unicode feh iwd > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -2731,16 +2731,16 @@ main()
   sleep_clear 1
 
   # chroot pacman setup
-  enable_pacman_multilib 'chroot'
-  sleep_clear 1
-  enable_pacman_color 'chroot'
-  sleep_clear 1
-  set_pacman_parallel_downloads 'chroot'
-  sleep_clear 1
-
-  # blackarch Linux
-  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
+  if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
   then
+    enable_pacman_multilib 'chroot'
+    sleep_clear 1
+    enable_pacman_color 'chroot'
+    sleep_clear 1
+    set_pacman_parallel_downloads 'chroot'
+    sleep_clear 1
+  else
+    # blackarch Linux
     setup_blackarch
     sleep_clear 1
   fi
