@@ -656,7 +656,7 @@ ask_pacman_parallel_downloads()
     if [[ ! "$PARALLEL_DOWNLOADS" == ?(-)+([[:digit:]]) ]]
     then
       warn "You need to enter a number"
-      sleep 3
+      sleep_clear 3
       unset PARALLEL_DOWNLOADS
       ask_pacman_parallel_downloads
     fi
