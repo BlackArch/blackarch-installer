@@ -2062,23 +2062,25 @@ run_strap_sh()
 
     if [ "$path" = "$CHROOT" ]
     then
-      chroot $path sh ${path}${strap_sh} > $VERBOSE 2>&1
+      chroot $path sh ${strap_sh} > $VERBOSE 2>&1
+    else
+      sh ${path}${strap_sh} > $VERBOSE 2>&1
     fi
-
-    sh ${path}${strap_sh} > $VERBOSE 2>&1
-
   else
     { err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE; }
   fi
 
-  # add blackarch linux default server
-  if ! grep -q 'blackarch' "$path/etc/pacman.conf"
+  if [ "$path" != "$CHROOT" ]
   then
-    printf '[blackarch]\nServer = %s\n' "$BA_REPO_URL" \
-      >> "$path/etc/pacman.conf"
-  else
-    sed -i "/\[blackarch\]/{ n;s?Server.*?Server = $BA_REPO_URL?; }" \
-      "$path/etc/pacman.conf"
+    # add blackarch linux default server
+    if ! grep -q 'blackarch' "$path/etc/pacman.conf"
+    then
+      printf '[blackarch]\nServer = %s\n' "$BA_REPO_URL" \
+        >> "$path/etc/pacman.conf"
+    else
+      sed -i "/\[blackarch\]/{ n;s?Server.*?Server = $BA_REPO_URL?; }" \
+        "$path/etc/pacman.conf"
+    fi
   fi
 
   # cleanup
