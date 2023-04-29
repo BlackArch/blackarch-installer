@@ -1842,9 +1842,6 @@ setup_base_system()
 
     install_base_packages
     sleep_clear 1
-
-    setup_resolvconf
-    sleep_clear 1
   fi
 
   setup_fstab
