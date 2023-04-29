@@ -1440,14 +1440,20 @@ check_space()
 {
   if [ $LUKS -eq $TRUE ]
   then
-    avail_space=$(df -m | grep "/dev/mapper/$CRYPT_ROOT" | awk '{print $4}')
+    avail_space=$(df --block-size="MB" | grep "/dev/mapper/$CRYPT_ROOT" | awk '{print $4}' head -c -3)
   else
-    avail_space=$(df -m | grep "$ROOT_PART" | awk '{print $4}')
+    avail_space=$(df --block-size="MB" | grep "$ROOT_PART" | awk '{print $4}' | head -c -3)
   fi
 
-  if [ "$avail_space" -le 40960 ]
+  boot_size=100
+  safety_space=5000
+  total_size=$(($total_size+$boot_size+$safety_space))
+
+  if [ $avail_space -le $total_size ]
   then
-    warn 'BlackArch Linux requires at least 40 GB of free space to install!'
+    warn "BlackArch Linux requires at least $total_size MB of free space to install!"
+    warn "You should also consider that this includes at least $boot_size MB reserved for the boot partition!"
+    exit $FAILURE
   fi
 
   return $SUCCESS
@@ -2383,16 +2389,15 @@ setup_blackarch_tools()
     > blackarch-scanner blackarch-sniffer blackarch-social blackarch-spoof
     > blackarch-threat-model blackarch-tunnel blackarch-unpacker blackarch-voip
     > blackarch-webapp blackarch-windows blackarch-wireless \n\n"
-    wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
+    wprintf "[?] BlackArch groups to install (space separated) [default: blackarch]: "
     read -r BA_GROUPS
     printf "\n"
     warn 'This can take a while, please wait...'
 
     if [ -z "$BA_GROUPS" ]
     then
+      warn 'Installing default: blackarch'
       printf "\n"
-      check_space
-      printf "\n\n"
       chroot $CHROOT pacman -S --needed --noconfirm --overwrite='*' blackarch \
         > $VERBOSE 2>&1
     else
@@ -2456,7 +2461,7 @@ dump_full_iso()
 
   for d in $full_dirs
   do
-    part_size=$(du -sm "$d" 2> /dev/null | awk '{print $1}')
+    part_size=$(du -s --block-size="MB" "$d" 2> /dev/null | awk '{print $1}' | head -c -3)
     ((total_size+=part_size))
     printf "
   > $d $part_size MB"
