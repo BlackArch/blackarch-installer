@@ -1709,6 +1709,16 @@ ask_user_account()
   then
     wprintf '[?] User name: '
     read -r NORMAL_USER
+
+    user="$(echo "$NORMAL_USER" | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' | cut -c 1-32)"
+
+    if [ -z $user ] || [[ $user =~ ^[[:digit:]]+$ ]]
+    then
+      unset NORMAL_USER
+      warn 'Username invalid'
+      sleep_clear 3
+      ask_user_account
+    fi
   fi
 
   return $SUCCESS
@@ -1734,8 +1744,7 @@ setup_testuser()
 # setup user account, password and environment
 setup_user()
 {
-  user="$(echo "$1" | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' |
-    cut -c 1-32)"
+  user="$1"
 
   title 'Base System Setup > User'
 
