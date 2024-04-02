@@ -2460,9 +2460,6 @@ main()
   check_boot_mode
   check_iso_type
 
-  # Update keyrings
-  install_keyrings
-
   # install mode
   ask_install_mode
 
@@ -2512,6 +2509,9 @@ main()
     sleep_clear 1
     check_inet_conn
     sleep_clear 1
+
+    # Update keyrings
+    install_keyrings
 
     # self updater
     self_updater
