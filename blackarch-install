@@ -367,7 +367,7 @@ ask_install_mode()
     then
       if [ "$ISO_TYPE" = "net" ]
       then
-        err 'WTF, Full-ISO mode with Netinstall? Nope!'
+        err 'Error: Full-ISO mode with Netinstall ISO is not possible.'
         ask_install_mode
         INSTALL_MODE=''
       fi
@@ -1119,12 +1119,12 @@ print_partitions()
 # ask user and get confirmation for formatting
 ask_formatting()
 {
-  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting partitions. Are you sure? No crying afterwards? [y/n]: '
+  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting partitions. Are you sure? This action is definitive [y/n]: '
   then
     return $SUCCESS
   else
     echo
-    err 'Seriously? No formatting no fun! Please format to continue or CTRL + c to cancel...'
+    err 'Please format to continue or CTRL + c to cancel...'
     ask_formatting
   fi
 
@@ -1333,9 +1333,9 @@ umount_filesystems()
 
   if [ "$routine" = 'harddrive' ]
   then
-    title 'Hard Drive Setup > Unmount'
+    title 'Unmounting filesystems'
 
-    wprintf '[+] Unmounting filesystems'
+    wprintf '[+] Unmounting mounts and hard drives'
     printf "\n\n"
 
     umount -Rf /mnt > /dev/null 2>&1; \
@@ -1343,9 +1343,9 @@ umount_filesystems()
     cryptsetup close "$CRYPT_ROOT" > /dev/null 2>&1
     swapoff "$HD_DEV"?* > /dev/null 2>&1
   else
-    title 'Game Over'
+    title 'Unmounting filesystems'
 
-    wprintf '[+] Unmounting filesystems'
+    wprintf '[+] Unmounting chroot, LUKS and swap'
     printf "\n\n"
 
     umount -Rf $CHROOT > /dev/null 2>&1
@@ -2041,8 +2041,6 @@ ask_x_setup()
   if confirm 'BlackArch Linux Setup > X11' '[?] Setup X11 + window managers [y/n]: '
   then
     X_SETUP=$TRUE
-    printf "\n"
-    printf "${BLINK}NOOB! NOOB! NOOB! NOOB! NOOB! NOOB! NOOB!${NC}\n\n"
   fi
 
   return $SUCCESS
@@ -2373,7 +2371,7 @@ dump_full_iso()
 
   check_space
 
-  wprintf '[+] Installing the backdoors to /'
+  wprintf '[+] Installing...'
   printf "\n\n"
   warn 'This can take a while, please wait...'
   printf "\n"
@@ -2469,23 +2467,14 @@ setup_blackarch()
 
 
 # for fun and lulz
-easter_backdoor()
+last_message()
 {
-  bar=0
-
-  title 'Game Over'
+  title 'Installation completed!'
 
   wprintf '[+] BlackArch Linux installation successfull!'
   printf "\n\n"
 
-  wprintf 'Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w '
-  while [ $bar -ne 5 ]
-  do
-    wprintf "."
-    sleep 1
-    bar=$((bar + 1))
-  done
-  printf " >> ${BLINK}${WHITE}HACK THE PLANET! D00R THE PLANET!${NC} <<"
+  printf " >> ${BLINK}${WHITE}HACK THE PLANET!${NC} <<"
   printf "\n\n"
 
   return $SUCCESS
@@ -2495,9 +2484,9 @@ easter_backdoor()
 # perform sync
 sync_disk()
 {
-  title 'Game Over'
+  title 'Disk synchronization'
 
-  wprintf '[+] Syncing disk'
+  wprintf '[+] Synchronizing disk'
   printf "\n\n"
 
   sync
@@ -2643,7 +2632,7 @@ main()
   sleep_clear 1
   sync_disk
   sleep_clear 1
-  easter_backdoor
+  last_message
 
   return $SUCCESS
 }
