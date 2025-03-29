@@ -10,7 +10,7 @@
 
 
 # blackarch-installer version
-VERSION='1.2.24'
+VERSION='1.2.25'
 
 # path to blackarch-installer
 BI_PATH='/usr/share/blackarch-installer'
@@ -178,7 +178,7 @@ ISO_TYPE=''
 
 # Exit on CTRL + c
 ctrl_c() {
-  err "Keyboard Interrupt detected, leaving..."
+  err "Keyboard Interrupt detected, leaving…"
   exit $FAILURE
 }
 
@@ -367,7 +367,7 @@ ask_install_mode()
     then
       if [ "$ISO_TYPE" = "net" ]
       then
-        err 'WTF, Full-ISO mode with Netinstall? Nope!'
+        err 'Error: Full-ISO mode with Netinstall ISO is not possible.'
         ask_install_mode
         INSTALL_MODE=''
       fi
@@ -815,7 +815,7 @@ net_conf_wlan()
 check_inet_conn()
 {
   title 'Network Setup > Connection Check'
-  wprintf '[+] Checking for Internet connection...'
+  wprintf '[+] Checking for Internet connection…'
 
   if ! curl -s http://www.yahoo.com/ > $VERBOSE
   then
@@ -942,7 +942,7 @@ zero_part()
   fi
   get_partitions
   if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
-    err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
+    err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again…'
     zero_part
   fi
   if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
@@ -1082,12 +1082,12 @@ print_partitions()
 # ask user and get confirmation for formatting
 ask_formatting()
 {
-  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting partitions. Are you sure? No crying afterwards? [y/n]: '
+  if confirm 'Hard Drive Setup > Partition Formatting' '[?] Formatting partitions. Are you sure? This action is definitive [y/n]: '
   then
     return $SUCCESS
   else
     echo
-    err 'Seriously? No formatting no fun! Please format to continue or CTRL + c to cancel...'
+    err 'Please format to continue or CTRL + c to cancel…'
     ask_formatting
   fi
 
@@ -1267,17 +1267,17 @@ umount_filesystems()
 
   if [ "$routine" = 'harddrive' ]
   then
-    title 'Hard Drive Setup > Unmount'
+    title 'Unmounting filesystems'
 
-    wprintf '[+] Unmounting filesystems'
+    wprintf '[+] Unmounting mounts and hard drives'
     printf "\n\n"
 
     umount -Rf /mnt > /dev/null 2>&1; \
     umount -Rf "$HD_DEV"{1..128} > /dev/null 2>&1 # gpt max - 128
   else
-    title 'Game Over'
+    title 'Unmounting filesystems'
 
-    wprintf '[+] Unmounting filesystems'
+    wprintf '[+] Unmounting chroot, lucks and swap'
     printf "\n\n"
 
     umount -Rf $CHROOT > /dev/null 2>&1
@@ -1315,7 +1315,7 @@ install_base_packages()
 
   wprintf '[+] Installing ArchLinux base packages'
   printf "\n\n"
-  warn 'This can take a while, please wait...'
+  warn 'This can take a while, please wait…'
   printf "\n"
 
   pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
@@ -1396,7 +1396,7 @@ setup_time()
 
     if [ $? -eq 1 ]
     then
-      warn 'Do you live on Mars? Setting default time zone...'
+      warn 'Do you live on Mars? Setting default time zone…'
       sleep 1
       default_time
     else
@@ -1454,7 +1454,7 @@ setup_initramfs()
       "$CHROOT/etc/mkinitcpio.conf"
   fi
 
-  warn 'This can take a while, please wait...'
+  warn 'This can take a while, please wait…'
   printf "\n"
   chroot $CHROOT mkinitcpio -P > $VERBOSE 2>&1
 
@@ -1717,7 +1717,7 @@ setup_extra_packages()
   > Xorg        : $(echo "$xorg" | wc -w) packages
   \n"
 
-  warn 'This can take a while, please wait...'
+  warn 'This can take a while, please wait…'
   printf "\n"
   sleep 2
 
@@ -1923,7 +1923,7 @@ run_strap_sh()
 
   wprintf '[+] Downloading and executing strap.sh'
   printf "\n\n"
-  warn 'This can take a while, please wait...'
+  warn 'This can take a while, please wait…'
   printf "\n"
 
   curl -s -o $strap_sh 'https://www.blackarch.org/strap.sh' > $VERBOSE 2>&1
@@ -1958,8 +1958,6 @@ ask_x_setup()
   if confirm 'BlackArch Linux Setup > X11' '[?] Setup X11 + window managers [y/n]: '
   then
     X_SETUP=$TRUE
-    printf "\n"
-    printf "${BLINK}NOOB! NOOB! NOOB! NOOB! NOOB! NOOB! NOOB!${NC}\n\n"
   fi
 
   return $SUCCESS
@@ -2210,7 +2208,7 @@ setup_blackarch_tools()
     wprintf "[?] BlackArch groups to install (space for multiple) [blackarch]: "
     read -r BA_GROUPS
     printf "\n"
-    warn 'This can take a while, please wait...'
+    warn 'This can take a while, please wait…'
     if [ -z "$BA_GROUPS" ]
     then
       printf "\n"
@@ -2225,7 +2223,7 @@ setup_blackarch_tools()
   else
     warn 'Installing all tools from source via blackman can take hours'
     printf "\n"
-    wprintf '[+] <Control-c> to abort ... '
+    wprintf '[+] <Control-c> to abort … '
     while [ $foo -gt 0 ]
     do
       wprintf "$foo "
@@ -2274,7 +2272,7 @@ dump_full_iso()
   wprintf '[+] Dumping data from Full-ISO. Grab a coffee and pop shells!'
   printf "\n\n"
 
-  wprintf '[+] Fetching total size to transfer, please wait...'
+  wprintf '[+] Fetching total size to transfer, please wait…'
   printf "\n"
 
   for d in $full_dirs
@@ -2290,15 +2288,15 @@ dump_full_iso()
 
   check_space
 
-  wprintf '[+] Installing the backdoors to /'
+  wprintf '[+] Installing…'
   printf "\n\n"
-  warn 'This can take a while, please wait...'
+  warn 'This can take a while, please wait…'
   printf "\n"
   rsync -aWx --human-readable --info=progress2 / $CHROOT > $VERBOSE 2>&1
   wprintf "[+] Installation done!\n"
 
   # clean up files
-  wprintf '[+] Cleaning Full Environment files, please wait...'
+  wprintf '[+] Cleaning Full Environment files, please wait…'
   sed -i 's/Storage=volatile/#Storage=auto/' ${CHROOT}/etc/systemd/journald.conf
   rm -rf "$CHROOT/etc/udev/rules.d/81-dhcpcd.rules"
   rm -rf "$CHROOT/etc/systemd/system/"{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
@@ -2386,23 +2384,14 @@ setup_blackarch()
 
 
 # for fun and lulz
-easter_backdoor()
+last_message()
 {
-  bar=0
-
-  title 'Game Over'
+  title 'Installation completed!'
 
   wprintf '[+] BlackArch Linux installation successfull!'
   printf "\n\n"
 
-  wprintf 'Yo n00b, b4ckd00r1ng y0ur sy5t3m n0w '
-  while [ $bar -ne 5 ]
-  do
-    wprintf "."
-    sleep 1
-    bar=$((bar + 1))
-  done
-  printf " >> ${BLINK}${WHITE}HACK THE PLANET! D00R THE PLANET!${NC} <<"
+  printf " >> ${BLINK}${WHITE}HACK THE PLANET!${NC} <<"
   printf "\n\n"
 
   return $SUCCESS
@@ -2412,9 +2401,9 @@ easter_backdoor()
 # perform sync
 sync_disk()
 {
-  title 'Game Over'
+  title 'Disk synchronization'
 
-  wprintf '[+] Syncing disk'
+  wprintf '[+] Synchronizing disk'
   printf "\n\n"
 
   sync
@@ -2427,7 +2416,7 @@ sync_disk()
 self_updater()
 {
   title 'Self Updater'
-  wprintf '[+] Checking for a new version of myself...'
+  wprintf '[+] Checking for a new version of myself…'
   printf "\n\n"
 
   pacman -Syy > $VERBOSE 2>&1
@@ -2561,7 +2550,7 @@ main()
   sleep_clear 1
   sync_disk
   sleep_clear 1
-  easter_backdoor
+  last_message
 
   return $SUCCESS
 }
