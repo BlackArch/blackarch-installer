@@ -1746,6 +1746,44 @@ reinitialize_keyring()
   return $SUCCESS
 }
 
+
+chroot_install()
+{
+  local pkgs='' missing='' p
+
+  for p in "$@"
+  do
+    if chroot $CHROOT pacman -Sp "$p" > /dev/null 2>&1
+    then
+      pkgs="$pkgs $p"
+    else
+      missing="$missing $p"
+    fi
+  done
+
+  if [ -n "$missing" ]
+  then
+    warn "Skipping packages not found in the repos:$missing"
+    printf "\n"
+  fi
+
+  if [ -z "$pkgs" ]
+  then
+    return $FAILURE
+  fi
+
+  # shellcheck disable=SC2086
+  if ! chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $pkgs \
+    > $VERBOSE 2>&1
+  then
+    warn 'Some packages failed to install.'
+    return $FAILURE
+  fi
+
+  return $SUCCESS
+}
+
+
 # install extra (missing) packages
 setup_extra_packages()
 {
@@ -1773,13 +1811,13 @@ setup_extra_packages()
   unzip upower usb_modeswitch usbutils zip zsh'
 
   network='atftp bind-tools bridge-utils curl darkhttpd dhclient dhcpcd dialog
-  dnscrypt-proxy dnsmasq dnsutils fwbuilder gnu-netcat ipw2100-fw ipw2200-fw iw
+  dnscrypt-proxy dnsmasq dnsutils fwbuilder iw
   iwd lftp nfs-utils ntp openconnect openssh openvpn ppp pptpclient rfkill
   rp-pppoe socat vpnc wget wireless_tools wpa_supplicant wvdial xl2tpd'
 
   xorg='rxvt-unicode xf86-video-amdgpu xf86-video-ati
   xf86-video-dummy xf86-video-fbdev xf86-video-intel xf86-video-nouveau
-  xf86-video-openchrome xf86-video-sisusb xf86-video-vesa xf86-video-vmware
+  xf86-video-sisusb xf86-video-vesa
   xf86-video-voodoo xorg-server xorg-xbacklight xorg-xinit xterm'
 
   all="$arch $bluetooth $browser $editor $filesystem $fonts $hardware $kernel"
@@ -1808,8 +1846,7 @@ setup_extra_packages()
   printf "\n"
   sleep 2
 
-  chroot $CHROOT pacman -S --needed --overwrite='*' --noconfirm $all \
-    > $VERBOSE 2>&1
+  chroot_install $all
 
   return $SUCCESS
 }
@@ -1891,7 +1928,6 @@ enable_iwd_networkd()
   wprintf '[+] Enabling Networkd, Resolved and Iwd'
   printf "\n\n"
 
-  # one at a time: "systemctl enable a b" enables nothing if a is missing
   for svc in systemd-networkd systemd-resolved iwd
   do
     chroot $CHROOT systemctl enable "$svc" > $VERBOSE 2>&1 ||
@@ -2249,9 +2285,7 @@ setup_vmware_utils()
   wprintf '[+] Setting up VMware utils'
   printf "\n\n"
 
-  chroot $CHROOT pacman -S open-vm-tools xf86-video-vmware \
-    xf86-input-vmmouse --overwrite='*' --needed --noconfirm \
-    > $VERBOSE 2>&1
+  chroot_install open-vm-tools xf86-input-vmmouse
 
   chroot $CHROOT systemctl enable vmware-vmblock-fuse.service > $VERBOSE 2>&1
   chroot $CHROOT systemctl enable vmtoolsd.service > $VERBOSE 2>&1
