@@ -937,10 +937,8 @@ ask_cfdisk()
 # zero out partition if needed/chosen
 zero_part()
 {
-  local zeroed_part=0
   if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed partition table [y/n]: '
   then
-    zeroed_part=1
     cfdisk -z "$HD_DEV"
     sync
   else
@@ -948,11 +946,11 @@ zero_part()
     sync
   fi
   get_partitions
-  if [ -z "$PARTITIONS" ] && [ $zeroed_part -eq 1 ] ; then
+  if [ -z "$PARTITIONS" ] ; then
     err 'You have not created partitions on your disk, make sure to write your changes before quitting cfdisk. Trying again...'
     zero_part
   fi
-  if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
+  if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -qi 'EFI' ; then
     err 'You are booting in UEFI mode but not EFI partition was created, make sure you select the "EFI System" type for your EFI partition.'
     zero_part
   fi
@@ -1043,6 +1041,17 @@ ask_partitions()
 
     get_partitions
 
+    # nothing to choose from (e.g. "no" to cfdisk on an empty disk):
+    # read_part could never accept an answer, so go create partitions
+    if [ -z "$PARTITIONS" ]
+    then
+      err "No partitions found on $HD_DEV, opening cfdisk to create them..."
+      sleep_clear 3
+      zero_part
+      get_partition_label
+      continue
+    fi
+
     if [ "$BOOT_MODE" = 'uefi' ]  && [ "$PART_LABEL" = 'gpt' ]
     then
       read_part 'EFI System partition'
@@ -1072,6 +1081,12 @@ ask_partitions()
       ROOT_FS_TYPE="ext4"
     fi
     read_part 'Swap partition - empty for none' 'empty'
+    while [ -n "$REPLY_PART" ] &&
+      { [ "$REPLY_PART" = "$BOOT_PART" ] || [ "$REPLY_PART" = "$ROOT_PART" ]; }
+    do
+      err 'Swap, root and boot partitions must be different.'
+      read_part 'Swap partition - empty for none' 'empty'
+    done
     SWAP_PART="$REPLY_PART"
 
     if [ "$SWAP_PART" = '' ]
