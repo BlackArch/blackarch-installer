@@ -930,10 +930,10 @@ ask_cfdisk()
 # zero out partition if needed/chosen
 zero_part()
 {
-  local zeroed_part=0;
+  local zeroed_part=0
   if confirm 'Hard Drive Setup' '[?] Start with an in-memory zeroed partition table [y/n]: '
-  zeroed_part=1;
   then
+    zeroed_part=1
     cfdisk -z "$HD_DEV"
     sync
   else
@@ -941,8 +941,8 @@ zero_part()
     sync
   fi
   get_partitions
-  if [ ${#PARTITIONS[@]} -eq 0 ] && [ $zeroed_part -eq 1 ] ; then
-    err 'You have not created partitions on your disk, make sure to write your changes before quiting cfdisk. Trying again...'
+  if [ -z "$PARTITIONS" ] && [ $zeroed_part -eq 1 ] ; then
+    err 'You have not created partitions on your disk, make sure to write your changes before quitting cfdisk. Trying again...'
     zero_part
   fi
   if [ "$BOOT_MODE" = 'uefi' ] && ! fdisk -l "$HD_DEV" -o type | grep -i 'EFI' ; then
@@ -962,6 +962,62 @@ get_partition_label()
 }
 
 
+# turn user input like "p1", "1", "nvme0n1p1" or "/dev/nvme0n1p1" into a full
+# device path. prints the normalized path (may still be invalid).
+normalize_part()
+{
+  local input="$1"
+
+  case "$input" in
+    /dev/*) echo "$input" ;;
+    "${HD_DEV#/dev/}"*) echo "/dev/$input" ;;
+    *)
+      # nvme/mmc/loop devices use a "p" separator (nvme0n1p1), sdX does not
+      if [[ "$HD_DEV" =~ [0-9]$ ]] && [[ "$input" =~ ^[0-9]+$ ]]
+      then
+        echo "${HD_DEV}p${input}"
+      else
+        echo "${HD_DEV}${input}"
+      fi
+      ;;
+  esac
+}
+
+
+# check that a full partition path is exactly one of the partitions on HD_DEV
+is_valid_part()
+{
+  [ -n "$1" ] && printf '%s\n' "$PARTITIONS" | grep -qxF -- "$1"
+}
+
+
+# ask for one partition until the answer is valid, result in $REPLY_PART
+read_part()
+{
+  local prompt="$1"
+  local allow_empty="$2"
+  local input=''
+
+  REPLY_PART=''
+  while true
+  do
+    wprintf "[?] $prompt (${HD_DEV}X): "
+    read -r input
+    if [ -z "$input" ] && [ "$allow_empty" = 'empty' ]
+    then
+      return $SUCCESS
+    fi
+    REPLY_PART="$(normalize_part "$input")"
+    if is_valid_part "$REPLY_PART"
+    then
+      return $SUCCESS
+    fi
+    wprintf "[!] $REPLY_PART is not a partition on $HD_DEV. Valid choices:\n"
+    printf '%s\n' "$PARTITIONS" | sed 's/^/    > /'
+  done
+}
+
+
 # get partitions
 ask_partitions()
 {
@@ -978,57 +1034,38 @@ ask_partitions()
 
     echo
 
+    get_partitions
+
     if [ "$BOOT_MODE" = 'uefi' ]  && [ "$PART_LABEL" = 'gpt' ]
     then
-      while [ -z "$BOOT_PART" ]; do
-        wprintf "[?] EFI System partition (${HD_DEV}X): "
-        read -r BOOT_PART
-        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
-          wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
-          wprintf "[?] EFI System partition (${HD_DEV}X): "
-          read -r BOOT_PART
-        done
-      done
+      read_part 'EFI System partition'
+      BOOT_PART="$REPLY_PART"
       BOOT_FS_TYPE="fat32"
     else
-      while [ -z "$BOOT_PART" ]; do
-        wprintf "[?] Boot partition (${HD_DEV}X): "
-        read -r BOOT_PART
-        until [[ "$PARTITIONS" =~ $BOOT_PART ]]; do
-          wprintf "[?] Your partition $BOOT_PART is not in the partitions list.\n"
-          wprintf "[?] Boot partition (${HD_DEV}X): "
-          read -r BOOT_PART
-        done
-      done
+      read_part 'Boot partition'
+      BOOT_PART="$REPLY_PART"
       wprintf '[?] Choose a filesystem to use in your boot partition (ext2, ext3, ext4)? (default: ext4): '
       read -r BOOT_FS_TYPE
       if [ -z "$BOOT_FS_TYPE" ]; then
         BOOT_FS_TYPE="ext4"
       fi
     fi
-    while [ -z "$ROOT_PART" ]; do
-      wprintf "[?] Root partition (${HD_DEV}X): "
-      read -r ROOT_PART
-      until [[ "$PARTITIONS" =~ $ROOT_PART ]]; do
-          wprintf "[?] Your partition $ROOT_PART is not in the partitions list.\n"
-          wprintf "[?] Root partition (${HD_DEV}X): "
-          read -r ROOT_PART
-      done
-    done
+    read_part 'Root partition'
+    ROOT_PART="$REPLY_PART"
+    if [ "$ROOT_PART" = "$BOOT_PART" ]
+    then
+      err 'Root and boot partition must be different.'
+      ROOT_PART=''
+      sleep_clear 2
+      continue
+    fi
     wprintf '[?] Choose a filesystem to use in your root partition (ext2, ext3, ext4, btrfs)? (default: ext4): '
     read -r ROOT_FS_TYPE
     if [ -z "$ROOT_FS_TYPE" ]; then
       ROOT_FS_TYPE="ext4"
     fi
-    wprintf "[?] Swap partition (${HD_DEV}X - empty for none): "
-    read -r SWAP_PART
-    if [ -n "$SWAP_PART" ]; then
-        until [[ "$PARTITIONS" =~ $SWAP_PART ]]; do
-          wprintf "[?] Your partition $SWAP_PART is not in the partitions list.\n"
-          wprintf "[?] Swap partition (${HD_DEV}X): "
-          read -r SWAP_PART
-        done
-    fi
+    read_part 'Swap partition - empty for none' 'empty'
+    SWAP_PART="$REPLY_PART"
 
     if [ "$SWAP_PART" = '' ]
     then
@@ -1104,9 +1141,29 @@ make_luks_partition()
   wprintf '[+] Creating LUKS partition'
   printf "\n\n"
 
-  cryptsetup -q -y -v luksFormat "$part" \
-    > $VERBOSE 2>&1 || { err 'Could not LUKS format, trying again.'; make_luks_partition "$@"; }
+  # a mapping left over from an earlier run keeps the partition busy and
+  # makes luksFormat fail no matter which passphrase is typed (issue #104)
+  if [ -e "/dev/mapper/$CRYPT_ROOT" ]
+  then
+    umount -R "/dev/mapper/$CRYPT_ROOT" > /dev/null 2>&1
+    cryptsetup close "$CRYPT_ROOT" > /dev/null 2>&1
+  fi
 
+  # stderr is shown on purpose: it holds the real reason for a failure
+  # ("Passphrases do not match", "device in use", ...). the passphrase
+  # prompts themselves go to /dev/tty
+  until cryptsetup -q -y -v luksFormat "$part" > $VERBOSE
+  do
+    echo
+    err 'Could not LUKS format (see the cryptsetup message above).'
+    if ! confirm 'Hard Drive Setup > Partition Creation (crypto)' \
+      '[?] Try again [y/n]: '
+    then
+      exit $FAILURE
+    fi
+  done
+
+  return $SUCCESS
 }
 
 
@@ -1120,9 +1177,18 @@ open_luks_partition()
 
   wprintf '[+] Opening LUKS partition'
   printf "\n\n"
-  cryptsetup open "$part" "$name" > $VERBOSE 2>&1 ||
-    { err 'Could not open LUKS device, please try again and make sure that your password is correct.'; open_luks_partition "$@"; }
+  until cryptsetup open "$part" "$name" > $VERBOSE
+  do
+    echo
+    err 'Could not open LUKS device (see the cryptsetup message above).'
+    if ! confirm 'Hard Drive Setup > Partition Creation (crypto)' \
+      '[?] Try again [y/n]: '
+    then
+      exit $FAILURE
+    fi
+  done
 
+  return $SUCCESS
 }
 
 
@@ -1273,7 +1339,9 @@ umount_filesystems()
     printf "\n\n"
 
     umount -Rf /mnt > /dev/null 2>&1; \
-    umount -Rf "$HD_DEV"{1..128} > /dev/null 2>&1 # gpt max - 128
+    umount -Rf "$HD_DEV"{1..128} "${HD_DEV}p"{1..128} > /dev/null 2>&1 # gpt max - 128
+    cryptsetup close "$CRYPT_ROOT" > /dev/null 2>&1
+    swapoff "$HD_DEV"?* > /dev/null 2>&1
   else
     title 'Game Over'
 
@@ -1318,8 +1386,15 @@ install_base_packages()
   warn 'This can take a while, please wait...'
   printf "\n"
 
-  pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
+  if ! pacstrap $CHROOT base base-devel btrfs-progs linux linux-firmware \
     terminus-font terminus-font-ttf > $VERBOSE 2>&1
+  then
+    echo
+    err 'pacstrap failed, the base system was NOT installed.'
+    warn 'Common causes: no network, bad mirror or outdated keyring.'
+    warn 'Try "pacman -Sy archlinux-keyring" and restart the installer, or use verbose output mode.'
+    exit $FAILURE
+  fi
   chroot $CHROOT pacman -Syy --noconfirm --overwrite='*' > $VERBOSE 2>&1
 
   return $SUCCESS
@@ -1609,22 +1684,19 @@ setup_user()
   wprintf "[+] Setting up $user account"
   printf "\n\n"
 
-  # normal user
-  if [ -n "$NORMAL_USER" ]
+  if [ "$user" = 'root' ]
   then
+    # root environment
+    cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
+  else
+    # normal user + environment
     chroot $CHROOT groupadd "$user" > $VERBOSE 2>&1
     chroot $CHROOT useradd -g "$user" -d "/home/$user" -s "/bin/bash" \
       -G "$user,wheel,users,video,audio" -m "$user" > $VERBOSE 2>&1
+    cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
     chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
     wprintf "[+] Added user: $user"
     printf "\n\n"
-  # environment
-  elif [ -z "$NORMAL_USER" ]
-  then
-    cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
-  else
-    cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
-    chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
   fi
 
   # password
@@ -1640,6 +1712,14 @@ setup_user()
       chroot $CHROOT passwd "$user"
     fi
     res=$?
+    # 125-127: chroot or passwd could not run at all (the base system is
+    # missing or broken), retrying would loop forever (issue #104)
+    if [ $res -ge 125 ] && [ $res -le 127 ]
+    then
+      echo
+      err "Cannot run passwd inside $CHROOT, the base system looks incomplete."
+      exit $FAILURE
+    fi
   done
 
   return $SUCCESS
@@ -1933,7 +2013,10 @@ run_strap_sh()
   then
     mv $strap_sh "${CHROOT}${strap_sh}"
     chmod a+x "${CHROOT}${strap_sh}"
-    chroot $CHROOT echo "$BA_REPO_URL" | sh ${CHROOT}${strap_sh} > $VERBOSE 2>&1
+    # run strap.sh inside the new system (before, only "echo" ran in the
+    # chroot and strap.sh itself ran on the live ISO)
+    echo "$BA_REPO_URL" | chroot $CHROOT sh "$strap_sh" > $VERBOSE 2>&1 ||
+      warn 'strap.sh reported an error, BlackArch packages may fail to install.'
   else
     { err "Wrong SHA1 sum for strap.sh: $sha1 (orig: $orig_sha1). Aborting!"; exit $FAILURE; }
   fi
@@ -2431,11 +2514,10 @@ self_updater()
   printf "\n\n"
 
   pacman -Syy > $VERBOSE 2>&1
-  repo="$(pacman -Ss blackarch-installer | head -1 | cut -d ' ' -f 2 |
-    cut -d '-' -f 1 | tr -d '.')0"
-  this="$(echo $VERSION | tr -d '.')0"
+  repo="$(pacman -Ss '^blackarch-installer$' | head -1 | cut -d ' ' -f 2 |
+    cut -d '-' -f 1)"
 
-  if [ "$this" -lt "$repo" ]
+  if [ -n "$repo" ] && [ "$(vercmp "$VERSION" "$repo")" -lt 0 ]
   then
     printf "\n\n"
     warn 'A new version is available! Going to fuck, err, update myself.'
