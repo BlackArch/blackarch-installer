@@ -311,9 +311,16 @@ confirm()
 
 install_keyrings()
 {
-  pacman -Syy archlinux-keyring blackarch-keyring
-}
+  keyrings='archlinux-keyring'
 
+  if grep -q '^\[blackarch\]' /etc/pacman.conf
+  then
+    keyrings="$keyrings blackarch-keyring"
+  fi
+
+  pacman -Sy --noconfirm --needed $keyrings > $VERBOSE 2>&1 ||
+    warn 'Could not update keyrings, package installation may fail.'
+}
 
 # print menu title
 title()
@@ -2542,9 +2549,6 @@ main()
   check_boot_mode
   check_iso_type
 
-  # Update keyrings
-  install_keyrings
-
   # install mode
   ask_install_mode
 
@@ -2593,6 +2597,10 @@ main()
     esac
     sleep_clear 1
     check_inet_conn
+    sleep_clear 1
+
+    # Update keyrings
+    install_keyrings
     sleep_clear 1
 
     # self updater
