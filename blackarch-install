@@ -1888,10 +1888,15 @@ enable_iwd_networkd()
 {
   title 'BlackArch Linux Setup > Network'
 
-  wprintf '[+] Enabling Iwd and Networkd'
+  wprintf '[+] Enabling Networkd, Resolved and Iwd'
   printf "\n\n"
 
-  chroot $CHROOT systemctl enable iwd systemd-networkd > $VERBOSE 2>&1
+  # one at a time: "systemctl enable a b" enables nothing if a is missing
+  for svc in systemd-networkd systemd-resolved iwd
+  do
+    chroot $CHROOT systemctl enable "$svc" > $VERBOSE 2>&1 ||
+      warn "Could not enable $svc"
+  done
 
   return $SUCCESS
 }
@@ -2644,6 +2649,7 @@ main()
   then
     setup_blackarch
     sleep_clear 1
+    ln -sf /run/systemd/resolve/stub-resolv.conf "$CHROOT/etc/resolv.conf"
   fi
 
   # epilog
