@@ -1,1 +1,0 @@
-from .cq import selectors
