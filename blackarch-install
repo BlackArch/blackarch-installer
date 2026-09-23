@@ -1593,9 +1593,200 @@ setup_hostname()
 }
 
 
+# print the graphics related parameters the live system was booted with, so
+# the installed system boots the same way. without this, a machine that only
+# comes up with e.g. "nomodeset" or "nouveau.modeset=0" gets a black screen
+# on the first boot of the installed system.
+get_live_gfx_params()
+{
+  local -a words
+  local w out=''
+
+  read -r -a words < /proc/cmdline 2> /dev/null
+
+  for w in "${words[@]}"
+  do
+    case "$w" in
+      nomodeset|modprobe.blacklist=*|video=*)
+        out="$out $w"
+        ;;
+      *=*)
+        # <module>.modeset=<value>, e.g. i915.modeset=0 or nvidia-drm.modeset=1
+        case "${w%%=*}" in
+          *.modeset) out="$out $w" ;;
+        esac
+        ;;
+    esac
+  done
+
+  merge_kernel_params '' "$out"
+}
+
+
+# merge two lists of kernel parameters, dropping duplicates and quotes
+merge_kernel_params()
+{
+  local -
+  local w out=''
+
+  set -f
+  for w in $(printf '%s %s' "$1" "$2" | tr -d "\"'")
+  do
+    case " $out " in
+      *" $w "*) ;;
+      *) out="${out:+$out }$w" ;;
+    esac
+  done
+
+  echo "$out"
+}
+
+
+# add the live graphics parameters to GRUB_CMDLINE_LINUX_DEFAULT
+add_gfx_params_grub()
+{
+  local gfx grub_def="$CHROOT/etc/default/grub"
+
+  gfx="$(get_live_gfx_params)"
+
+  if [ -z "$gfx" ] || [ ! -f "$grub_def" ]
+  then
+    return $SUCCESS
+  fi
+
+  GFX="$gfx" awk -v F="$grub_def" '
+    function merge(cur, extra,    t, n, i, r) {
+      gsub(/["\047]/, "", cur)
+      n = split(cur " " extra, t, " ")
+      r = ""
+      for (i = 1; i <= n; i++)
+        if (t[i] != "" && index(" " r " ", " " t[i] " ") == 0)
+          r = (r == "" ? t[i] : r " " t[i])
+      return r
+    }
+    BEGIN {
+      add = ENVIRON["GFX"]
+      out = ""
+      done = 0
+      while ((getline l < F) > 0) {
+        if (!done && l ~ /^GRUB_CMDLINE_LINUX_DEFAULT=/) {
+          l = "GRUB_CMDLINE_LINUX_DEFAULT=\"" merge(substr(l, 28), add) "\""
+          done = 1
+        }
+        out = out l "\n"
+      }
+      close(F)
+      if (!done)
+        out = out "GRUB_CMDLINE_LINUX_DEFAULT=\"" merge("", add) "\"\n"
+      printf "%s", out > F
+      close(F)
+    }'
+
+  wprintf "[+] Kept graphics boot parameters from the live system: $gfx"
+  printf "\n\n"
+
+  return $SUCCESS
+}
+
+
+# list the PARTUUIDs of all partitions currently present (lowercase)
+get_present_partuuids()
+{
+  {
+    lsblk -rno PARTUUID 2> /dev/null
+    blkid -s PARTUUID -o value 2> /dev/null
+  } | tr '[:upper:]' '[:lower:]' | sed '/^$/d' | sort -u
+}
+
+
+# run efibootmgr from the live system, or from the new system as fallback
+run_efibootmgr()
+{
+  if command -v efibootmgr > /dev/null 2>&1
+  then
+    efibootmgr "$@"
+  elif [ -x "$CHROOT/usr/bin/efibootmgr" ]
+  then
+    chroot $CHROOT efibootmgr "$@"
+  else
+    return $FAILURE
+  fi
+}
+
+
+# remove systemd-boot NVRAM entries that point to partitions which do not
+# exist anymore. every reinstall recreates the ESP with a new PARTUUID and
+# "bootctl install" registers a new "Linux Boot Manager" (plus "Fallback
+# Linux Boot Manager") entry, while the old ones stay in the firmware
+# forever. entries of other boot loaders and of existing partitions are left
+# alone.
+clean_stale_efi_entries()
+{
+  local present entries line num label guid removed=''
+
+  if ! entries="$(run_efibootmgr -v 2> /dev/null)"
+  then
+    warn 'efibootmgr not available, cannot clean up old EFI boot entries.'
+    printf "\n"
+    return $SUCCESS
+  fi
+
+  present="$(get_present_partuuids)"
+
+  # without a list of partitions we cannot tell stale from valid entries
+  if [ -z "$present" ]
+  then
+    return $SUCCESS
+  fi
+
+  while IFS= read -r line
+  do
+    num="$(printf '%s\n' "$line" |
+      sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\).*/\1/p')"
+    [ -z "$num" ] && continue
+
+    label="$(printf '%s\n' "$line" |
+      sed 's/^Boot[0-9A-Fa-f]\{4\}[* ] *//' |
+      sed 's/[[:space:]]*\(HD\|PciRoot\|VenHw\|VenMsg\|BBS\)(.*//')"
+    case "$label" in
+      'Linux Boot Manager'|'Fallback Linux Boot Manager') ;;
+      *) continue ;;
+    esac
+
+    # only touch entries that start systemd-boot
+    printf '%s\n' "$line" | grep -qi 'systemd' || continue
+
+    guid="$(printf '%s\n' "$line" |
+      grep -oiE 'HD\([0-9]+,GPT,[0-9a-f-]{36}' | head -1 | cut -d ',' -f 3 |
+      tr '[:upper:]' '[:lower:]')"
+    [ -z "$guid" ] && continue
+
+    if ! printf '%s\n' "$present" | grep -qxF "$guid"
+    then
+      if run_efibootmgr -q -b "$num" -B > $VERBOSE 2>&1
+      then
+        removed="$removed Boot$num"
+      fi
+    fi
+  done << EOT
+$entries
+EOT
+
+  if [ -n "$removed" ]
+  then
+    wprintf "[+] Removed stale EFI boot entries:$removed"
+    printf "\n\n"
+  fi
+
+  return $SUCCESS
+}
+
+
 # setup boot loader for UEFI/GPT or BIOS/MBR
 setup_bootloader()
 {
+  local gfx opts
+
   title 'Base System Setup > Boot Loader'
 
   if [ "$BOOT_MODE" = 'uefi' ] && [ "$PART_LABEL" = 'gpt' ]
@@ -1603,26 +1794,35 @@ setup_bootloader()
     wprintf '[+] Setting up EFI boot loader'
     printf "\n\n"
 
+    clean_stale_efi_entries
+
     chroot $CHROOT bootctl install > $VERBOSE 2>&1
     uuid="$(blkid "$ROOT_PART" | cut -d ' ' -f 2 | cut -d '"' -f 2)"
 
     if [ $LUKS = $TRUE ]
     then
-      cat >> "$CHROOT/boot/loader/entries/arch.conf" << EOF
-title   BlackArch Linux
-linux   /vmlinuz-linux
-initrd    /initramfs-linux.img
-options   cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT rw
-EOF
-
+      opts="cryptdevice=UUID=$uuid:$CRYPT_ROOT root=/dev/mapper/$CRYPT_ROOT rw"
     else
-      cat >> "$CHROOT/boot/loader/entries/arch.conf" << EOF
+      opts="root=UUID=$uuid rw"
+    fi
+
+    gfx="$(get_live_gfx_params)"
+    if [ -n "$gfx" ]
+    then
+      opts="$(merge_kernel_params "$opts" "$gfx")"
+      wprintf "[+] Kept graphics boot parameters from the live system: $gfx"
+      printf "\n\n"
+    fi
+
+    # overwrite, don't append: a reused ESP (dualboot) would otherwise end up
+    # with the entry duplicated inside the same file
+    mkdir -p "$CHROOT/boot/loader/entries"
+    cat > "$CHROOT/boot/loader/entries/arch.conf" << EOF
 title   BlackArch Linux
 linux   /vmlinuz-linux
 initrd    /initramfs-linux.img
-options   root=UUID=$uuid rw
+options   $opts
 EOF
-    fi
   else
     wprintf '[+] Setting up GRUB boot loader'
     printf "\n\n"
@@ -1653,6 +1853,8 @@ EOF
       "$CHROOT/etc/default/grub"
 
     sed -i 's/#GRUB_COLOR_/GRUB_COLOR_/g' "$CHROOT/etc/default/grub"
+
+    add_gfx_params_grub
 
     chroot $CHROOT grub-install --target=i386-pc "$HD_DEV" > $VERBOSE 2>&1
 
@@ -1695,11 +1897,17 @@ setup_testuser()
 }
 
 
+# turn user input into a valid user name
+sanitize_username()
+{
+  echo "$1" | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' | cut -c 1-32
+}
+
+
 # setup user account, password and environment
 setup_user()
 {
-  user="$(echo "$1" | tr -dc '[:alnum:]_' | tr '[:upper:]' '[:lower:]' |
-    cut -c 1-32)"
+  user="$(sanitize_username "$1")"
 
   title 'Base System Setup > User'
 
@@ -1815,7 +2023,7 @@ setup_extra_packages()
 
   fonts='ttf-dejavu ttf-indic-otf ttf-liberation xorg-fonts-misc'
 
-  hardware='amd-ucode intel-ucode'
+  hardware='amd-ucode efibootmgr intel-ucode'
 
   kernel='linux-headers'
 
@@ -2139,6 +2347,86 @@ setup_display_manager()
 }
 
 
+# setup wallpaper. /usr/share/blackarch/wallpaper.{png,jpg} are owned by the
+# blackarch-wallpaper package; copying our own files there leaves unowned
+# files behind and every blackarch-config-* package that depends on
+# blackarch-wallpaper then fails with "exists in filesystem".
+setup_wallpaper()
+{
+  if chroot_install blackarch-wallpaper
+  then
+    return $SUCCESS
+  fi
+
+  # fallback (blackarch repo unreachable): ship the bundled copy
+  warn 'Could not install blackarch-wallpaper, using the bundled wallpaper.'
+  mkdir -p "$CHROOT/usr/share/blackarch"
+  cp -f "$BI_PATH/data/usr/share/blackarch/wallpaper."{png,jpg} \
+    "$CHROOT/usr/share/blackarch/." > $VERBOSE 2>&1
+
+  return $SUCCESS
+}
+
+
+# awesome window manager
+setup_wm_awesome()
+{
+  chroot_install awesome rxvt-unicode feh
+  cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
+  cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
+  # fix bullshit exit() issue
+  sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
+    "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
+  cp -f "$BI_PATH/data/usr/share/xsessions/awesome.desktop" \
+    "$CHROOT/usr/share/xsessions/."
+}
+
+
+# fluxbox window manager
+setup_wm_fluxbox()
+{
+  chroot_install fluxbox rxvt-unicode feh
+  cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
+  cp -f "$BI_PATH/data/usr/share/xsessions/fluxbox.desktop" \
+    "$CHROOT/usr/share/xsessions/."
+}
+
+
+# i3 window manager
+setup_wm_i3()
+{
+  chroot_install i3-wm i3status i3lock i3blocks dmenu rofi rxvt-unicode
+  cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
+  cp -f "$BI_PATH/data/usr/share/xsessions/i3.desktop" \
+    "$CHROOT/usr/share/xsessions/."
+}
+
+
+# openbox window manager
+setup_wm_openbox()
+{
+  chroot_install openbox rxvt-unicode feh
+  cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
+  mkdir -p "$CHROOT/usr/share/themes"
+  cp -r "$BI_PATH/data/usr/share/themes/blackarch" "$CHROOT/usr/share/themes/."
+  cp -f "$BI_PATH/data/usr/share/xsessions/openbox.desktop" \
+    "$CHROOT/usr/share/xsessions/."
+}
+
+
+# spectrwm window manager. the config uses urxvt as terminal, dmenu as menu
+# and xlock (xlockmore) as screen locker, so all of them must be present or
+# the key bindings silently do nothing.
+setup_wm_spectrwm()
+{
+  chroot_install spectrwm dmenu xlockmore rxvt-unicode feh
+  chroot_install blackarch-config-spectrwm
+  cp -f "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
+  cp -f "$BI_PATH/data/usr/share/xsessions/spectrwm.desktop" \
+    "$CHROOT/usr/share/xsessions/."
+}
+
+
 # setup window managers
 setup_window_managers()
 {
@@ -2147,9 +2435,7 @@ setup_window_managers()
   wprintf '[+] Setting up window managers'
   printf "\n\n"
 
-  while true
-  do
-    printf "
+  printf "
   1. Awesome
   2. Fluxbox
   3. I3-wm
@@ -2157,89 +2443,33 @@ setup_window_managers()
   5. Spectrwm
   6. All of the above
   \n"
-    wprintf '[?] Choose an option [6]: '
-    read -r choice
-    echo
-    case $choice in
-      1)
-        chroot $CHROOT pacman -S awesome --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
-        cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
-        cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
-        # fix bullshit exit() issue
-        sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
-        cp -r "$BI_PATH/data/usr/share/xsessions/awesome.desktop" "$CHROOT/usr/share/xsessions"
-        break
-        ;;
-      2)
-        chroot $CHROOT pacman -S fluxbox --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
-        cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
-        cp -r "$BI_PATH/data/usr/share/xsessions/fluxbox.desktop" "$CHROOT/usr/share/xsessions"
-        break
-        ;;
-      3)
-        chroot $CHROOT pacman -S i3 dmenu rofi --needed --overwrite='*' \
-          --noconfirm > $VERBOSE 2>&1
-        cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
-        cp -r "$BI_PATH/data/usr/share/xsessions/i3.desktop" "$CHROOT/usr/share/xsessions"
-        break
-        ;;
-      4)
-        chroot $CHROOT pacman -S openbox --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
-        cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
-        cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
-          "$CHROOT/usr/share/themes/i3lock/."
-        cp -r "$BI_PATH/data/usr/share/xsessions/openbox.desktop" "$CHROOT/usr/share/xsessions"
-        break
-        ;;
-      5)
-        chroot $CHROOT pacman -S spectrwm --needed --overwrite='*' --noconfirm \
-          > $VERBOSE 2>&1
-        cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
-        cp -r "$BI_PATH/data/usr/share/xsessions/spectrwm.desktop" "$CHROOT/usr/share/xsessions"
-        break
-        ;;
-      *)
-        chroot $CHROOT pacman -S fluxbox openbox awesome i3 spectrwm --needed \
-          --overwrite='*' --noconfirm > $VERBOSE 2>&1
+  wprintf '[?] Choose an option [6]: '
+  read -r choice
+  echo
 
-        # awesome
-        cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
-        cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
-        sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
-          "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
+  mkdir -p "$CHROOT/usr/share/xsessions"
 
-        # fluxbox
-        cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
+  # wallpaper first, so no blackarch-config-* package trips over it
+  setup_wallpaper
 
-        # i3
-        cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
-
-        # openbox
-        cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
-        cp -r "$BI_PATH/data/usr/share/themes/blackarch" \
-          "$CHROOT/usr/share/themes/."
-
-        # spectrwm
-        cp -r "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
-
-        # xsessions
-        cp -r "$BI_PATH/data/usr/share/xsessions" "$CHROOT/usr/share/xsessions"
-
-        break
-        ;;
-    esac
-  done
-
-  # wallpaper
-  cp -r "$BI_PATH/data/usr/share/blackarch" "$CHROOT/usr/share/blackarch"
+  case $choice in
+    1) setup_wm_awesome ;;
+    2) setup_wm_fluxbox ;;
+    3) setup_wm_i3 ;;
+    4) setup_wm_openbox ;;
+    5) setup_wm_spectrwm ;;
+    *)
+      setup_wm_awesome
+      setup_wm_fluxbox
+      setup_wm_i3
+      setup_wm_openbox
+      setup_wm_spectrwm
+      ;;
+  esac
 
   # remove wrong xsession entries
-  chroot $CHROOT rm /usr/share/xsessions/openbox-kde.desktop > $VERBOSE 2>&1
-  chroot $CHROOT rm /usr/share/xsessions/i3-with-shmlog.desktop > $VERBOSE 2>&1
+  chroot $CHROOT rm -f /usr/share/xsessions/openbox-kde.desktop > $VERBOSE 2>&1
+  chroot $CHROOT rm -f /usr/share/xsessions/i3-with-shmlog.desktop > $VERBOSE 2>&1
 
   return $SUCCESS
 }
@@ -2458,6 +2688,64 @@ dump_full_iso()
 }
 
 
+# make zsh the default login shell of root and the normal user. the
+# BlackArch zshrc (blackarch-config-zsh) is copied as ~/.zshrc; without any
+# ~/.zshrc zsh would greet every new user with its setup wizard.
+setup_default_shell()
+{
+  local zshrc='/usr/share/blackarch/config/zsh/zshrc' u home users='root'
+
+  title 'BlackArch Linux Setup > Shell'
+
+  wprintf '[+] Setting up zsh as default shell'
+  printf "\n\n"
+
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
+  then
+    chroot_install zsh
+    chroot_install blackarch-config-zsh
+  fi
+
+  if [ ! -x "$CHROOT/usr/bin/zsh" ]
+  then
+    warn 'zsh is not installed, keeping bash as default shell.'
+    return $SUCCESS
+  fi
+
+  if [ -n "$NORMAL_USER" ]
+  then
+    users="$users $(sanitize_username "$NORMAL_USER")"
+  fi
+
+  for u in $users
+  do
+    if ! chroot $CHROOT usermod -s /usr/bin/zsh "$u" > $VERBOSE 2>&1
+    then
+      warn "Could not change the shell of $u."
+      continue
+    fi
+
+    home="$(chroot $CHROOT getent passwd "$u" | cut -d ':' -f 6)"
+    if [ -n "$home" ] && [ -d "$CHROOT$home" ] && [ ! -e "$CHROOT$home/.zshrc" ]
+    then
+      if [ -f "$CHROOT$zshrc" ]
+      then
+        cp "$CHROOT$zshrc" "$CHROOT$home/.zshrc"
+      else
+        echo '# ~/.zshrc' > "$CHROOT$home/.zshrc"
+      fi
+      chroot $CHROOT chown "$u:" "$home/.zshrc" > $VERBOSE 2>&1
+    fi
+
+    wprintf "[+] Default shell of $u: /usr/bin/zsh"
+    printf "\n"
+  done
+  printf "\n"
+
+  return $SUCCESS
+}
+
+
 # setup blackarch related stuff
 setup_blackarch()
 {
@@ -2471,6 +2759,9 @@ setup_blackarch()
   sleep_clear 1
 
   run_strap_sh
+  sleep_clear 1
+
+  setup_default_shell
   sleep_clear 1
 
   ask_x_setup
@@ -2699,6 +2990,9 @@ main()
     setup_blackarch
     sleep_clear 1
     ln -sf /run/systemd/resolve/stub-resolv.conf "$CHROOT/etc/resolv.conf"
+  else
+    setup_default_shell
+    sleep_clear 1
   fi
 
   # epilog
