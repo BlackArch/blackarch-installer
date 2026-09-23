@@ -151,6 +151,9 @@ BA_REPO_URL='https://ftp.halifax.rwth-aachen.de/blackarch/$repo/os/$arch'
 # default ArchLinux repository URL
 AR_REPO_URL='https://mirror.rackspace.com/archlinux/$repo/os/$arch'
 
+# where the blackarch-config-* packages stage their files (inside $CHROOT)
+BA_CONFIG='/usr/share/blackarch/config'
+
 # X (display + window managers ) setup - default: false
 X_SETUP=$FALSE
 
@@ -1914,16 +1917,17 @@ setup_user()
   wprintf "[+] Setting up $user account"
   printf "\n\n"
 
+  # dotfiles (bash, vim, X11, i3) come from the blackarch-config-* packages,
+  # see setup_dotfiles(), setup_display_manager() and setup_wm_i3()
   if [ "$user" = 'root' ]
   then
-    # root environment
+    # root environment (helper scripts)
     cp -r "$BI_PATH/data/root/." "$CHROOT/root/." > $VERBOSE 2>&1
   else
-    # normal user + environment
+    # normal user
     chroot $CHROOT groupadd "$user" > $VERBOSE 2>&1
     chroot $CHROOT useradd -g "$user" -d "/home/$user" -s "/bin/bash" \
       -G "$user,wheel,users,video,audio" -m "$user" > $VERBOSE 2>&1
-    cp -r "$BI_PATH/data/user/." "$CHROOT/home/$user/." > $VERBOSE 2>&1
     chroot $CHROOT chown -R "$user":"$user" "/home/$user" > $VERBOSE 2>&1
     wprintf "[+] Added user: $user"
     printf "\n\n"
@@ -2002,6 +2006,64 @@ chroot_install()
     warn 'Some packages failed to install.'
     return $FAILURE
   fi
+
+  return $SUCCESS
+}
+
+
+# the blackarch-config-* packages only stage their files (mostly below
+# $BA_CONFIG, lxdm below /etc/lxdm-blackarch and /usr/share/*-blackarch);
+# nothing is copied into place by pacman, so the installer does that step.
+# $1 is the staged file or directory and $2 the destination, both paths inside
+# $CHROOT. a directory is merged into the destination directory, a file
+# replaces the destination file.
+copy_ba_config()
+{
+  local src="$CHROOT$1" dst="$CHROOT$2"
+
+  if [ ! -e "$src" ]
+  then
+    warn "Missing $1, is its blackarch-config package installed?"
+    printf "\n"
+    return $FAILURE
+  fi
+
+  if [ -d "$src" ]
+  then
+    mkdir -p "$dst"
+    cp -a "$src/." "$dst/." > $VERBOSE 2>&1
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp -af "$src" "$dst" > $VERBOSE 2>&1
+  fi
+}
+
+
+# copy a staged config into the home directory of root and of the normal user
+# $1: source, relative to $BA_CONFIG
+# $2: destination, relative to the home directory (e.g. .config/i3/config)
+copy_ba_home_config()
+{
+  local src="$BA_CONFIG/$1" dst="$2" u home users='root'
+
+  if [ -n "$NORMAL_USER" ]
+  then
+    users="$users $(sanitize_username "$NORMAL_USER")"
+  fi
+
+  for u in $users
+  do
+    home="$(chroot $CHROOT getent passwd "$u" | cut -d ':' -f 6)"
+    if [ -z "$home" ] || [ ! -d "$CHROOT$home" ]
+    then
+      continue
+    fi
+
+    copy_ba_config "$src" "$home/$dst" || return $FAILURE
+
+    # chown the top-level entry, so that e.g. ~/.config is owned by the user
+    chroot $CHROOT chown -R "$u:" "$home/${dst%%/*}" > $VERBOSE 2>&1
+  done
 
   return $SUCCESS
 }
@@ -2369,12 +2431,20 @@ setup_display_manager()
   chroot $CHROOT pacman -S lxdm --needed --overwrite='*' --noconfirm \
     > $VERBOSE 2>&1
 
-  # config files
+  # config packages. blackarch-config-lxdm also ships the xsession files used
+  # by setup_window_managers()
+  chroot_install blackarch-config-lxdm blackarch-config-gtk \
+    blackarch-config-x11
+
+  # config files. xinitrc and xorg.conf.d are not packaged
   cp -r "$BI_PATH/data/etc/X11" "$CHROOT/etc/."
-  cp -r "$BI_PATH/data/etc/xprofile" "$CHROOT/etc/."
-  cp -r "$BI_PATH/data/etc/lxdm/." "$CHROOT/etc/lxdm/."
-  cp -r "$BI_PATH/data/usr/share/lxdm/." "$CHROOT/usr/share/lxdm/."
-  cp -r "$BI_PATH/data/usr/share/gtk-2.0/." "$CHROOT/usr/share/gtk-2.0/."
+  copy_ba_config "$BA_CONFIG/x11/xprofile" /etc/xprofile
+  copy_ba_home_config x11/Xdefaults .Xdefaults
+  copy_ba_home_config x11/Xresources .Xresources
+  copy_ba_config /etc/lxdm-blackarch /etc/lxdm
+  copy_ba_config /usr/share/lxdm-blackarch /usr/share/lxdm
+  # the package stages gtk-2.0/gtk-2.0/, not gtk-2.0/ as its .install says
+  copy_ba_config "$BA_CONFIG/gtk-2.0/gtk-2.0" /usr/share/gtk-2.0
   mkdir -p "$CHROOT/usr/share/xsessions"
 
   # enable in systemd
@@ -2385,69 +2455,74 @@ setup_display_manager()
 
 
 # setup wallpaper. /usr/share/blackarch/wallpaper.{png,jpg} are owned by the
-# blackarch-wallpaper package; copying our own files there leaves unowned
-# files behind and every blackarch-config-* package that depends on
-# blackarch-wallpaper then fails with "exists in filesystem".
+# blackarch-wallpaper package, which most blackarch-config-* packages depend
+# on.
 setup_wallpaper()
 {
-  if chroot_install blackarch-wallpaper
+  if ! chroot_install blackarch-wallpaper
   then
-    return $SUCCESS
+    warn 'Could not install blackarch-wallpaper, no wallpaper will be set.'
+    printf "\n"
   fi
 
-  # fallback (blackarch repo unreachable): ship the bundled copy
-  warn 'Could not install blackarch-wallpaper, using the bundled wallpaper.'
-  mkdir -p "$CHROOT/usr/share/blackarch"
-  cp -f "$BI_PATH/data/usr/share/blackarch/wallpaper."{png,jpg} \
-    "$CHROOT/usr/share/blackarch/." > $VERBOSE 2>&1
-
   return $SUCCESS
+}
+
+
+# install the xsession file of a window manager. $1: window manager name.
+# the files are shipped by blackarch-config-lxdm (see setup_display_manager)
+setup_xsession()
+{
+  copy_ba_config "/usr/share/xsessions-blackarch/$1.desktop" \
+    "/usr/share/xsessions/$1.desktop"
 }
 
 
 # awesome window manager
 setup_wm_awesome()
 {
-  chroot_install awesome rxvt-unicode feh
-  cp -r "$BI_PATH/data/etc/xdg/awesome/." "$CHROOT/etc/xdg/awesome/."
-  cp -r "$BI_PATH/data/usr/share/awesome/." "$CHROOT/usr/share/awesome/."
+  chroot_install awesome rxvt-unicode feh blackarch-config-awesome
+  copy_ba_config "$BA_CONFIG/awesome/etc/xdg/awesome/rc.lua.blackarch" \
+    /etc/xdg/awesome/rc.lua
+  copy_ba_config "$BA_CONFIG/awesome/usr/share/awesome/themes/blackarch" \
+    /usr/share/awesome/themes/blackarch
   # fix bullshit exit() issue
   sed -i 's|local visible, action = cmd(item, self)|local visible, action = cmd(0, 0)|' \
     "$CHROOT/usr/share/awesome/lib/awful/menu.lua"
-  cp -f "$BI_PATH/data/usr/share/xsessions/awesome.desktop" \
-    "$CHROOT/usr/share/xsessions/."
+  setup_xsession awesome
 }
 
 
 # fluxbox window manager
 setup_wm_fluxbox()
 {
-  chroot_install fluxbox rxvt-unicode feh
-  cp -r "$BI_PATH/data/usr/share/fluxbox/." "$CHROOT/usr/share/fluxbox/."
-  cp -f "$BI_PATH/data/usr/share/xsessions/fluxbox.desktop" \
-    "$CHROOT/usr/share/xsessions/."
+  chroot_install fluxbox rxvt-unicode feh blackarch-config-fluxbox
+  copy_ba_config "$BA_CONFIG/fluxbox" /usr/share/fluxbox
+  setup_xsession fluxbox
 }
 
 
-# i3 window manager
+# i3 window manager. blackarch-config-i3 depends on i3-gaps, which was merged
+# into i3-wm; if that dependency cannot be resolved, the package is skipped
+# and copy_ba_home_config() warns about the missing config.
 setup_wm_i3()
 {
   chroot_install i3-wm i3status i3lock i3blocks dmenu rofi rxvt-unicode
-  cp -r "$BI_PATH/data/root/"{.config,.i3status.conf} "$CHROOT/root/."
-  cp -f "$BI_PATH/data/usr/share/xsessions/i3.desktop" \
-    "$CHROOT/usr/share/xsessions/."
+  chroot_install blackarch-config-i3
+  copy_ba_home_config i3/config .config/i3/config
+  copy_ba_home_config i3/i3status.conf .i3status.conf
+  setup_xsession i3
 }
 
 
 # openbox window manager
 setup_wm_openbox()
 {
-  chroot_install openbox rxvt-unicode feh
-  cp -r "$BI_PATH/data/etc/xdg/openbox/." "$CHROOT/etc/xdg/openbox/."
-  mkdir -p "$CHROOT/usr/share/themes"
-  cp -r "$BI_PATH/data/usr/share/themes/blackarch" "$CHROOT/usr/share/themes/."
-  cp -f "$BI_PATH/data/usr/share/xsessions/openbox.desktop" \
-    "$CHROOT/usr/share/xsessions/."
+  chroot_install openbox rxvt-unicode feh blackarch-config-openbox
+  copy_ba_config "$BA_CONFIG/openbox/etc/xdg/openbox" /etc/xdg/openbox
+  copy_ba_config "$BA_CONFIG/openbox/usr/share/themes/blackarch" \
+    /usr/share/themes/blackarch
+  setup_xsession openbox
 }
 
 
@@ -2456,11 +2531,23 @@ setup_wm_openbox()
 # the key bindings silently do nothing.
 setup_wm_spectrwm()
 {
-  chroot_install spectrwm dmenu xlockmore rxvt-unicode feh
-  chroot_install blackarch-config-spectrwm
-  cp -f "$BI_PATH/data/etc/spectrwm.conf" "$CHROOT/etc/spectrwm.conf"
-  cp -f "$BI_PATH/data/usr/share/xsessions/spectrwm.desktop" \
-    "$CHROOT/usr/share/xsessions/."
+  local conf="$CHROOT/etc/spectrwm.conf"
+
+  chroot_install spectrwm dmenu xlockmore rxvt-unicode feh \
+    blackarch-config-spectrwm
+
+  if copy_ba_config "$BA_CONFIG/spectrwm/spectrwm.conf" /etc/spectrwm.conf
+  then
+    # installer overrides: the packaged config disables the lock key
+    # (program[lock] = /bin/false) and uses the default modkey (Mod1)
+    sed -i 's|^program\[lock\].*|program[lock] = xlock -mode blank|' "$conf"
+    if ! grep -q '^modkey' "$conf"
+    then
+      echo 'modkey = Mod4' >> "$conf"
+    fi
+  fi
+
+  setup_xsession spectrwm
 }
 
 
@@ -2486,7 +2573,7 @@ setup_window_managers()
 
   mkdir -p "$CHROOT/usr/share/xsessions"
 
-  # wallpaper first, so no blackarch-config-* package trips over it
+  # wallpaper first, it is used by every window manager config
   setup_wallpaper
 
   case $choice in
@@ -2725,6 +2812,46 @@ dump_full_iso()
 }
 
 
+# install the BlackArch bash and vim configs into the home of root and of the
+# normal user. this must run after run_strap_sh() (BlackArch repo). in
+# Full-ISO mode nothing is installed: the configs come with the live system.
+setup_dotfiles()
+{
+  title 'BlackArch Linux Setup > Dotfiles'
+
+  wprintf '[+] Setting up bash and vim configs'
+  printf "\n\n"
+
+  if [ "$INSTALL_MODE" != "$INSTALL_FULL_ISO" ]
+  then
+    chroot_install blackarch-config-bash blackarch-config-vim
+  fi
+
+  copy_ba_home_config bash/bashrc .bashrc
+  copy_ba_home_config bash/bash_profile .bash_profile
+  copy_ba_home_config vim/vimrc .vimrc
+  copy_ba_home_config vim/vim .vim
+
+  # Full-ISO mode skips the X11 and window manager setup, so their per-user
+  # configs are copied here, if the live system has them
+  if [ "$INSTALL_MODE" = "$INSTALL_FULL_ISO" ]
+  then
+    if [ -d "$CHROOT$BA_CONFIG/x11" ]
+    then
+      copy_ba_home_config x11/Xdefaults .Xdefaults
+      copy_ba_home_config x11/Xresources .Xresources
+    fi
+    if [ -d "$CHROOT$BA_CONFIG/i3" ]
+    then
+      copy_ba_home_config i3/config .config/i3/config
+      copy_ba_home_config i3/i3status.conf .i3status.conf
+    fi
+  fi
+
+  return $SUCCESS
+}
+
+
 # make zsh the default login shell of root and the normal user. the
 # BlackArch zshrc (blackarch-config-zsh) is copied as ~/.zshrc; without any
 # ~/.zshrc zsh would greet every new user with its setup wizard.
@@ -2799,6 +2926,9 @@ setup_blackarch()
   sleep_clear 1
 
   run_strap_sh
+  sleep_clear 1
+
+  setup_dotfiles
   sleep_clear 1
 
   setup_default_shell
@@ -3031,6 +3161,8 @@ main()
     sleep_clear 1
     ln -sf /run/systemd/resolve/stub-resolv.conf "$CHROOT/etc/resolv.conf"
   else
+    setup_dotfiles
+    sleep_clear 1
     setup_default_shell
     sleep_clear 1
     setup_wifi_persist

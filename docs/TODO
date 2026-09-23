@@ -17,6 +17,10 @@ ChangeLog and TODO list for blackarch-installer
   [ ] update: support real btrfs support: add flat-tree support (noptrix)
   [ ] update: check/test uefi installation (especially grub stuff)
   [ ] update: add help text for each section if feasible
+  [x] update: install blackarch-config-{bash,vim,x11,gtk,lxdm,awesome,fluxbox,
+      i3,openbox} and copy their files into place instead of shipping copies
+      in data/ (spectrwm, zsh and the wallpaper were already packaged)
+  [x] update: remove the bundled copies from data/ and the wallpaper fallback
 
 
 ===> 1.2.22
