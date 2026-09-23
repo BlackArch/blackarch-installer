@@ -2161,6 +2161,43 @@ enable_iwd_networkd()
 }
 
 
+# persist wifi credentials into the installed system (iwd format)
+setup_wifi_persist()
+{
+  title 'BlackArch Linux Setup > Network'
+
+  wprintf '[+] Saving WiFi settings to the installed system'
+  printf "\n\n"
+
+  mkdir -p "$CHROOT/var/lib/iwd" > $VERBOSE 2>&1
+  chmod 700 "$CHROOT/var/lib/iwd"
+
+  # networks the live ISO already knows (e.g. connected with iwctl)
+  if [ -d /var/lib/iwd ]
+  then
+    cp -a /var/lib/iwd/. "$CHROOT/var/lib/iwd/" > $VERBOSE 2>&1
+  fi
+
+  # network entered in the installer's "WiFi WPA Setup" mode
+  if [ -n "$WLAN_SSID" ] && [ -n "$WLAN_PASSPHRASE" ]
+  then
+    # iwd uses the plain SSID as file name only for [A-Za-z0-9_-],
+    # otherwise '=' followed by the hex-encoded SSID
+    if printf '%s' "$WLAN_SSID" | grep -Eq '^[A-Za-z0-9_-]+$'
+    then
+      name="$WLAN_SSID"
+    else
+      name="=$(printf '%s' "$WLAN_SSID" | od -An -tx1 | tr -d ' \n')"
+    fi
+    printf '[Security]\nPassphrase=%s\n' "$WLAN_PASSPHRASE" \
+      > "$CHROOT/var/lib/iwd/$name.psk"
+    chmod 600 "$CHROOT/var/lib/iwd/$name.psk"
+  fi
+
+  return $SUCCESS
+}
+
+
 # update /etc files and set up iptables
 update_etc()
 {
@@ -2755,6 +2792,9 @@ setup_blackarch()
   enable_iwd_networkd
   sleep_clear 1
 
+  setup_wifi_persist
+  sleep_clear 1
+
   ask_mirror
   sleep_clear 1
 
@@ -2992,6 +3032,8 @@ main()
     ln -sf /run/systemd/resolve/stub-resolv.conf "$CHROOT/etc/resolv.conf"
   else
     setup_default_shell
+    sleep_clear 1
+    setup_wifi_persist
     sleep_clear 1
   fi
 
